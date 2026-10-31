@@ -23,7 +23,8 @@ inclusion: always
 ## Determinism
 
 - No network, real microphone, real clock or random values without an injected seed in unit or property tests.
-- Fixture audio lives in `packages/*/fixtures/` and is small (a few seconds), synthetic (sine waves, noise) or consented.
+- No audio files are committed outside `apps/web/public/replay/` (see the security steering). Test audio is synthetic and generated at test time from seeded generators: sine waves, noise, silence and chirps, a few seconds long at most.
+- When a tool needs an audio file (for example Playwright's fake audio capture), test setup writes it to a git-ignored temporary directory and removes it afterwards.
 - Cross-language consistency: `packages/contracts/fixtures/golden/*.json` holds golden vectors (windowing, PCM16 encoding, calibration). Both the TS and Python test suites assert against the same files.
 
 ## Definition of done
