@@ -10,6 +10,7 @@ All hook and agent files are created through Kiro so they use its current native
 
 - **Hook**: a Kiro agent hook stored as a v1 JSON file in `.kiro/hooks/`, run by the Kiro IDE (1.x) and the Kiro CLI V3 (`kiro-cli --v3`).
 - **Saved**: saved or edited by the Kiro agent. Manual editor saves do not trigger hooks; the git pre-commit hook and CI cover manual edits.
+- **Turn_Report**: the findings that command hooks collect during one agent turn. It lives in a state file under `.git/kiro-hooks/`, so it is never committed, and the `hook-findings` Hook delivers it to the agent when the turn ends. Command-hook output on file-save events does not reach the agent in the Kiro CLI V3, so this is how those hooks "report in the chat".
 - **Manual_Steering_Command**: a steering file with `inclusion: manual`, run on demand as a `/<name>` slash command. Kiro no longer supports creating manual-trigger hooks, so on-demand workflows use this instead.
 - **Custom_Agent**: a Kiro custom agent configuration with its own prompt, tools and context.
 - **MCP_Config**: `.kiro/settings/mcp.json`.
@@ -25,10 +26,10 @@ All hook and agent files are created through Kiro so they use its current native
 
 #### Acceptance Criteria
 
-1. WHEN a TypeScript file under `packages/` or `apps/web/` is saved, THE `test-affected` Hook SHALL run the tests of the affected package and report failures in the chat.
-2. WHEN a Python file under `apps/engine/`, `packages/model-lab/` or `packages/doppelganger-mcp/` is saved, THE `test-affected` Hook SHALL run Ruff and the affected pytest suite.
-3. WHEN a file under `packages/contracts/schemas/` is saved, THE `contracts-codegen` Hook SHALL run `mise run gen:contracts` and report changed generated files.
-4. WHEN a file under `packages/tokens/` is saved, THE `token-contrast` Hook SHALL rebuild the tokens and report every contrast pair below its target.
+1. WHEN a TypeScript file under `packages/` or `apps/web/` is saved, THE `test-affected` Hook SHALL run the tests of the affected package and add each failure to the Turn_Report.
+2. WHEN a Python file under `apps/engine/`, `packages/model-lab/` or `packages/doppelganger-mcp/` is saved, THE `test-affected` Hook SHALL run Ruff and the affected pytest suite and add each failure to the Turn_Report.
+3. WHEN a file under `packages/contracts/schemas/` is saved, THE `contracts-codegen` Hook SHALL run `mise run gen:contracts` and add the changed generated files, or the failure, to the Turn_Report.
+4. WHEN a file under `packages/tokens/` is saved, THE `token-contrast` Hook SHALL rebuild the tokens and add a build failure, including any contrast pair below its target, to the Turn_Report.
 
 ### Requirement 2: Privacy and security hooks (Phase A)
 
@@ -36,9 +37,12 @@ All hook and agent files are created through Kiro so they use its current native
 
 #### Acceptance Criteria
 
-1. WHEN any source file is saved, THE `secret-sentinel` Hook SHALL scan the file for credentials, personal data (e-mails, local paths, IPs) and committed tokens, and SHALL report each finding with its line.
+1. WHEN any source file is saved, THE `secret-sentinel` Hook SHALL scan the file for credentials, personal data (e-mails, local paths, IPs) and committed tokens, and SHALL add each finding with its line to the Turn_Report.
 2. WHEN a file under `apps/web/src/`, `apps/engine/` or `packages/detector/` is saved, THE `zero-disk-guard` Hook SHALL ask the agent to check the change against the security steering (disk writes of audio, network calls to non-self origins, audio in logs, recording packages) and report violations.
 3. WHEN the developer runs `/privacy-audit`, THE `privacy-audit` Manual_Steering_Command SHALL run a full audit of the repository against the security steering and write the result to the chat.
+4. THE Turn_Report, the `hook-findings` message and the Journal SHALL never contain a detected secret or personal-data value. Each such finding SHALL give its type, file, line and a masked snippet made of the value's first 4 characters followed by "…" ("…" alone when the value has 4 characters or fewer).
+5. THE Turn_Report SHALL hold at most 50 findings, followed by one line "…and N more" when more were found.
+6. WHEN an agent turn ends and the Turn_Report is not empty, THE `hook-findings` Hook SHALL deliver it to the agent at most once per turn and then clear it.
 
 ### Requirement 3: Spec and journal hooks (Phase A)
 

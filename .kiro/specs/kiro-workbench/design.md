@@ -16,6 +16,7 @@ Kiro IDE 1.x / CLI V3 (kiro-cli --v3)
  │    ├── zero-disk-guard      PostFileSave: web/engine/detector → agent review vs security steering
  │    ├── spec-lint            PostFileSave: .kiro/specs   → reference integrity
  │    ├── journal-keeper       Stop                        → scripts/journal-keeper.py (asks for one entry at most)
+ │    ├── hook-findings        UserPromptSubmit + Stop     → scripts/hooks/findings.py (delivers the Turn_Report once per turn)
  │    └── prompt-logger        UserPromptSubmit            → scripts/prompt-logger.py (disabled until enabled by the developer)
  ├── Manual steering commands (.kiro/steering/*.md, inclusion: manual)
  │    ├── /privacy-audit                                   → full audit
@@ -41,11 +42,21 @@ Each hook that asks the agent to act uses a short, specific prompt. Examples:
 
 Command hooks (`test-affected`, `contracts-codegen`, `token-contrast`) run shell commands through `mise`, so their behavior equals what CI runs.
 
-File triggers fire only when the Kiro agent saves or edits a file (see Saved in the requirements glossary).
+File triggers fire only when the Kiro agent saves or edits a file (see Saved in the requirements glossary). Command hooks read the saved path from the `file_path` field of the event JSON on STDIN. The Kiro CLI V3 does not fill in `{{filePath}}`, so commands do not use it, and `resolve-path.sh` ignores any argument that is still an unfilled `{{…}}` placeholder.
+
+### Turn_Report delivery
+
+The dry run in task 1.7 showed that in the Kiro CLI V3, output from `PostFileSave` command hooks never reaches the agent, whatever the exit code. So the four command hooks on file saves do not print their findings; they add them to the Turn_Report instead:
+
+- **State file:** `.git/kiro-hooks/findings/<session>.json`, one per session, never committed. Writes take a file lock, because several hooks run at once for the same save.
+- **Finding:** `{hook, kind, file, line, detail}`. For secrets and personal data, `detail` is the masked snippet: the first 4 characters of the value followed by "…", or "…" alone when the value has 4 characters or fewer. The raw value is used only in memory. gitleaks writes its report to a pipe (`--report-path -`), never to a file. For test, codegen and token failures, `detail` is a short summary plus the command that reproduces the failure (for example `mise run test -- packages/detector`). Test output is not copied, because it could echo a secret.
+- **Cap:** at most 50 findings are stored; later ones only increase an `overflow` counter, which is shown as "…and N more".
+- **Turn boundaries:** `findings.py turn-start`, on `UserPromptSubmit`, clears the "delivered" flag. `findings.py deliver`, on `Stop`, does nothing if the report is empty or was already delivered in this turn. Otherwise it prints `{"decision": "block", "reason": "<findings>"}`, marks the report as delivered and clears it. Findings that arrive after delivery wait for the next turn, so the follow-up turn can never loop.
+- **Exit codes:** command hooks on file saves always exit 0 and print at most one masked summary line. A non-zero exit would show a CLI warning to the user; in the IDE it would send stderr to the agent a second time.
 
 ### Command-hook scripts
 
-- **secret-sentinel** (`scripts/secret-sentinel.sh`): reads the saved path from the hook event on STDIN, runs `gitleaks dir` on that file and a PII check (`scripts/pii_scan.py`) for e-mails, local home paths and IPv4 addresses, and prints `path:line: finding` for each hit. The PII check ignores documented placeholders: `example.com` and `example.org` addresses, `127.0.0.1`, `0.0.0.0`, the RFC 5737 documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) and placeholder paths such as `/home/<user>`. No LLM call.
+- **secret-sentinel** (`scripts/hooks/secret-sentinel.sh`, logic in `scripts/hooks/findings.py`): reads the saved path from the hook event on STDIN, runs `gitleaks dir` on that file and a PII check (`scripts/pii_scan.py`) for e-mails, local home paths and IPv4 addresses, and adds each hit to the Turn_Report as `path:line` with a masked snippet. The PII check ignores documented placeholders: `example.com` and `example.org` addresses, `127.0.0.1`, `0.0.0.0`, the RFC 5737 documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) and placeholder paths such as `/home/<user>`. No LLM call.
 - **journal-keeper** (`scripts/journal-keeper.py`): on `Stop`, compares `git status --porcelain` with a snapshot taken at the start of the turn. When files other than `docs/kiro-journal.md` and `docs/prompt-history.md` changed and the journal was not touched, it returns `{"decision": "block", "reason": "<journal-keeper prompt>"}` once; it records that it asked, so it never asks twice in the same turn and the follow-up turn cannot loop.
 - **prompt-logger** (`scripts/prompt-logger.py`): on `UserPromptSubmit`, redacts the prompt first (gitleaks findings, e-mails, home paths, IPs, using the same placeholder rules), then appends the next numbered entry with `Outcome: _pending_`. The surface is `CLI` or `IDE` only when the event payload or environment identifies it reliably; otherwise `set by hand`. If redaction fails for any reason, nothing is written and a warning is printed. Shipped with `enabled: false`; once the developer enables it, it is the only writer of new entries.
 
@@ -111,4 +122,4 @@ The MCP tool outputs reuse the `AutopsyReport` and `ModelManifest` schemas from 
 - Hypothesis property test for Property 1, generating paths with `..`, symlinks, absolute paths and Unicode.
 - Integration test for Property 2 against the engine's FastAPI `TestClient`.
 - Hooks: one manual dry run each, recorded in the journal with a screenshot of the output.
-- Command-hook scripts: unit tests in `scripts/tests/` (PII true and false positives, journal-keeper no-loop case, prompt-logger redaction-failure case).
+- Command-hook scripts: unit tests in `scripts/tests/` (PII true and false positives, journal-keeper no-loop case, prompt-logger redaction-failure case, an unfilled `{{…}}` argument in `resolve-path.sh`, and for the Turn_Report: masking, the raw value never appearing in the state file, the Stop message or the hook's stdout and stderr, the 50-finding cap, and delivery at most once per turn).
