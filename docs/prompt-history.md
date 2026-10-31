@@ -47,4 +47,33 @@ Stop at the project-foundation checkpoint (task 6) and show me:
 Continue with kiro-workbench Phase A only after I say "go".
 ```
 
+Outcome: tasks 1.1 to 4.1 done in 13 commits; `mise run check` and `check:all` pass. Stopped at 4.2 asking about the license allowlist (Requirement 4.4), fixture audio vs the forbidden-path rule, and four changes made without proposing them first (gitleaks command, Biome on Markdown, TypeScript 7 vs dependency-cruiser, command adjustments).
+
+## 002 — 2026-10-30 — CLI — project-foundation
+
+```text
+Decisions:
+
+1. License allowlist: (a). Accept your proposed text for Requirement 4.4, including the SPDX override list for packages that report a license category. Each override must cite the project's license file URL in a comment. Unknown licenses fail the check.
+
+2. Fixture audio: don't commit any audio outside apps/web/public/replay/. Keep the security rule as it is. Generate synthetic fixtures (sine waves, noise, silence, chirps) at test time from seeded generators. When a tool needs a file (for example, Playwright's fake audio capture), write it to a git-ignored temporary directory during test setup. Cross-language golden vectors stay as JSON in packages/contracts/fixtures/golden/. Update the testing steering ("Fixture audio lives in…") to say this, and remove the packages/*/fixtures/ audio wording.
+
+3. Unproposed changes:
+   - gitleaks `git --pre-commit --staged`: OK.
+   - Excluding *.md from Biome: OK. Markdown under .kiro/ and docs/ must never be auto-formatted, especially the append-only prompt history.
+   - mypy on src/, check installing from lockfiles, lefthook through `mise x`: OK.
+   - TypeScript: don't use the @swc/core workaround. Pin TypeScript 6.0.3 for ecosystem compatibility, revert dependency-cruiser to its normal parser, and record in ADR 0001 why we stay on 6.x and what would trigger moving to 7.
+   Update project-foundation/design.md to match all of the above.
+   From now on, propose deviations before implementing them, even small ones.
+
+4. Commit hygiene (applies to every commit from now on):
+   - No AI attribution of any kind in commit messages, PR descriptions, tags or code comments. That means no "Co-Authored-By" trailers for any AI tool, no "Generated with/by …" lines, and no mentions of AI assistants as authors. Kiro usage is documented in docs/kiro-journal.md and the write-up, not in commits.
+   - Don't change git user.name or user.email, and don't pass --author.
+   - Check the 13 existing commits now with `git log --format='%H%n%B' | grep -niE 'co-authored|generated (with|by)|assistant'`. If any match, rewrite those messages (nothing has been pushed yet) and show me the result.
+
+5. Logging: fill in the "Outcome" line of entry 001 in docs/prompt-history.md, then append this message verbatim as entry 002 (CLI, project-foundation).
+
+Then continue with task 4.2 and stop at the task 6 checkpoint as planned.
+```
+
 Outcome: _pending_
