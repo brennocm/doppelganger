@@ -1,0 +1,79 @@
+# uv workspace root for the Python side of the monorepo.
+# The root is a virtual project: it only ties the members together and holds shared tooling.
+
+[project]
+name = "doppelganger-workspace"
+version = "0.0.0"
+description = "Doppelgänger Python workspace (engine, model lab, MCP server)"
+requires-python = "==3.12.*"
+license = "MIT"
+dependencies = [
+    "doppelganger-engine",
+    "doppelganger-model-lab",
+    "doppelganger-mcp",
+]
+
+[dependency-groups]
+dev = [
+    "mypy==2.4.1",
+    "pytest==9.2.0",
+    "ruff==0.17.3",
+]
+
+[tool.uv]
+package = false
+required-version = "==0.13.6"
+
+[tool.uv.workspace]
+members = ["apps/engine", "packages/model-lab", "packages/doppelganger-mcp"]
+
+[tool.uv.sources]
+doppelganger-engine = { workspace = true }
+doppelganger-model-lab = { workspace = true }
+doppelganger-mcp = { workspace = true }
+
+# --- Ruff: one formatter and one linter for Python -------------------------
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["apps/engine/src", "packages/model-lab/src", "packages/doppelganger-mcp/src"]
+extend-exclude = ["**/generated/**"]
+
+[tool.ruff.lint]
+# Strict: every rule, minus the few that contradict each other or the formatter.
+select = ["ALL"]
+ignore = [
+    "D203",   # conflicts with D211 (no blank line before class docstring)
+    "D213",   # conflicts with D212 (summary on the first line)
+    "COM812", # conflicts with the formatter
+    "ISC001", # conflicts with the formatter
+    "CPY001", # copyright lives in the root LICENSE, not in per-file headers
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = [
+    "S101",   # assert is how pytest works
+    "D",      # test names describe themselves
+    "INP001", # test folders are not packages
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+# --- mypy: strict on every Python package ----------------------------------
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+mypy_path = ["apps/engine/src", "packages/model-lab/src", "packages/doppelganger-mcp/src"]
+explicit_package_bases = true
+
+# --- pytest -----------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["apps/engine/tests", "packages/model-lab/tests", "packages/doppelganger-mcp/tests"]
+addopts = ["--strict-markers", "--strict-config", "--import-mode=importlib"]
+xfail_strict = true
