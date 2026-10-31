@@ -12,6 +12,8 @@ uv = "0.13.6"
 shellcheck = "0.11.0"
 gitleaks = "8.30.1"
 lefthook = "2.2.2"
+# GitHub MCP server for Kiro (.kiro/settings/mcp.json); pinned here so mise.lock verifies it.
+"github:github/github-mcp-server" = "2.0.3"
 
 [env]
 # uv must use the mise-pinned Python, never download its own.

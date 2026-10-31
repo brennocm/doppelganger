@@ -21,7 +21,7 @@
     - _Requirements: 9.2_
 
 - [ ] 2. Configure MCP servers
-  - [ ] 2.1 Add Playwright, documentation, Hugging Face and GitHub servers to `.kiro/settings/mcp.json`; the GitHub token comes from an environment variable reference
+  - [x] 2.1 Add Playwright, documentation, Hugging Face and GitHub servers to `.kiro/settings/mcp.json`; the GitHub token comes from an environment variable reference
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
   - [ ] 2.2 Verify each server responds (one tool call each) and record it in the journal
     - _Requirements: 6.1, 6.2, 6.3, 6.4_

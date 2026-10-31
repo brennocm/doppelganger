@@ -1,0 +1,42 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "mise",
+      "args": [
+        "x",
+        "--",
+        "npx",
+        "-y",
+        "@playwright/mcp@0.0.83",
+        "--headless",
+        "--isolated",
+        "--browser",
+        "chromium"
+      ]
+    },
+    "docs": {
+      "command": "mise",
+      "args": ["x", "--", "npx", "-y", "@upstash/context7-mcp@4.4.4"]
+    },
+    "huggingface": {
+      "url": "https://huggingface.co/mcp",
+      "headers": {
+        "Authorization": "Bearer ${HF_TOKEN}"
+      }
+    },
+    "github": {
+      "command": "mise",
+      "args": [
+        "x",
+        "--",
+        "github-mcp-server",
+        "stdio",
+        "--toolsets=repos,issues,pull_requests",
+        "--lockdown-mode"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    }
+  }
+}

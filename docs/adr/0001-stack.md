@@ -43,11 +43,16 @@ Versions were checked against the official sources on 2026-10-30: nodejs.org `di
 | import-linter | 2.15 | `pyproject.toml` dev group | Latest stable. |
 | pip-audit | 2.10.1 | `pyproject.toml` dev group | Latest stable. Audits the hashed `uv export` of `uv.lock` without resolving anything. |
 | uv_build | 0.13.6 | each member's `[build-system]` | Same version as uv. |
+| github-mcp-server | 2.0.3 | `.mise.toml` (`github:` backend), `mise.lock` | Official GitHub MCP server (MIT), run locally over stdio so the version is pinned and checksum-verified, unlike the hosted endpoint. Started with `--toolsets=repos,issues,pull_requests --lockdown-mode`. |
+| @playwright/mcp | 0.0.83 | `.kiro/settings/mcp.json` (`npx -y`, exact version) | Microsoft's Playwright MCP server (Apache-2.0), latest release. It depends on a Playwright 1.64 alpha build, which is how Microsoft ships it. Runs `--headless --isolated --browser chromium`. |
+| @upstash/context7-mcp | 4.4.4 | `.kiro/settings/mcp.json` (`npx -y`, exact version) | Context7 documentation server (MIT), latest release. Works without an API key; reads `CONTEXT7_API_KEY` from the environment when set. |
 | actions/checkout | v7.0.1 (`3d3c42e5…`) | workflows | Latest release, pinned by commit SHA. |
 | jdx/mise-action | v5.2.4 (`6be3c7ed…`) | workflows | Latest release, pinned by commit SHA. |
 | actions/configure-pages | v6.0.0 (`45bfe019…`) | `pages.yml` | Latest release, pinned by commit SHA. |
 | actions/upload-pages-artifact | v5.0.0 (`fc324d35…`) | `pages.yml` | Latest release, pinned by commit SHA. Needs `include-hidden-files: true` to keep `.nojekyll`. |
 | actions/deploy-pages | v5.0.1 (`368f8252…`) | `pages.yml` | Latest release, pinned by commit SHA. |
+
+The MCP servers started with `npx -y <package>@<version>` are pinned to an exact version but are not in `pnpm-lock.yaml`, so they get no lockfile integrity check, no 24 h release-age delay and no license-policy check; their licenses were checked by hand. The Hugging Face server is the hosted endpoint `https://huggingface.co/mcp`, which has no version to pin.
 
 The rest of the stack in the tech steering (`onnxruntime-web`, `fast-check`, Playwright, FastAPI, Uvicorn, `onnxruntime`, PyTorch, Hypothesis, the MCP SDK) is not installed yet. Each spec that first needs one of them pins it and adds a row to this table.
 
