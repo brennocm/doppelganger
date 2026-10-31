@@ -1,0 +1,94 @@
+# Doppelgänger .gitignore
+# .kiro/ is tracked on purpose (specs, steering, hooks, agents, MCP config). Never ignore it.
+
+# --- Dependencies ---
+node_modules/
+.pnpm-store/
+.venv/
+venv/
+__pypackages__/
+
+# --- Build outputs ---
+dist/
+build/
+out/
+*.tsbuildinfo
+*.egg-info/
+*.whl
+.vite/
+
+# --- Caches ---
+.cache/
+.turbo/
+.eslintcache
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/
+.import_linter_cache/
+
+# --- Test and coverage reports ---
+coverage/
+.coverage
+.coverage.*
+htmlcov/
+junit*.xml
+test-results/
+playwright-report/
+blob-report/
+reports/
+
+# --- Logs ---
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# --- Local environment and secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.local
+.mise.local.toml
+mise.local.toml
+
+# --- Datasets (live outside the repo, paths from env vars; see ml-honesty steering) ---
+datasets/
+data/raw/
+data/external/
+*.parquet
+*.arrow
+
+# --- Audio: only the consented demo samples in apps/web/public/replay/ are allowed ---
+*.wav
+*.mp3
+*.ogg
+*.opus
+*.flac
+*.m4a
+*.aac
+*.webm
+!apps/web/public/replay/**/*.wav
+!apps/web/public/replay/**/*.mp3
+!apps/web/public/replay/**/*.ogg
+!apps/web/public/replay/**/*.opus
+
+# --- Editor and personal configuration ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.history/
+*.code-workspace
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+desktop.ini
