@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "token-contrast",
+      "description": "Rebuild design tokens and report contrast pairs below target (kiro-workbench Requirement 1.4).",
+      "trigger": "PostFileSave",
+      "matcher": "(^|/)packages/tokens/",
+      "action": { "type": "command", "command": "scripts/hooks/token-contrast.sh" },
+      "timeout": 120
+    }
+  ]
+}

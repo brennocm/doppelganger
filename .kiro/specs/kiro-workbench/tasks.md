@@ -7,7 +7,7 @@
     - _Requirements: 1.1, 1.2_
   - [x] 1.2 Create `contracts-codegen` (save in `packages/contracts/schemas/`)
     - _Requirements: 1.3_
-  - [ ] 1.3 Create `token-contrast` (save in `packages/tokens/`)
+  - [x] 1.3 Create `token-contrast` (save in `packages/tokens/`)
     - _Requirements: 1.4_
   - [ ] 1.4 Create `secret-sentinel` and `zero-disk-guard` using the prompts in the design
     - _Requirements: 2.1, 2.2_
