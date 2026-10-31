@@ -12,7 +12,7 @@ Public benchmark ($BENCHMARK_DIR) ────────┤
                                           ▼
                  codecs.py (Opus / 8 kHz / noise, via ffmpeg in memory pipes)
                                           ▼
- candidates/*.py (load PyTorch checkpoints) ──► evaluate.py ──► reports/<date>/
+ candidates/*.py (load PyTorch checkpoints) ──► export.py (fp32 ONNX) ──► evaluate.py ──► reports/<date>/
                                           ▼
                  calibrate.py (temperature scaling on dev split)
                                           ▼
@@ -43,6 +43,10 @@ Window length equals the model's native input (for AASIST, 64,600 samples). Hop 
 
 ### Evaluation
 
+- Candidates are evaluated as ONNX files through `model_lab.inference`, the same code path the engine and MCP server use, so the reported numbers belong to the exact file that ships. A PyTorch candidate is first exported to fp32 ONNX (with the parity check); its loader in `candidates/` only builds the module and loads the checkpoint. The AASIST-L and AASIST loaders are written with the gate run (task 4.1), because they need the upstream model code (MIT) and the checkpoints.
+- Datasets: the Haunt_Set from `$HAUNT_SET_DIR/index.csv`, and the ASVspoof 2019 LA eval partition from `$BENCHMARK_DIR` (protocol `ASVspoof2019_LA_cm_protocols/ASVspoof2019.LA.cm.eval.trl.txt`), optionally subsampled deterministically (`--benchmark-limit`). Files are decoded to 16 kHz mono in memory by ffmpeg.
+- A clip shorter than one window is zero-padded to one window. Codec noise uses a seed derived from the item's relative path.
+- ORT CPU latency is measured per window during evaluation (single thread); the ORT Web latency comes from the bench-web run and is merged with `--web-latency`.
 - Splits: Haunt_Set is split by **recording session** (not by window) into dev (calibration and threshold tuning) and eval (reported numbers), so no session leaks between them.
 - Metrics computed with NumPy and scikit-learn; EER by ROC interpolation.
 - The latency benchmark for ORT Web uses a tiny HTML page in `packages/model-lab/bench-web/`, driven by Playwright in headless Chromium.

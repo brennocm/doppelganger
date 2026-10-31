@@ -18,7 +18,7 @@
     - _Requirements: 2.1, 4.1_
 
 - [ ] 3. Evaluation harness
-  - [ ] 3.1 Implement candidate loaders and `evaluate.py` with EER, AUC, false-alarm and detection rates per condition
+  - [ ] 3.1 Implement the ONNX candidate loader and `evaluate.py` with EER, AUC, false-alarm and detection rates per condition
     - _Requirements: 2.1, 2.2, 2.5_
   - [ ] 3.2 Port the EMA and hysteresis logic for "after smoothing" metrics and assert parity with the golden vectors
     - _Requirements: 3.1_
@@ -28,7 +28,7 @@
     - _Requirements: 2.3_
 
 - [ ] 4. Go/no-go gate
-  - [ ] 4.1 Run the evaluation, apply the gate, and write the ADR with the numbers
+  - [ ] 4.1 Write the AASIST-L and AASIST checkpoint loaders in `candidates/`, export them to fp32 ONNX, run the evaluation, apply the gate, and write the ADR with the numbers
     - _Requirements: 3.1, 3.3_
   - [ ] 4.2 If the gate fails, run the fallbacks in order (codec-augmented fine-tuning first) and update the ADR
     - _Requirements: 3.2_
