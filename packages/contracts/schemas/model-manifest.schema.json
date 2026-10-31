@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://doppelganger.invalid/schemas/model-manifest.schema.json",
+  "title": "ModelManifest",
+  "description": "Describes one exported ONNX model (detection-model Requirement 5.4).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "role",
+    "file",
+    "sha256",
+    "bytes",
+    "quantization",
+    "sampleRate",
+    "windowSamples",
+    "hopSamples",
+    "input",
+    "output",
+    "outputKind",
+    "spoofIndex",
+    "calibration",
+    "thresholds",
+    "license",
+    "source"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "role": {
+      "description": "light: browser model; pro: engine model; test: synthetic CI model that detects nothing.",
+      "type": "string",
+      "enum": ["light", "pro", "test"]
+    },
+    "file": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*\\.onnx$" },
+    "url": {
+      "description": "Download URL for models published as release assets (the Pro_Model).",
+      "type": "string",
+      "pattern": "^https://"
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "bytes": { "type": "integer", "minimum": 1 },
+    "quantization": { "type": "string", "enum": ["fp32", "int8"] },
+    "sampleRate": { "type": "integer", "const": 16000 },
+    "windowSamples": { "type": "integer", "minimum": 1 },
+    "hopSamples": { "type": "integer", "minimum": 1 },
+    "input": { "type": "string", "minLength": 1 },
+    "output": { "type": "string", "minLength": 1 },
+    "outputKind": { "type": "string", "enum": ["single-logit", "two-class-logits"] },
+    "spoofIndex": { "type": "integer", "minimum": 0, "maximum": 1 },
+    "calibration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "temperature"],
+      "properties": {
+        "method": { "type": "string", "const": "temperature" },
+        "temperature": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unease", "possession", "release"],
+      "properties": {
+        "unease": { "type": "number", "minimum": 0, "maximum": 1 },
+        "possession": { "type": "number", "minimum": 0, "maximum": 1 },
+        "release": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "weights", "trainingData", "verifiedOn"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "weights": { "type": "string", "minLength": 1 },
+        "trainingData": { "type": "string", "minLength": 1 },
+        "verifiedOn": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" }
+      }
+    },
+    "source": { "type": "string", "minLength": 1 }
+  }
+}

@@ -8,6 +8,7 @@ description = "Doppelgänger Python workspace (engine, model lab, MCP server)"
 requires-python = "==3.12.*"
 license = "MIT"
 dependencies = [
+    "doppelganger-contracts",
     "doppelganger-engine",
     "doppelganger-model-lab",
     "doppelganger-mcp",
@@ -15,6 +16,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "datamodel-code-generator==0.87.0",
     "doppelganger-model-lab[lab]",
     "hypothesis==6.170.14",
     "import-linter==2.15",
@@ -29,9 +31,10 @@ package = false
 required-version = "==0.13.6"
 
 [tool.uv.workspace]
-members = ["apps/engine", "packages/model-lab", "packages/doppelganger-mcp"]
+members = ["apps/engine", "packages/contracts", "packages/model-lab", "packages/doppelganger-mcp"]
 
 [tool.uv.sources]
+doppelganger-contracts = { workspace = true }
 doppelganger-engine = { workspace = true }
 doppelganger-model-lab = { workspace = true }
 doppelganger-mcp = { workspace = true }
@@ -47,8 +50,15 @@ explicit = true
 [tool.ruff]
 target-version = "py312"
 line-length = 100
-src = ["apps/engine/src", "packages/model-lab/src", "packages/doppelganger-mcp/src"]
+src = [
+    "apps/engine/src",
+    "packages/contracts/src",
+    "packages/model-lab/src",
+    "packages/doppelganger-mcp/src",
+]
 extend-exclude = ["**/generated/**"]
+# Also skip excluded files when they are passed explicitly (pre-commit passes staged files).
+force-exclude = true
 
 [tool.ruff.lint]
 # Strict: every rule, minus the few that contradict each other or the formatter.
@@ -80,24 +90,30 @@ python_version = "3.12"
 strict = true
 warn_unreachable = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
-mypy_path = ["apps/engine/src", "packages/model-lab/src", "packages/doppelganger-mcp/src"]
+mypy_path = [
+    "apps/engine/src",
+    "packages/contracts/src",
+    "packages/model-lab/src",
+    "packages/doppelganger-mcp/src",
+]
 explicit_package_bases = true
 
 # --- import-linter: Python boundary rules from .kiro/steering/structure.md ---
 [tool.importlinter]
-root_packages = ["doppelganger_engine", "model_lab", "doppelganger_mcp"]
+root_packages = ["doppelganger_contracts", "doppelganger_engine", "model_lab", "doppelganger_mcp"]
 include_external_packages = false
 
 [[tool.importlinter.contracts]]
 name = "Python packages never import from apps/engine"
 type = "forbidden"
-source_modules = ["model_lab", "doppelganger_mcp"]
+source_modules = ["doppelganger_contracts", "model_lab", "doppelganger_mcp"]
 forbidden_modules = ["doppelganger_engine"]
 
 # --- pytest -----------------------------------------------------------------
 [tool.pytest.ini_options]
 testpaths = [
     "apps/engine/tests",
+    "packages/contracts/tests",
     "packages/model-lab/tests",
     "packages/doppelganger-mcp/tests",
     "scripts/tests",

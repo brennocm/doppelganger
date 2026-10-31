@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://doppelganger.invalid/schemas/detector-update.schema.json",
+  "title": "DetectorUpdate",
+  "description": "One update from the detector to its listeners. Never carries audio.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["state", "smoothed", "raw", "windowIndex", "at"],
+  "properties": {
+    "state": {
+      "title": "HauntingState",
+      "type": "string",
+      "enum": ["idle", "listening", "mask", "unease", "possession", "exorcised"]
+    },
+    "smoothed": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "raw": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "windowIndex": { "type": ["integer", "null"], "minimum": 0 },
+    "at": { "type": "number" },
+    "error": { "type": "string", "enum": ["inference-failed"] }
+  }
+}

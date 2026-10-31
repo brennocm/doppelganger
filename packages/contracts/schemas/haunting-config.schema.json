@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://doppelganger.invalid/schemas/haunting-config.schema.json",
+  "title": "DetectorConfig",
+  "description": "Detector configuration (detection-core design, Default configuration).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "alpha",
+    "unease",
+    "possession",
+    "release",
+    "confirmWindows",
+    "releaseWindows",
+    "silenceMs",
+    "maxPending",
+    "vad"
+  ],
+  "properties": {
+    "alpha": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+    "unease": { "type": "number", "minimum": 0, "maximum": 1 },
+    "possession": { "type": "number", "minimum": 0, "maximum": 1 },
+    "release": { "type": "number", "minimum": 0, "maximum": 1 },
+    "confirmWindows": { "type": "integer", "minimum": 1 },
+    "releaseWindows": { "type": "integer", "minimum": 1 },
+    "silenceMs": { "type": "integer", "minimum": 0 },
+    "maxPending": { "type": "integer", "minimum": 1 },
+    "vad": {
+      "title": "VadConfig",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minRms", "maxZeroCrossingRate", "minVoicedFraction"],
+      "properties": {
+        "minRms": { "type": "number", "minimum": 0 },
+        "maxZeroCrossingRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "minVoicedFraction": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

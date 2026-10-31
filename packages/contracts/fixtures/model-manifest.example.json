@@ -1,0 +1,25 @@
+{
+  "id": "example-light",
+  "version": "1.0.0",
+  "role": "test",
+  "file": "example-light.int8.onnx",
+  "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "bytes": 1024,
+  "quantization": "int8",
+  "sampleRate": 16000,
+  "windowSamples": 64600,
+  "hopSamples": 16000,
+  "input": "waveform",
+  "output": "logits",
+  "outputKind": "two-class-logits",
+  "spoofIndex": 1,
+  "calibration": { "method": "temperature", "temperature": 1.7 },
+  "thresholds": { "unease": 0.4, "possession": 0.7, "release": 0.5 },
+  "license": {
+    "code": "MIT",
+    "weights": "MIT",
+    "trainingData": "none (example)",
+    "verifiedOn": "2026-10-31"
+  },
+  "source": "example fixture for contract tests"
+}

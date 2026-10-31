@@ -49,6 +49,9 @@ Versions were checked against the official sources on 2026-10-30: nodejs.org `di
 | onnx | 1.23.2 | `packages/model-lab` extra `lab` | Latest stable. Needed by `quantize_dynamic` and to inspect exported graphs. |
 | PyTorch | 2.15.0 (`+cpu`) | `packages/model-lab` extra `lab`, CPU index `download.pytorch.org/whl/cpu` | Latest stable. Loads candidate checkpoints and exports them. The CPU index avoids several GB of CUDA wheels. Export uses the TorchScript exporter (`dynamo=False`), which needs no `onnxscript`. |
 | Hypothesis | 6.170.14 | root `dev` group | Latest stable. Property-based tests (MPL-2.0, development only, unmodified). |
+| json-schema-to-typescript | 16.0.0 | `packages/contracts` devDependencies | Latest stable (MIT). Generates the TS types in `gen:contracts`. |
+| datamodel-code-generator | 0.87.0 | root `dev` group | Latest stable (MIT). Generates the Pydantic models in `gen:contracts`. |
+| Pydantic | 2.14.2 | `packages/contracts` (Python) dependencies | Latest stable (MIT). Runtime validation of manifests and engine messages. |
 | github-mcp-server | 2.0.3 | `.mise.toml` (`github:` backend), `mise.lock` | Official GitHub MCP server (MIT), run locally over stdio so the version is pinned and checksum-verified, unlike the hosted endpoint. Started with `--toolsets=repos,issues,pull_requests --lockdown-mode`. |
 | @playwright/mcp | 0.0.83 | `.kiro/settings/mcp.json` (`npx -y`, exact version) | Microsoft's Playwright MCP server (Apache-2.0), latest release. It depends on a Playwright 1.64 alpha build, which is how Microsoft ships it. Runs `--headless --isolated --browser chromium`. |
 | @upstash/context7-mcp | 4.4.4 | `.kiro/settings/mcp.json` (`npx -y`, exact version) | Context7 documentation server (MIT), latest release. Works without an API key; reads `CONTEXT7_API_KEY` from the environment when set. |

@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://doppelganger.invalid/schemas/session-stats.schema.json",
+  "title": "SessionStats",
+  "description": "Per-session summary for the incident report (detection-core Requirement 6). No audio.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "startedAt",
+    "voicedMs",
+    "peak",
+    "msInState",
+    "transitions",
+    "droppedWindows",
+    "failedWindows"
+  ],
+  "properties": {
+    "startedAt": { "type": ["number", "null"] },
+    "voicedMs": { "type": "number", "minimum": 0 },
+    "peak": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "msInState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idle", "listening", "mask", "unease", "possession", "exorcised"],
+      "properties": {
+        "idle": { "type": "number", "minimum": 0 },
+        "listening": { "type": "number", "minimum": 0 },
+        "mask": { "type": "number", "minimum": 0 },
+        "unease": { "type": "number", "minimum": 0 },
+        "possession": { "type": "number", "minimum": 0 },
+        "exorcised": { "type": "number", "minimum": 0 }
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "title": "StateTransition",
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to", "at"],
+        "properties": {
+          "from": {
+            "type": "string",
+            "enum": ["idle", "listening", "mask", "unease", "possession", "exorcised"]
+          },
+          "to": {
+            "type": "string",
+            "enum": ["idle", "listening", "mask", "unease", "possession", "exorcised"]
+          },
+          "at": { "type": "number" }
+        }
+      }
+    },
+    "droppedWindows": { "type": "integer", "minimum": 0 },
+    "failedWindows": { "type": "integer", "minimum": 0 }
+  }
+}

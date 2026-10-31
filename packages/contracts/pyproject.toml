@@ -1,0 +1,14 @@
+[project]
+name = "doppelganger-contracts"
+version = "0.0.0"
+description = "Doppelgänger contracts: Pydantic models generated from the JSON Schemas."
+requires-python = "==3.12.*"
+license = "MIT"
+dependencies = ["pydantic==2.14.2"]
+
+[build-system]
+requires = ["uv_build==0.13.6"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "doppelganger_contracts"

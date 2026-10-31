@@ -90,7 +90,8 @@ run = "scripts/test.sh"
 
 [tasks."gen:contracts"]
 description = "Regenerate TS and Python types from JSON Schema"
-run = "echo 'gen:contracts: not implemented yet (detection-model, detection-core specs)'"
+depends = ["deps"]
+run = "scripts/gen-contracts.sh"
 
 [tasks."model:eval"]
 description = "Run the model evaluation harness"
