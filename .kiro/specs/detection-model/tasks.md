@@ -36,10 +36,10 @@
 - [ ] 5. Calibration
   - [ ] 5.1 Implement temperature scaling, ECE reporting and the golden calibration vectors
     - _Requirements: 4.1, 4.2, 4.3_
-  - [ ]* 5.2 Write property test for probability bounds
+  - [x]* 5.2 Write property test for probability bounds
     - **Property 1: Calibrated output is a probability**
     - **Validates: Requirements 4.1**
-  - [ ]* 5.3 Write property test for monotonic calibration
+  - [x]* 5.3 Write property test for monotonic calibration
     - **Property 2: Calibration is monotonic**
     - **Validates: Requirements 4.1**
 
