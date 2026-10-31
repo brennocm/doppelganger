@@ -76,4 +76,4 @@ Decisions:
 Then continue with task 4.2 and stop at the task 6 checkpoint as planned.
 ```
 
-Outcome: _pending_
+Outcome: Decisions applied (spec and testing steering updated, TypeScript 6.0.3, no AI attribution found in the 13 commits), tasks 4.2–5.2 done, checkpoint run on a clean clone; task 6 waits for the first Pages deploy. See the journal entries for groups 4 and 5–6.
