@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 # Shared helper for hook scripts: print a hook's target file path relative to the repo root.
 # Source it, then call: rel="$(hook_path "$@")"
-# The path comes from the first argument ({{filePath}}) or, failing that, from the
-# hook event JSON on STDIN (file_path, path or tool_input.path).
+# The path comes from the hook event JSON on STDIN (file_path, path or tool_input.path).
+# A first argument is used only for manual runs; an argument that is still an unfilled
+# template placeholder such as {{filePath}} is ignored, because the Kiro CLI V3 does not
+# substitute it.
 
 hook_path() {
   local raw="${1:-}"
+  if [[ "$raw" == *'{{'*'}}'* ]]; then
+    raw=""
+  fi
   if [[ -z "$raw" && ! -t 0 ]]; then
     raw="$(python3 -c 'import json,sys
 try:

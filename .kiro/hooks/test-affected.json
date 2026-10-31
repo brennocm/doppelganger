@@ -6,7 +6,7 @@
       "description": "Run the tests of the package that owns a saved TS or Python file (kiro-workbench Requirements 1.1, 1.2).",
       "trigger": "PostFileSave",
       "matcher": "(^|/)(packages/[^/]+/.+\\.ts|apps/web/.+\\.ts|(apps/engine|packages/model-lab|packages/doppelganger-mcp)/.+\\.py)$",
-      "action": { "type": "command", "command": "scripts/hooks/test-affected.sh {{filePath}}" },
+      "action": { "type": "command", "command": "scripts/hooks/test-affected.sh" },
       "timeout": 180
     }
   ]
