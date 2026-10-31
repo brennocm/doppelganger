@@ -15,7 +15,7 @@
     - _Requirements: 2.3_
   - [x] 1.6 Create `journal-keeper` (agent stop) and `spec-lint` (save in `.kiro/specs/`)
     - _Requirements: 3.1, 3.2_
-  - [ ] 1.6a Create `prompt-logger` (prompt submit) if the trigger exists in the current Kiro version; otherwise note in the journal that prompts are logged by hand
+  - [x] 1.6a Create `prompt-logger` (prompt submit) if the trigger exists in the current Kiro version; otherwise note in the journal that prompts are logged by hand
     - _Requirements: 3.3_
   - [ ] 1.7 Dry-run every hook once and record the output in the journal
     - _Requirements: 9.2_
