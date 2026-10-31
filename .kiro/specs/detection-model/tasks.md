@@ -9,9 +9,9 @@
 - [ ] 2. Data preparation (outside the repository)
   - [x] 2.1 Document in `packages/model-lab/HAUNT_SET.md` how the Haunt_Set is recorded (sessions, sentences, devices) and how consented clones are produced, without including any cloning code or prompts
     - _Requirements: 7.1, 7.2_
-  - [ ] 2.2 Implement `codecs.py` (Opus 16/32 kbps, 8 kHz band, noise at 10 dB SNR) using in-memory ffmpeg pipes
+  - [x] 2.2 Implement `codecs.py` (Opus 16/32 kbps, 8 kHz band, noise at 10 dB SNR) using in-memory ffmpeg pipes
     - _Requirements: 2.1_
-  - [ ]* 2.3 Write property test for codec simulation length
+  - [x]* 2.3 Write property test for codec simulation length
     - **Property 3: Codec simulation preserves length**
     - **Validates: Requirements 2.1**
   - [ ] 2.4 Implement session-based dev/eval splitting

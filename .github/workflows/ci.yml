@@ -41,6 +41,10 @@ jobs:
           install: true
           cache: true
 
+      # ffmpeg simulates the codec conditions in the model-lab tests (detection-model 2.2).
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg
+
       # Installs from pnpm-lock.yaml and uv.lock only (--frozen-lockfile, --locked),
       # then runs every gate in check:all.
       - name: mise run check:all
