@@ -35,7 +35,7 @@ This spec chooses, evaluates, calibrates and exports the voice-clone detection m
 1. WHEN `mise run model:eval` runs, THE Model_Lab SHALL evaluate every candidate on the Haunt_Set under every Codec_Condition, and on at least one public spoofing benchmark whose license allows evaluation use.
 2. THE Model_Lab SHALL report, per model and condition: EER, ROC AUC, the false-alarm rate on genuine windows at the possession threshold, and the detection rate on synthetic windows at that threshold.
 3. THE Model_Lab SHALL report inference latency p50 and p95 per window for ONNX Runtime CPU and for ONNX Runtime Web (single-thread WASM SIMD, measured in a headless Chromium benchmark page).
-4. THE Model_Lab SHALL write results to `packages/model-lab/reports/<date>/results.json` and a human-readable `summary.md`; raw audio paths SHALL come from environment variables and SHALL NOT be written to reports.
+4. THE Model_Lab SHALL write results to `packages/model-lab/reports/<date>/results.json` and a human-readable `summary.md`; raw audio paths SHALL come from environment variables and SHALL NOT be written to reports. Only these two files of each run SHALL be committed; every other file under `reports/` (scores, plots, logs) SHALL stay git-ignored.
 5. THE evaluation SHALL be deterministic for the same inputs and model.
 
 ### Requirement 3: Go/no-go gate

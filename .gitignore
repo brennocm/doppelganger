@@ -42,6 +42,12 @@ blob-report/
 # go to docs/evidence/ only when the developer asks for them.
 .playwright-mcp/
 reports/
+# Model-lab runs: commit only summary.md and results.json of each dated run
+# (detection-model Requirement 2.4); scores, plots and logs stay ignored.
+!/packages/model-lab/reports/
+/packages/model-lab/reports/*/*
+!/packages/model-lab/reports/*/summary.md
+!/packages/model-lab/reports/*/results.json
 
 # --- Logs ---
 *.log
