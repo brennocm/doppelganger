@@ -27,7 +27,8 @@
 - [ ] 2. Configure MCP servers
   - [x] 2.1 Add Playwright, documentation, Hugging Face and GitHub servers to `.kiro/settings/mcp.json`; the GitHub token comes from an environment variable reference
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
-  - [ ] 2.2 Verify each server responds (one tool call each) and record it in the journal
+  - [x] 2.2 Verify each server responds (one tool call each) and record it in the journal
+    - GitHub skipped: the server is disabled (`"disabled": true`) until a token is needed; see the journal entry of 2026-10-30.
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
 - [ ] 3. Create the custom agents through Kiro
