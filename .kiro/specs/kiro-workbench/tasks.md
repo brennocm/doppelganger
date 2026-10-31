@@ -13,7 +13,7 @@
     - _Requirements: 2.1, 2.2_
   - [x] 1.5 Create the `privacy-audit` manual steering command (`/privacy-audit`)
     - _Requirements: 2.3_
-  - [ ] 1.6 Create `journal-keeper` (agent stop) and `spec-lint` (save in `.kiro/specs/`)
+  - [x] 1.6 Create `journal-keeper` (agent stop) and `spec-lint` (save in `.kiro/specs/`)
     - _Requirements: 3.1, 3.2_
   - [ ] 1.6a Create `prompt-logger` (prompt submit) if the trigger exists in the current Kiro version; otherwise note in the journal that prompts are logged by hand
     - _Requirements: 3.3_

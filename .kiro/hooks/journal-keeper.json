@@ -1,0 +1,25 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "journal-keeper-snapshot",
+      "description": "Record the working tree at the start of each turn, for journal-keeper.",
+      "trigger": "UserPromptSubmit",
+      "action": {
+        "type": "command",
+        "command": "mise x -- python scripts/hooks/journal_keeper.py snapshot"
+      },
+      "timeout": 20
+    },
+    {
+      "name": "journal-keeper",
+      "description": "When a turn changed files and the journal was not updated, ask once for a journal entry (kiro-workbench Requirement 3.1).",
+      "trigger": "Stop",
+      "action": {
+        "type": "command",
+        "command": "mise x -- python scripts/hooks/journal_keeper.py check"
+      },
+      "timeout": 20
+    }
+  ]
+}

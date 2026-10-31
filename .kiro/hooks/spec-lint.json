@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "spec-lint",
+      "description": "Check requirement references and Validates lines in saved specs (kiro-workbench Requirement 3.2).",
+      "trigger": "PostFileSave",
+      "matcher": "(^|/)\\.kiro/specs/",
+      "action": {
+        "type": "agent",
+        "prompt": "In the saved spec, list tasks whose `_Requirements_` reference IDs that do not exist in `requirements.md`, and correctness properties without a 'Validates' line. Reply 'consistent' if none."
+      }
+    }
+  ]
+}
