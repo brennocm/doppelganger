@@ -1,0 +1,47 @@
+# CI: the same `mise run check:all` that developers run locally.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege: CI only reads the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # mise refuses tool versions that are not in mise.lock.
+  MISE_LOCKED: "1"
+  # Do not let lefthook install git hooks on the runner.
+  LEFTHOOK: "0"
+
+jobs:
+  check-all:
+    name: check:all
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history for the gitleaks history scan.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up toolchain (mise)
+        uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
+        with:
+          version: 2026.10.21
+          install: true
+          cache: true
+
+      # Installs from pnpm-lock.yaml and uv.lock only (--frozen-lockfile, --locked),
+      # then runs every gate in check:all.
+      - name: mise run check:all
+        run: mise run check:all

@@ -47,9 +47,20 @@ run = [
   "scripts/test.sh",
 ]
 
+[tasks."secrets:history"]
+description = "gitleaks over the full git history"
+hide = true
+run = "gitleaks git --redact --no-banner --verbose ."
+
 [tasks."check:all"]
 description = "check plus builds, E2E, audits, license check and full-history secret scan (CI)"
-run = "echo 'check:all: not implemented yet (project-foundation tasks 4.1-4.2)'"
+depends = ["deps"]
+run = [
+  { task = "check" },
+  "scripts/check-forbidden-paths.sh --all",
+  { task = "secrets:history" },
+  "echo 'check:all: no E2E suites yet (added by haunted-ui)'",
+]
 
 [tasks.fix]
 description = "Apply every auto-fix"

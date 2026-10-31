@@ -27,7 +27,7 @@
     - _Requirements: 1.3_
 
 - [ ] 4. CI and Pages
-  - [ ] 4.1 Write `.github/workflows/ci.yml` running `mise run check:all`, actions pinned by SHA, least-privilege permissions, frozen lockfiles
+  - [x] 4.1 Write `.github/workflows/ci.yml` running `mise run check:all`, actions pinned by SHA, least-privilege permissions, frozen lockfiles
     - _Requirements: 4.1, 4.2, 4.3_
   - [ ] 4.2 Add `pnpm audit`, `pip-audit` and the license allowlist check to `check:all`
     - _Requirements: 4.4_
