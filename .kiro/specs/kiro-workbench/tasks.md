@@ -31,7 +31,7 @@
     - _Requirements: 5.1, 5.4_
   - [x] 3.2 Create `haunter` with the design-system steering and Playwright MCP
     - _Requirements: 5.2, 5.4_
-  - [ ] 3.3 Create `necromancer` with the ml-honesty steering and Hugging Face MCP
+  - [x] 3.3 Create `necromancer` with the ml-honesty steering and Hugging Face MCP
     - _Requirements: 5.3, 5.4_
   - [ ] 3.4 Try at least one custom agent in the Kiro CLI and one in the IDE; record the differences
     - _Requirements: 9.1_
