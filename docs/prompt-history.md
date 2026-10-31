@@ -177,4 +177,4 @@ Este prompt também precisa entrar no histórico como entrada 006. O prompt-logg
 Logging: append this message by hand as entry 006. Re-read the file right before editing.
 ```
 
-Outcome: _pending_
+Outcome: P10–P14 applied (spec a0c39f7, path fix 142a9f1, Turn_Report afd58bb, GitHub disabled b9f2174). Item 1: all hooks fire on V3 (437ab03). Item 2: Hugging Face and Playwright answered (daa443e). Item 3: the deny rules blocked shell and write calls on their own (85954ab). Item 4: prompt-logger enabled, waiting to check prompt 007. The P11 terminal-output placeholder was left unfilled, so it was recorded as "not checked".

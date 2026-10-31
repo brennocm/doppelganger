@@ -3,11 +3,11 @@
   "hooks": [
     {
       "name": "prompt-logger",
-      "description": "Append each submitted prompt, redacted, to docs/prompt-history.md (kiro-workbench Requirement 3.3). Disabled until the developer enables it; then it is the only writer of new entries.",
+      "description": "Append each submitted prompt, redacted, to docs/prompt-history.md (kiro-workbench Requirement 3.3). Enabled: it is the only writer of new entries; entries are no longer added by hand.",
       "trigger": "UserPromptSubmit",
       "action": { "type": "command", "command": "mise x -- python scripts/hooks/prompt_logger.py" },
       "timeout": 45,
-      "enabled": false
+      "enabled": true
     }
   ]
 }
