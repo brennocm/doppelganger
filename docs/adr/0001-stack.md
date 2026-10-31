@@ -1,0 +1,80 @@
+# 0001 — Stack and pinned versions
+
+- Status: accepted
+- Date: 2026-10-30
+- Spec: `project-foundation` (Requirements 1.1, 2.2, 3.1, 4.2, 4.3)
+
+## Context
+
+Doppelgänger is a polyglot monorepo. A TypeScript web app runs inference in the browser, and Python covers the model lab, the optional Pro engine and the MCP server. A developer, Kiro and CI must run exactly the same tools at the same versions, and a clean clone must pass `mise install && mise run check`.
+
+## Decision
+
+- **mise** pins every command-line tool and is the only task runner (`mise run <verb>`). `mise.lock` records per-platform download URLs and SHA-256 checksums, and CI installs with `MISE_LOCKED=1`.
+- **pnpm workspaces** hold the TypeScript packages and **a uv workspace** holds the Python packages. Each has one committed lockfile (`pnpm-lock.yaml`, `uv.lock`), and installs are always frozen (`pnpm install --frozen-lockfile`, `uv sync --locked`).
+- One formatter and one linter per language: **Biome** (TS, JS, JSON; never Markdown), **Ruff** (Python), **ShellCheck** (shell).
+- Types: **TypeScript** strict with `noUncheckedIndexedAccess`, and **mypy** `--strict`.
+- Boundaries: **dependency-cruiser** (TS) and **import-linter** (Python).
+- Supply chain: **gitleaks** in pre-commit (**lefthook**) and in CI, plus `pnpm audit`, **pip-audit** and a license policy check (`scripts/check_licenses.py`).
+- Every version is exact. Version ranges are never used. Both mise and pnpm refuse versions published less than 24 hours ago (mise default `minimum_release_age = 24h`, and `minimumReleaseAge: 1440` in `pnpm-workspace.yaml`). This limits exposure to compromised releases that get pulled shortly after publishing.
+
+### Pinned versions
+
+Versions were checked against the official sources on 2026-10-30: nodejs.org `dist/index.json`, the npm registry, PyPI, python.org, and the GitHub releases API.
+
+| Tool | Version | Where pinned | Why this version |
+| --- | --- | --- | --- |
+| mise | ≥ 2026.10.21 (`min_version`); CI uses 2026.10.21 | `.mise.toml`, workflows | The version this repository was set up and tested with. 2026.10.24 was hours old and is held back by the 24 h rule. |
+| Node.js | 26.13.0 | `.mise.toml`, `engines` | Newest LTS line (26, "Lithium"). It is inside the supported range of Vite 8 (`>=22.12`), Vitest 5 (`^22.12 \|\| ^24 \|\| >=26`) and dependency-cruiser 18 (`^22 \|\| ^24 \|\| >=26`). |
+| pnpm | 12.16.1 | `.mise.toml`, `packageManager`, `engines` | Latest stable. Its settings `allowBuilds`, `trustPolicy`, `blockExoticSubdeps` and strict `minimumReleaseAge` are used. |
+| Python | 3.12.16 | `.mise.toml`, `requires-python ==3.12.*` | The tech steering fixes Python 3.12; 3.12.16 is its newest patch release. |
+| uv | 0.13.6 | `.mise.toml`, `required-version` | Latest stable. `uv_build` matches it. |
+| ShellCheck | 0.11.0 | `.mise.toml` | Latest release. |
+| gitleaks | 8.30.1 | `.mise.toml` | Latest release. Uses `gitleaks git --pre-commit --staged`, because `protect` is not part of this CLI. |
+| lefthook | 2.2.2 | `.mise.toml`, `min_version` | Latest release. |
+| TypeScript | 6.0.3 | `package.json` (root and each package) | See "Why TypeScript 6, not 7" below. |
+| Biome | 2.6.4 | `package.json` | Latest stable. |
+| Vite | 8.3.5 | `apps/*`, `packages/*` | Latest stable, and Vitest 5's peer dependency. |
+| Vitest | 5.0.5 | `apps/*`, `packages/*` | Latest stable. |
+| dependency-cruiser | 18.7.0 | `package.json` | Latest stable. Supports TypeScript `>=2 <7`. |
+| Ruff | 0.17.3 | `pyproject.toml` dev group | Latest stable. |
+| mypy | 2.4.1 | `pyproject.toml` dev group | Latest stable. |
+| pytest | 9.2.0 | `pyproject.toml` dev group | Latest stable. |
+| import-linter | 2.15 | `pyproject.toml` dev group | Latest stable. |
+| pip-audit | 2.10.1 | `pyproject.toml` dev group | Latest stable. Audits the hashed `uv export` of `uv.lock` without resolving anything. |
+| uv_build | 0.13.6 | each member's `[build-system]` | Same version as uv. |
+| actions/checkout | v7.0.1 (`3d3c42e5…`) | workflows | Latest release, pinned by commit SHA. |
+| jdx/mise-action | v5.2.4 (`6be3c7ed…`) | workflows | Latest release, pinned by commit SHA. |
+| actions/configure-pages | v6.0.0 (`45bfe019…`) | `pages.yml` | Latest release, pinned by commit SHA. |
+| actions/upload-pages-artifact | v5.0.0 (`fc324d35…`) | `pages.yml` | Latest release, pinned by commit SHA. Needs `include-hidden-files: true` to keep `.nojekyll`. |
+| actions/deploy-pages | v5.0.1 (`368f8252…`) | `pages.yml` | Latest release, pinned by commit SHA. |
+
+The rest of the stack in the tech steering (`onnxruntime-web`, `fast-check`, Playwright, FastAPI, Uvicorn, `onnxruntime`, PyTorch, Hypothesis, the MCP SDK) is not installed yet. Each spec that first needs one of them pins it and adds a row to this table.
+
+### Why TypeScript 6, not 7
+
+TypeScript 7.0.2 was the latest stable release on 2026-10-30. It is the native (Go) compiler, and its JavaScript API is published only under `typescript/unstable/*`. Tools that read TypeScript through the compiler API do not support it yet. dependency-cruiser 18.7.0 declares `typescript >=2.0.0 <7.0.0` and warns that it would miss TypeScript sources. The boundary check is a requirement (2.3), so it must use its normal parser.
+
+An earlier attempt kept TypeScript 7 and made dependency-cruiser parse with `@swc/core`. That was reverted: it added a native dependency with a build script, and it found fewer dependencies (5 modules and 0 dependencies, against 10 and 5 with the TypeScript parser).
+
+**Move to TypeScript 7 when both of these hold:**
+
+1. dependency-cruiser releases a version whose `supportedTranspilers.typescript` range includes 7.x, and
+2. every other tool in the repository that reads TypeScript through its API at that point (for example a future codegen step in `gen:contracts`) supports 7.x.
+
+The upgrade must keep `mise run check` green, and it updates this ADR.
+
+## Alternatives considered
+
+- **Several tools for versions and tasks** (nvm or Volta, pyenv, Make or npm scripts). Rejected: each language would have its own pins and its own entry points, so Kiro, developers and CI could drift apart.
+- **Turborepo or Nx for orchestration.** Rejected for now: the repository is small and mise tasks are enough. They would add a dependency and a second task language.
+- **ESLint and Prettier instead of Biome.** Rejected: two tools and many plugins, where Biome is one pinned binary.
+- **Poetry or pip-tools instead of uv.** Rejected: the tech steering chose uv, and a uv workspace gives all three Python packages one shared lockfile.
+- **Version ranges with lockfiles only.** Rejected: an exact pin makes every upgrade a visible diff.
+- **TypeScript 7 with `@swc/core` for dependency-cruiser.** Tried and reverted; see above.
+
+## Consequences
+
+- A clean clone needs only mise. `mise install` installs the toolchain and the git hooks, and `mise run check` installs dependencies from the lockfiles before running.
+- Upgrades are deliberate: change the pin, refresh the lockfile, run `mise run check:all`, and update this table.
+- A brand-new release cannot be installed during its first 24 hours, even on purpose, unless the pin is excluded explicitly.
