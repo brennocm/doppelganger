@@ -59,6 +59,7 @@ run = [
   { task = "check" },
   "scripts/check-forbidden-paths.sh --all",
   { task = "secrets:history" },
+  "scripts/audit.sh",
   "echo 'check:all: no E2E suites yet (added by haunted-ui)'",
 ]
 
