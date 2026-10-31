@@ -11,7 +11,7 @@
     - _Requirements: 1.4_
   - [x] 1.4 Create `secret-sentinel` and `zero-disk-guard` using the prompts in the design
     - _Requirements: 2.1, 2.2_
-  - [ ] 1.5 Create the `privacy-audit` manual steering command (`/privacy-audit`)
+  - [x] 1.5 Create the `privacy-audit` manual steering command (`/privacy-audit`)
     - _Requirements: 2.3_
   - [ ] 1.6 Create `journal-keeper` (agent stop) and `spec-lint` (save in `.kiro/specs/`)
     - _Requirements: 3.1, 3.2_
