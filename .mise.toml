@@ -1,0 +1,57 @@
+# Doppelgänger toolchain and command interface.
+# Every command a developer, Kiro or CI runs goes through these tasks.
+# Versions are exact pins; see docs/adr/0001-stack.md for the reasons.
+
+min_version = "2026.10.21"
+
+[tools]
+node = "26.13.0"
+pnpm = "12.16.1"
+python = "3.12.16"
+uv = "0.13.6"
+
+[env]
+# uv must use the mise-pinned Python, never download its own.
+UV_PYTHON_DOWNLOADS = "never"
+# Base path for the Pages build: "/<repo>/" on GitHub Pages, "/" for custom domains and self-hosting.
+PAGES_BASE = "{{ get_env(name='PAGES_BASE', default='/') }}"
+
+[tasks.check]
+description = "Definition of done: format, lint, typecheck, boundaries, unit and property tests"
+run = "echo 'check: not implemented yet (project-foundation task 3.1)'"
+
+[tasks."check:all"]
+description = "check plus builds, E2E, audits, license check and full-history secret scan (CI)"
+run = "echo 'check:all: not implemented yet (project-foundation tasks 4.1-4.2)'"
+
+[tasks.fix]
+description = "Apply every auto-fix"
+run = "echo 'fix: not implemented yet (project-foundation task 3.1)'"
+
+[tasks.dev]
+description = "Web app and landing dev servers"
+run = "echo 'dev: not implemented yet (audio-capture, landing-page specs)'"
+
+[tasks."dev:engine"]
+description = "Pro engine via Docker Compose"
+run = "echo 'dev:engine: not implemented yet (local-runtime spec)'"
+
+[tasks.test]
+description = "Tests; accepts a target, e.g. mise run test -- packages/detector"
+run = "echo 'test: not implemented yet (project-foundation task 3.4)'"
+
+[tasks."gen:contracts"]
+description = "Regenerate TS and Python types from JSON Schema"
+run = "echo 'gen:contracts: not implemented yet (detection-model, detection-core specs)'"
+
+[tasks."model:eval"]
+description = "Run the model evaluation harness"
+run = "echo 'model:eval: not implemented yet (detection-model spec)'"
+
+[tasks."model:export"]
+description = "Export, quantize and verify ONNX models; update the manifest"
+run = "echo 'model:export: not implemented yet (detection-model spec)'"
+
+[tasks."build:pages"]
+description = "Build landing (/) and app (/app/) into one Pages artifact"
+run = "echo 'build:pages: not implemented yet (project-foundation task 4.3)'"
