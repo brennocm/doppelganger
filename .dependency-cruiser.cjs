@@ -52,7 +52,6 @@ module.exports = {
     },
   ],
   options: {
-    parser: "swc",
     tsPreCompilationDeps: true,
     tsConfig: { fileName: "tsconfig.base.json" },
     doNotFollow: { path: "node_modules" },

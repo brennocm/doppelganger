@@ -12,9 +12,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.4",
-    "@swc/core": "1.16.20",
     "dependency-cruiser": "18.7.0",
-    "typescript": "7.0.2"
+    "typescript": "6.0.3"
   },
   "scripts": {
     "boundaries": "depcruise apps packages --config .dependency-cruiser.cjs --output-type err-long"
