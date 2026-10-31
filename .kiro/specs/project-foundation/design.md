@@ -67,7 +67,7 @@ Python: `import-linter` contracts for `packages/model-lab` must not import `apps
 
 `scripts/check_licenses.py` (standard library only) checks every installed npm and Python dependency against `scripts/license-policy.toml`:
 
-- The license comes from the package's SPDX expression: `license` in `package.json`, or `License-Expression` (PEP 639) in Python metadata. `AND`, `OR` and parentheses are evaluated.
+- The license comes from the package's SPDX expression: `license` in `package.json`, or `License-Expression` (PEP 639) in Python metadata. `AND`, `OR` and parentheses are evaluated. `<id> WITH <exception>` is one ID and must appear in the allowlist as written (only `Apache-2.0 WITH LLVM-exception` today).
 - A package that reports only a license category or free text (for example the classifier "BSD License") must have an entry in the policy's override list, keyed by `name==version`, with the SPDX ID and a comment citing the project's license file URL. A version bump therefore forces the override to be checked again.
 - Runtime dependencies (`pnpm licenses list --prod`, and `uv export --no-dev`) must use the base allowlist. Development-only dependencies may also use MPL-2.0.
 - A package whose license is unknown, or outside the allowlist that applies to it, fails the check with its name, version and license.

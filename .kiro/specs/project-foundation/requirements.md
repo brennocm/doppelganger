@@ -54,7 +54,7 @@ This spec sets up the repository skeleton, toolchain, quality gates, CI and the 
 1. WHEN a pull request is opened or a commit lands on `main`, THE CI SHALL run `mise run check:all`.
 2. THE CI workflows SHALL pin every third-party action by commit SHA and declare least-privilege `permissions`.
 3. THE CI SHALL install dependencies only from committed lockfiles.
-4. THE CI SHALL run `pnpm audit`, `pip-audit` and a license check over all installed dependencies, and SHALL fail on licenses outside an allowlist (MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD, Unlicense, CC0-1.0, Python-2.0, PSF-2.0). Development-only dependencies MAY also use MPL-2.0 when used unmodified. Runtime dependencies shipped in the Pages_Artifact or the engine image SHALL NOT.
+4. THE CI SHALL run `pnpm audit`, `pip-audit` and a license check over all installed dependencies, and SHALL fail on licenses outside an allowlist (MIT, Apache-2.0, Apache-2.0 WITH LLVM-exception, BSD-2-Clause, BSD-3-Clause, BSL-1.0, ISC, 0BSD, Zlib, Unlicense, CC0-1.0, Python-2.0, PSF-2.0). Development-only dependencies MAY also use MPL-2.0 when used unmodified. Runtime dependencies shipped in the Pages_Artifact or the engine image SHALL NOT.
 
 ### Requirement 5: GitHub Pages pipeline
 
