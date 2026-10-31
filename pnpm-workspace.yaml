@@ -15,7 +15,9 @@ trustPolicy: no-downgrade
 blockExoticSubdeps: true
 # Dependency build scripts need explicit approval in allowBuilds.
 strictDepBuilds: true
-allowBuilds: {}
+allowBuilds:
+  # postinstall only re-checks the native binary, which arrives through a platform optional dependency.
+  "@swc/core": false
 # Fail when the running Node or pnpm does not match "engines".
 engineStrict: true
 # Exact versions only.

@@ -15,6 +15,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "import-linter==2.15",
     "mypy==2.4.1",
     "pytest==9.2.0",
     "ruff==0.17.3",
@@ -71,6 +72,17 @@ warn_unreachable = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 mypy_path = ["apps/engine/src", "packages/model-lab/src", "packages/doppelganger-mcp/src"]
 explicit_package_bases = true
+
+# --- import-linter: Python boundary rules from .kiro/steering/structure.md ---
+[tool.importlinter]
+root_packages = ["doppelganger_engine", "model_lab", "doppelganger_mcp"]
+include_external_packages = false
+
+[[tool.importlinter.contracts]]
+name = "Python packages never import from apps/engine"
+type = "forbidden"
+source_modules = ["model_lab", "doppelganger_mcp"]
+forbidden_modules = ["doppelganger_engine"]
 
 # --- pytest -----------------------------------------------------------------
 [tool.pytest.ini_options]

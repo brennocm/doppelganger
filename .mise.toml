@@ -36,9 +36,11 @@ depends = ["deps"]
 run = [
   "pnpm exec biome ci .",
   "pnpm -r run typecheck",
+  "pnpm --silent boundaries",
   "uv run --locked ruff check .",
   "uv run --locked ruff format --check .",
   "uv run --locked mypy apps/engine/src packages/model-lab/src packages/doppelganger-mcp/src",
+  "uv run --locked lint-imports --no-cache",
   { task = "lint:shell" },
 ]
 

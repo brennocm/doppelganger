@@ -19,7 +19,7 @@
 - [ ] 3. Quality gates
   - [x] 3.1 Add Biome config, the TypeScript typecheck task, Ruff, mypy and ShellCheck into `mise run check`
     - _Requirements: 3.1, 1.3, 1.4_
-  - [ ] 3.2 Add dependency-cruiser and import-linter rules from the design; wire them into `check`
+  - [x] 3.2 Add dependency-cruiser and import-linter rules from the design; wire them into `check`
     - _Requirements: 2.3_
   - [ ] 3.3 Add lefthook with Biome, Ruff, gitleaks and the forbidden-path check
     - _Requirements: 3.2, 3.3_
