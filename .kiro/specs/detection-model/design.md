@@ -98,7 +98,7 @@ Temperature scaling on the spoof logit: `p = sigmoid(z / T)` for single-logit mo
 
 ### Property 3: Codec simulation preserves length
 
-*For any* 16 kHz input of N samples and any codec condition, the simulated output has N samples (±1 % before trimming, exactly N after trim/pad).
+*For any* 16 kHz input of N samples and any codec condition, the simulated output has exactly N samples after trim/pad. Before trimming, the codec output differs from N by at most 1 % or 960 samples (60 ms: three 20 ms Opus frames plus resampler delay), whichever is larger, because codecs work in whole frames. Empty input returns empty output without running ffmpeg; non-finite samples are rejected.
 
 **Validates: Requirements 2.1**
 
@@ -113,6 +113,7 @@ Temperature scaling on the spoof logit: `p = sigmoid(z / T)` for single-logit mo
 - Missing `$HAUNT_SET_DIR` or `$BENCHMARK_DIR`: the command exits with a message naming the variable.
 - ONNX export failure: the candidate is marked "export failed" in the report with the operator name; the next fallback is tried.
 - ffmpeg missing: clear message with install hint.
+- Noise at 10 dB SNR is white Gaussian noise from a seeded generator (`numpy.random.default_rng(seed)`), so evaluation stays deterministic (Requirement 2.5). A silent input gets no noise, because its SNR is undefined. Output is clipped to [-1, 1].
 
 ## Testing Strategy
 
