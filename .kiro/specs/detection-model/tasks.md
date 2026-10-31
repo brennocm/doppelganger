@@ -14,7 +14,7 @@
   - [x]* 2.3 Write property test for codec simulation length
     - **Property 3: Codec simulation preserves length**
     - **Validates: Requirements 2.1**
-  - [ ] 2.4 Implement session-based dev/eval splitting
+  - [x] 2.4 Implement session-based dev/eval splitting
     - _Requirements: 2.1, 4.1_
 
 - [ ] 3. Evaluation harness
