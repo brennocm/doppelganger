@@ -34,6 +34,11 @@
         "capability": "fs_write",
         "match": ["**"],
         "effect": "deny"
+      },
+      {
+        "capability": "subagent",
+        "match": ["*"],
+        "effect": "deny"
       }
     ]
   },

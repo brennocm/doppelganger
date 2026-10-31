@@ -9,6 +9,16 @@
         "capability": "fs_write",
         "match": ["**"],
         "effect": "deny"
+      },
+      {
+        "capability": "mcp",
+        "match": ["playwright/browser_run_code_unsafe", "playwright/browser_file_upload"],
+        "effect": "deny"
+      },
+      {
+        "capability": "subagent",
+        "match": ["*"],
+        "effect": "deny"
       }
     ]
   },

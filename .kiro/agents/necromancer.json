@@ -26,6 +26,11 @@
         "match": ["*"],
         "exclude": ["mise run model:*"],
         "effect": "deny"
+      },
+      {
+        "capability": "subagent",
+        "match": ["*"],
+        "effect": "deny"
       }
     ]
   },
