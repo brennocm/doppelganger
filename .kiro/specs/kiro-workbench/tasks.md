@@ -29,7 +29,7 @@
 - [ ] 3. Create the custom agents through Kiro
   - [x] 3.1 Create `exorcist` with read-only tools and the security steering
     - _Requirements: 5.1, 5.4_
-  - [ ] 3.2 Create `haunter` with the design-system steering and Playwright MCP
+  - [x] 3.2 Create `haunter` with the design-system steering and Playwright MCP
     - _Requirements: 5.2, 5.4_
   - [ ] 3.3 Create `necromancer` with the ml-honesty steering and Hugging Face MCP
     - _Requirements: 5.3, 5.4_
