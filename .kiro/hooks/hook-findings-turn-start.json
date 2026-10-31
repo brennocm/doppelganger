@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "hook-findings-turn-start",
+      "trigger": "UserPromptSubmit",
+      "description": "Start a new turn for the Turn_Report, so hook-findings may deliver once more (kiro-workbench Requirement 2.6).",
+      "action": {
+        "type": "command",
+        "command": "mise x -- python scripts/hooks/findings.py turn-start",
+        "timeout": 20
+      }
+    }
+  ]
+}

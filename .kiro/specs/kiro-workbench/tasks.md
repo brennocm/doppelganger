@@ -19,7 +19,7 @@
     - _Requirements: 3.3_
   - [ ] 1.7 Dry-run every hook once and record the output in the journal
     - _Requirements: 9.2_
-  - [ ] 1.8 Read the saved path from STDIN only (drop `{{filePath}}`, ignore unfilled `{{…}}` arguments in `resolve-path.sh`), with a test
+  - [x] 1.8 Read the saved path from STDIN only (drop `{{filePath}}`, ignore unfilled `{{…}}` arguments in `resolve-path.sh`), with a test
     - _Requirements: 1.1, 1.2, 2.1_
   - [ ] 1.9 Add the Turn_Report: command hooks on file saves record masked findings in `.git/kiro-hooks/findings/`, and the `hook-findings` Stop hook delivers them once per turn, with tests for masking, the cap and once-per-turn delivery
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.4, 2.5, 2.6_

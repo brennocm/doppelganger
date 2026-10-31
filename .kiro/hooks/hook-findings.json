@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "hook-findings",
+      "trigger": "Stop",
+      "description": "When the turn ends, deliver the masked command-hook findings (Turn_Report) to the agent once, then clear them (kiro-workbench Requirements 2.4-2.6).",
+      "action": {
+        "type": "command",
+        "command": "mise x -- python scripts/hooks/findings.py deliver",
+        "timeout": 20
+      }
+    }
+  ]
+}
