@@ -125,4 +125,4 @@ Order: spec updates first, then hooks, MCP and agents, each with its own commit 
 Logging: append this message as entry 004 by hand (the prompt-logger is still disabled). Re-read the file right before editing.
 ```
 
-Outcome: _pending_
+Outcome: Spec updated, hooks (tasks 1.1–1.6a), MCP config (2.1) and agents (3.1–3.3) created and committed; 1.7 hook dry runs, 2.2 GitHub/Hugging Face/Playwright calls and 3.4 IDE comparison wait for a CLI update, tokens, a browser install and an IDE session. See the four kiro-workbench journal entries.
