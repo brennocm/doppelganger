@@ -31,7 +31,7 @@
     - _Requirements: 4.1, 4.2, 4.3_
   - [x] 4.2 Add `pnpm audit`, `pip-audit` and the license allowlist check to `check:all`
     - _Requirements: 4.4_
-  - [ ] 4.3 Implement `mise run build:pages` and `scripts/verify-pages.mjs` (CSP present, no external origins)
+  - [x] 4.3 Implement `mise run build:pages` and `scripts/verify-pages.mjs` (CSP present, no external origins)
     - _Requirements: 5.2, 5.3, 5.4_
   - [ ] 4.4 Write `.github/workflows/pages.yml` to deploy after CI passes on `main`
     - _Requirements: 5.1_

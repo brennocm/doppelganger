@@ -60,6 +60,7 @@ run = [
   "scripts/check-forbidden-paths.sh --all",
   { task = "secrets:history" },
   "scripts/audit.sh",
+  { task = "build:pages" },
   "echo 'check:all: no E2E suites yet (added by haunted-ui)'",
 ]
 
@@ -99,7 +100,8 @@ run = "echo 'model:export: not implemented yet (detection-model spec)'"
 
 [tasks."build:pages"]
 description = "Build landing (/) and app (/app/) into one Pages artifact"
-run = "echo 'build:pages: not implemented yet (project-foundation task 4.3)'"
+depends = ["deps"]
+run = "scripts/build-pages.sh"
 
 [hooks]
 # Install the git hooks (lefthook.yml) whenever the toolchain is installed.
