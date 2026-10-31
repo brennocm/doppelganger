@@ -1,0 +1,27 @@
+# Implementation Plan
+
+- [ ] 1. Structure and content
+  - [ ] 1.1 Build the page outline with semantic sections and the design tokens
+    - _Requirements: 1.1, 1.3_
+  - [ ] 1.2 Write the scenario, proof panel, tier table, install commands and build story copy; review it with the `haunter` agent
+    - _Requirements: 2.1, 2.2, 3.1, 3.2, 3.3, 4.1, 4.2, 6.1_
+  - [ ] 1.3 Import the evaluation summary at build time and render the Limits section
+    - _Requirements: 5.1, 5.2_
+  - [ ]* 1.4 Write the build test that numbers come from the report
+    - **Property 2: Numbers come from the report**
+    - **Validates: Requirements 5.2**
+
+- [ ] 2. Media
+  - [ ] 2.1 Record the Mask → Possession capture from the app (replay mode), encode under 2 MB, add the poster and the reduced-motion swap
+    - _Requirements: 1.2, 7.3_
+  - [ ] 2.2 Implement the video facade and the landing CSP
+    - _Requirements: 7.1, 7.2_
+  - [ ]* 2.3 Write Playwright test for no third-party requests before consent
+    - **Property 1: No third-party requests before consent**
+    - **Validates: Requirements 7.1**
+
+- [ ] 3. Verification
+  - [ ] 3.1 Add the weight budget check and axe-core checks at 375 px and 1440 px
+    - _Requirements: 7.3, 7.4_
+  - [ ] 3.2 Capture screenshots with the Playwright MCP and record them in the journal
+    - _Requirements: 7.4_
