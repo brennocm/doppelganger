@@ -26,14 +26,14 @@
   - [x] 3.4 Add one smoke test per workspace package
     - _Requirements: 1.3_
 
-- [ ] 4. CI and Pages
+- [x] 4. CI and Pages
   - [x] 4.1 Write `.github/workflows/ci.yml` running `mise run check:all`, actions pinned by SHA, least-privilege permissions, frozen lockfiles
     - _Requirements: 4.1, 4.2, 4.3_
   - [x] 4.2 Add `pnpm audit`, `pip-audit` and the license allowlist check to `check:all`
     - _Requirements: 4.4_
   - [x] 4.3 Implement `mise run build:pages` and `scripts/verify-pages.mjs` (CSP present, no external origins)
     - _Requirements: 5.2, 5.3, 5.4_
-  - [ ] 4.4 Write `.github/workflows/pages.yml` to deploy after CI passes on `main`
+  - [x] 4.4 Write `.github/workflows/pages.yml` to deploy after CI passes on `main`
     - _Requirements: 5.1_
 
 - [ ] 5. Decision records
