@@ -1,7 +1,7 @@
 # Implementation Plan
 
 - [ ] 1. Initialize the repository skeleton
-  - [ ] 1.1 Create the folder layout from the structure steering with a `README.md` stub per app and package
+  - [x] 1.1 Create the folder layout from the structure steering with a `README.md` stub per app and package
     - _Requirements: 2.1_
   - [ ] 1.2 Write `.gitignore` covering dependencies, builds, caches, reports, `.env*` (keep `.env.example`), datasets, audio outside `apps/web/public/replay/`, editor and OS files; make sure `.kiro/` is not ignored
     - _Requirements: 3.4_
