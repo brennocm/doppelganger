@@ -25,6 +25,7 @@
       }
     },
     "github": {
+      "disabled": true,
       "command": "mise",
       "args": [
         "x",

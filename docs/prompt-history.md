@@ -126,3 +126,55 @@ Logging: append this message as entry 004 by hand (the prompt-logger is still di
 ```
 
 Outcome: Spec updated, hooks (tasks 1.1–1.6a), MCP config (2.1) and agents (3.1–3.3) created and committed; 1.7 hook dry runs, 2.2 GitHub/Hugging Face/Playwright calls and 3.4 IDE comparison wait for a CLI update, tokens, a browser install and an IDE session. See the four kiro-workbench journal entries.
+
+## 005 — 2026-10-30 — CLI — kiro-workbench (Phase A)
+
+```text
+New session on the V3 engine (kiro-cli updated). Re-read every file in .kiro/steering/, the kiro-workbench spec, and the last four entries of docs/kiro-journal.md before doing anything.
+
+State: kiro-workbench Phase A tasks 1 to 3 are implemented and pushed. Only HF_TOKEN is exported. The Playwright browser is installed, and CONTEXT7_API_KEY is unset on purpose.
+
+Decision: I won't create the GitHub token for now. We don't use issues or PRs, and I push by hand, so it would be an unused credential. Set the github MCP server to "disabled": true in mcp.json (keep its configuration for later), update the journal and the "environment variables" notes accordingly, and record the decision and the reason in the journal.
+
+Finish the open verification tasks:
+1. Task 1.7: dry-run every hook inside this V3 session (have the agent edit a scratch file in each watched path, then revert it), and run /privacy-audit once. Record each hook's real output in the journal. List any hook that still doesn't fire.
+2. Task 2.2: one real tool call per enabled MCP server (Hugging Face: search for an anti-spoofing model; Playwright: open https://brennocm.github.io/doppelganger/ and take a screenshot; Context7: already done). GitHub is skipped because it's disabled; note that in the task.
+3. Agent permissions: prove that exorcist's deny rules fire on their own, not only because the model refuses. For example, temporarily give it an instruction that conflicts with its role in a throwaway test, and show the permission denial. Record the evidence.
+4. Enable prompt-logger ("enabled": true). From the next prompt on it is the only writer of new entries. Verify that it logs exactly one entry for the next prompt I send, with redaction working, then report.
+
+Same rules: one commit per item, no AI attribution, propose deviations first, stop when items 1 to 4 are done and tell me it's ready to push. Task 3.4 (the IDE comparison) stays open for me to do in the IDE.
+
+Logging: append this message by hand as entry 005 (prompt-logger is still disabled at this point). Re-read the file right before editing
+```
+
+Outcome: Stopped during item 1 and proposed P10–P14. The dry run showed that V3 does not fill in `{{filePath}}`, so secret-sentinel and test-affected skipped every file. Output from PostFileSave and PostToolUse command hooks never reached the agent. Kiro blocked agent writes to `.kiro/settings/mcp.json`. Nothing was committed.
+
+## 006 — 2026-10-30 — CLI — kiro-workbench (Phase A)
+
+```text
+Decisions:
+
+P10: OK. Remove {{filePath}} from the commands, make resolve-path.sh ignore unfilled {{…}} arguments, and add the test.
+
+P11: OK. Implement the state file and Stop hook approach whatever my terminal shows. It's deterministic and costs no model call per save. Update requirements 1.x and 2.1 and the design first. Rules:
+  - Findings must never contain the secret itself. Report the type, file, line and a masked snippet (first 4 characters + "…"). This applies to the state file, the Stop message and the journal. Add a test that the raw value never appears in any output.
+  - Deliver findings at most once per turn, then clear them. Cap the file at 50 findings plus a "…and N more" line.
+  - Keep the state file under .git/kiro-hooks/, so it is never committed.
+  For the journal: <paste here whether your terminal showed hook output, or write "not checked">.
+
+P12: Done by me. github now has "disabled": true in .kiro/settings/mcp.json (uncommitted). Commit it with the P13 journal entry.
+
+P13: OK. HF_TOKEN (read-only) is exported. CONTEXT7_API_KEY stays unset.
+
+P14: OK.
+
+Then finish item 1 (contracts-codegen, both test-affected cases, journal-keeper, /privacy-audit) and continue with items 2 to 4 as planned. Same rules: one commit per item, propose deviations first, stop when done and tell me it's ready to push.
+
+Note: Kiro blocking agent writes to mcp.json is a good finding for the write-up. Record it in the journal as a platform guardrail, along with the fact that you didn't work around it.
+
+Este prompt também precisa entrar no histórico como entrada 006. O prompt-logger ainda está desativado, então peça ao Kiro para adicioná-lo à mão, como nas vezes anteriores, ou cole a linha abaixo no fim da mensagem:
+
+Logging: append this message by hand as entry 006. Re-read the file right before editing.
+```
+
+Outcome: _pending_
