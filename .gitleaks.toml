@@ -1,0 +1,43 @@
+# gitleaks configuration: the default rules plus fixed token shapes matched regardless of
+# entropy, so low-entropy token-shaped strings are caught too. The regular expressions
+# must stay equal to scripts/token_shapes.py; scripts/tests/test_token_shapes.py checks it.
+title = "doppelganger"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "token-shape-github-classic"
+description = "GitHub classic or OAuth token shape (ghp_, gho_), any entropy"
+regex = '''\b(?:ghp|gho)_[A-Za-z0-9]{36}\b'''
+keywords = ["ghp_", "gho_"]
+
+[[rules]]
+id = "token-shape-github-fine-grained"
+description = "GitHub fine-grained token shape (github_pat_), any entropy"
+regex = '''\bgithub_pat_[A-Za-z0-9_]{22,255}\b'''
+keywords = ["github_pat_"]
+
+[[rules]]
+id = "token-shape-huggingface"
+description = "Hugging Face token shape (hf_), any entropy"
+regex = '''\bhf_[A-Za-z0-9]{30,40}\b'''
+keywords = ["hf_"]
+
+[[rules]]
+id = "token-shape-sk"
+description = "sk- API key shape, any entropy"
+regex = '''\bsk-[A-Za-z0-9_-]{20,}'''
+keywords = ["sk-"]
+
+[[rules]]
+id = "token-shape-aws-access-key"
+description = "AWS access key ID shape (AKIA), any entropy"
+regex = '''\bAKIA[A-Z0-9]{16}\b'''
+keywords = ["akia"]
+
+[[rules]]
+id = "token-shape-slack"
+description = "Slack bot or user token shape (xoxb-, xoxp-), any entropy"
+regex = '''\bxox[bp]-[A-Za-z0-9-]{10,}'''
+keywords = ["xoxb-", "xoxp-"]

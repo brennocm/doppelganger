@@ -30,9 +30,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-# pii_scan lives one folder up, in scripts/.
+# pii_scan and token_shapes live one folder up, in scripts/.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pii_scan
+import token_shapes
 
 CAP = 50
 ELLIPSIS = "…"
@@ -183,15 +184,21 @@ def scan_secrets(repo: Path, rel: str, scanner: SecretScanner) -> list[Finding]:
     except (OSError, UnicodeDecodeError):
         text = ""
     findings: list[Finding] = []
+    seen: set[tuple[int, str]] = set()
     try:
-        findings.extend(
-            Finding("secret-sentinel", f"secret ({rule})", rel, line, mask(value))
-            for line, rule, value in scanner(file)
-        )
+        for line, rule, value in scanner(file):
+            seen.add((line, value))
+            findings.append(Finding("secret-sentinel", f"secret ({rule})", rel, line, mask(value)))
     except (OSError, ValueError, subprocess.SubprocessError):
         findings.append(
             Finding("secret-sentinel", "scan-error", rel, None, "gitleaks could not scan this file")
         )
+    # Fixed token shapes, whatever their entropy; skip what gitleaks already reported.
+    findings.extend(
+        Finding("secret-sentinel", f"secret ({m.rule})", rel, m.line, mask(m.value))
+        for m in token_shapes.find(text)
+        if (m.line, m.value) not in seen
+    )
     findings.extend(
         Finding("secret-sentinel", f.kind, rel, f.line, mask(f.value)) for f in pii_scan.find(text)
     )

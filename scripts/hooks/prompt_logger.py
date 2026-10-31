@@ -28,9 +28,10 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
-# pii_scan lives one folder up, in scripts/.
+# pii_scan and token_shapes live one folder up, in scripts/.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pii_scan
+import token_shapes
 
 HISTORY = Path("docs/prompt-history.md")
 UNKNOWN = "set by hand"
@@ -73,12 +74,13 @@ def gitleaks_secrets(text: str) -> list[str]:
 
 
 def redact(prompt: str, scan_secrets: SecretScanner) -> str:
-    """Redact secrets and personal data, then verify nothing is left."""
+    """Redact secrets, token shapes and personal data, then verify nothing is left."""
     text = prompt
     for secret in sorted(set(scan_secrets(text)), key=len, reverse=True):
         text = text.replace(secret, "<redacted-secret>")
+    text = token_shapes.redact(text)
     text = pii_scan.redact(text)
-    if scan_secrets(text) or pii_scan.find(text):
+    if scan_secrets(text) or token_shapes.find(text) or pii_scan.find(text):
         msg = "redacted text still contains a secret or personal data"
         raise RedactionError(msg)
     return text
