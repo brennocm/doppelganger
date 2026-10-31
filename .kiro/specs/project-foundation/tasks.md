@@ -36,10 +36,10 @@
   - [x] 4.4 Write `.github/workflows/pages.yml` to deploy after CI passes on `main`
     - _Requirements: 5.1_
 
-- [ ] 5. Decision records
+- [x] 5. Decision records
   - [x] 5.1 Write ADR 0001 (stack), 0002 (browser-first inference), 0003 (delivery tiers: Pages, self-hosted, Pro engine), 0004 (MIT license), each with the rejected alternatives
     - _Requirements: 6.1_
-  - [ ] 5.2 Write the first `README.md`: what it is, live demo link placeholder, tiers, limitations, how to run locally
+  - [x] 5.2 Write the first `README.md`: what it is, live demo link placeholder, tiers, limitations, how to run locally
     - _Requirements: 6.3_
 
 - [ ] 6. Checkpoint
