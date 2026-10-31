@@ -7,7 +7,7 @@
     - _Requirements: 1.2, 1.3_
 
 - [ ] 2. Data preparation (outside the repository)
-  - [ ] 2.1 Document in `packages/model-lab/HAUNT_SET.md` how the Haunt_Set is recorded (sessions, sentences, devices) and how consented clones are produced, without including any cloning code or prompts
+  - [x] 2.1 Document in `packages/model-lab/HAUNT_SET.md` how the Haunt_Set is recorded (sessions, sentences, devices) and how consented clones are produced, without including any cloning code or prompts
     - _Requirements: 7.1, 7.2_
   - [ ] 2.2 Implement `codecs.py` (Opus 16/32 kbps, 8 kHz band, noise at 10 dB SNR) using in-memory ffmpeg pipes
     - _Requirements: 2.1_
