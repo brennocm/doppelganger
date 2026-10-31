@@ -9,7 +9,7 @@
     - _Requirements: 1.3_
   - [x] 1.3 Create `token-contrast` (save in `packages/tokens/`)
     - _Requirements: 1.4_
-  - [ ] 1.4 Create `secret-sentinel` and `zero-disk-guard` using the prompts in the design
+  - [x] 1.4 Create `secret-sentinel` and `zero-disk-guard` using the prompts in the design
     - _Requirements: 2.1, 2.2_
   - [ ] 1.5 Create the `privacy-audit` manual steering command (`/privacy-audit`)
     - _Requirements: 2.3_

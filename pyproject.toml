@@ -87,6 +87,11 @@ forbidden_modules = ["doppelganger_engine"]
 
 # --- pytest -----------------------------------------------------------------
 [tool.pytest.ini_options]
-testpaths = ["apps/engine/tests", "packages/model-lab/tests", "packages/doppelganger-mcp/tests"]
+testpaths = [
+    "apps/engine/tests",
+    "packages/model-lab/tests",
+    "packages/doppelganger-mcp/tests",
+    "scripts/tests",
+]
 addopts = ["--strict-markers", "--strict-config", "--import-mode=importlib"]
 xfail_strict = true

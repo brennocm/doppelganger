@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "zero-disk-guard",
+      "description": "Ask the agent to review saved web, engine and detector code against the security steering (kiro-workbench Requirement 2.2).",
+      "trigger": "PostFileSave",
+      "matcher": "(^|/)(apps/web/src|apps/engine|packages/detector)/",
+      "action": {
+        "type": "agent",
+        "prompt": "Review the saved file against `.kiro/steering/security.md`. Report any code that writes audio to disk or browser storage, sends audio or scores to a non-self origin, logs audio or user file names, or adds a recording/upload/transcription dependency. Reply 'clean' if none. Do not edit files."
+      }
+    }
+  ]
+}
