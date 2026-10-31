@@ -42,5 +42,5 @@
   - [x] 5.2 Write the first `README.md`: what it is, live demo link placeholder, tiers, limitations, how to run locally
     - _Requirements: 6.3_
 
-- [ ] 6. Checkpoint
+- [x] 6. Checkpoint
   - Run `mise run check` on a clean clone and confirm the first Pages deploy shows placeholder pages at `/` and `/app/`. Add a journal entry.

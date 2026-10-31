@@ -76,4 +76,20 @@ Decisions:
 Then continue with task 4.2 and stop at the task 6 checkpoint as planned.
 ```
 
-Outcome: Decisions applied (spec and testing steering updated, TypeScript 6.0.3, no AI attribution found in the 13 commits), tasks 4.2–5.2 done, checkpoint run on a clean clone; task 6 waits for the first Pages deploy. See the journal entries for groups 4 and 5–6.
+Outcome: Decisions applied (spec and testing steering updated, TypeScript 6.0.3, no AI attribution found in the 13 commits), tasks 4.2–5.2 done, checkpoint run on a clean clone; task 6 waited for the first Pages deploy, which then passed (ci and pages green on e2a645d; both URLs load), and task 6 was ticked under prompt 003. See the journal entries for groups 4 and 5–6.
+
+## 003 — 2026-10-30 — CLI — project-foundation + kiro-workbench
+
+```text
+The repository is created and main is pushed: brennocm/doppelganger. Pages source is set to GitHub Actions, and the github-pages environment is restricted to main.
+Deploy result: ci passed, then pages deployed. Both https://brennocm.github.io/doppelganger/ and https://brennocm.github.io/doppelganger/app/ load the placeholder pages.
+
+1. Replace the <owner>/<repo> placeholders in the README and the live-demo link with brennocm/doppelganger and https://brennocm.github.io/doppelganger/. Tick task 6 and fill in the Outcome of entry 002 if anything changed.
+2. Go: start kiro-workbench Phase A, tasks 1 to 3, with the same working rules. Include task 1.6a (prompt-logger) if the trigger exists.
+3. Logging: append this message as entry 003 (CLI, project-foundation + kiro-workbench). Re-read docs/prompt-history.md right before editing, so the duplicate from last time doesn't happen again.
+4. Same commit rules as before: no AI attribution in any commit, and propose deviations before implementing them. Push to origin main after each task group, and check that ci passes.
+
+Stop after Phase A task 3 and show me: the hooks and agents created (and which ones are pending for the IDE), the mcp.json without secrets, the environment variables I must export, and the journal entries.
+```
+
+Outcome: _pending_

@@ -8,10 +8,12 @@ Built with Kiro for Kiroween 2026. See [`docs/kiro-journal.md`](docs/kiro-journa
 
 ## Live demo
 
-**https://&lt;owner&gt;.github.io/&lt;repo&gt;/** (placeholder until the repository is published)
+**[brennocm.github.io/doppelganger](https://brennocm.github.io/doppelganger/)**
 
-- Landing page: `/`
-- App: `/app/`
+- Landing page: [/doppelganger/](https://brennocm.github.io/doppelganger/)
+- App: [/doppelganger/app/](https://brennocm.github.io/doppelganger/app/)
+
+Both are placeholder pages until the UI specs are implemented.
 
 ## Delivery tiers
 
@@ -36,8 +38,8 @@ In every tier, no audio, transcript or score is sent to a remote host, and audio
 Requirements: Linux or Windows with WSL2 (the platforms tested so far), plus [mise](https://mise.jdx.dev/). macOS should work, since `mise.lock` includes macOS builds, but it has not been tested. mise installs the pinned Node, pnpm, Python, uv and the other tools listed in [ADR 0001](docs/adr/0001-stack.md).
 
 ```sh
-git clone https://github.com/<owner>/<repo>.git
-cd <repo>
+git clone https://github.com/brennocm/doppelganger.git
+cd doppelganger
 mise trust
 mise install            # toolchain + git hooks
 mise run check          # definition of done: format, lint, types, boundaries, tests
@@ -53,7 +55,7 @@ Then open `http://127.0.0.1:8788/`.
 | `mise run check:all` | `check` plus secret scan of the full history, dependency and license audit, Pages build (CI runs this) |
 | `mise run fix` | Apply every auto-fix |
 | `mise run test -- <package>` | Tests for one package, for example `mise run test -- packages/detector` |
-| `mise run build:pages` | Build the Pages artifact; set `PAGES_BASE=/<repo>/` for a project site |
+| `mise run build:pages` | Build the Pages artifact; set `PAGES_BASE=/doppelganger/` for the GitHub Pages project site |
 
 `dev`, `dev:engine`, `gen:contracts`, `model:eval` and `model:export` exist but print "not implemented yet" until their specs land.
 

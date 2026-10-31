@@ -43,3 +43,9 @@ Template:
 - Feature used: spec | steering
 - What happened: Wrote ADRs 0001–0004 and the first README (tasks 5.1–5.2), then ran the checkpoint on a fresh `git clone` in a temporary directory: `mise install` followed by `mise run check` passed in 7.5 s, and `mise run check:all` in 8.0 s (22 commits scanned by gitleaks, no leaks, no known vulnerabilities, 90 packages within the license policy, 3 HTML files passing the CSP check).
 - Effect: Checking the drafts against the repository removed claims that could not be backed up. Biome does not lint HTML here, the README listed macOS as supported although only Linux and WSL2 were tested, and ADR 0002 credited a WebGPU follow-up to a spec that never mentions it. Task 6 stays open: the deploy check needs a GitHub repository with Pages enabled, which only the developer can create.
+
+## 2026-10-30 — project-foundation checkpoint: first Pages deploy
+- Kiro surface: CLI
+- Feature used: spec
+- What happened: The developer created `brennocm/doppelganger`, pushed `main` and set Pages to deploy from GitHub Actions. `ci` passed on the push and `pages` deployed after it. Independent check: `/doppelganger/`, `/doppelganger/app/` and the bundled app script all return 200, and an unknown path returns 404. Task 6 is ticked and the README placeholders now point at the real repository and URL.
+- Effect: The `workflow_run` chain from `ci` to `pages` and the `PAGES_BASE` derived from `configure-pages` worked on the first real run, with no fixes needed. project-foundation is complete.
