@@ -11,7 +11,7 @@
     - _Requirements: 1.4_
   - [ ] 1.4 Create `secret-sentinel` and `zero-disk-guard` using the prompts in the design
     - _Requirements: 2.1, 2.2_
-  - [ ] 1.5 Create the manual `privacy-audit` hook
+  - [ ] 1.5 Create the `privacy-audit` manual steering command (`/privacy-audit`)
     - _Requirements: 2.3_
   - [ ] 1.6 Create `journal-keeper` (agent stop) and `spec-lint` (save in `.kiro/specs/`)
     - _Requirements: 3.1, 3.2_
@@ -36,8 +36,8 @@
   - [ ] 3.4 Try at least one custom agent in the Kiro CLI and one in the IDE; record the differences
     - _Requirements: 9.1_
 
-- [ ] 4. Create the `haunt-snapshots` hook (once `haunted-ui` task 2 exists)
-  - Manual trigger; uses Playwright MCP against `?test-state=<state>` URLs
+- [ ] 4. Create the `haunt-snapshots` manual steering command (once `haunted-ui` task 2 exists)
+  - Run as `/haunt-snapshots`; uses Playwright MCP against `?test-state=<state>` URLs
   - _Requirements: 4.1, 4.2_
 
 ## Phase B (after detection-model provides an ONNX model)

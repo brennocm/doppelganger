@@ -7,17 +7,19 @@ Kiro gets three kinds of extensions: **hooks** (event-driven automation), **cust
 ## Architecture
 
 ```text
-Kiro IDE / CLI
- ├── Hooks (.kiro/hooks/)
- │    ├── test-affected        on save: *.ts, *.py         → run tests
- │    ├── contracts-codegen    on save: contracts/schemas  → mise run gen:contracts
- │    ├── token-contrast       on save: packages/tokens    → build + contrast report
- │    ├── secret-sentinel      on save: any source file    → secret/PII scan
- │    ├── zero-disk-guard      on save: web/engine/detector→ security steering review
- │    ├── spec-lint            on save: .kiro/specs        → reference integrity
- │    ├── journal-keeper       on agent stop               → append journal entry
- │    ├── privacy-audit        manual                      → full audit
- │    └── haunt-snapshots      manual                      → Playwright screenshots of all states
+Kiro IDE 1.x / CLI V3 (kiro-cli --v3)
+ ├── Hooks (.kiro/hooks/*.json, schema v1)
+ │    ├── test-affected        PostFileSave: *.ts, *.py    → run tests
+ │    ├── contracts-codegen    PostFileSave: contracts/schemas → mise run gen:contracts
+ │    ├── token-contrast       PostFileSave: packages/tokens → build + contrast report
+ │    ├── secret-sentinel      PostFileSave: any file      → scripts/secret-sentinel.sh (gitleaks + PII)
+ │    ├── zero-disk-guard      PostFileSave: web/engine/detector → agent review vs security steering
+ │    ├── spec-lint            PostFileSave: .kiro/specs   → reference integrity
+ │    ├── journal-keeper       Stop                        → scripts/journal-keeper.py (asks for one entry at most)
+ │    └── prompt-logger        UserPromptSubmit            → scripts/prompt-logger.py (disabled until enabled by the developer)
+ ├── Manual steering commands (.kiro/steering/*.md, inclusion: manual)
+ │    ├── /privacy-audit                                   → full audit
+ │    └── /haunt-snapshots                                 → Playwright screenshots of all states
  ├── Custom agents: exorcist · haunter · necromancer
  └── MCP (.kiro/settings/mcp.json)
       ├── playwright         (browser automation)
@@ -38,6 +40,14 @@ Each hook that asks the agent to act uses a short, specific prompt. Examples:
 - **spec-lint:** "In the saved spec, list tasks whose `_Requirements_` reference IDs that do not exist in `requirements.md`, and correctness properties without a 'Validates' line. Reply 'consistent' if none."
 
 Command hooks (`test-affected`, `contracts-codegen`, `token-contrast`) run shell commands through `mise`, so their behavior equals what CI runs.
+
+File triggers fire only when the Kiro agent saves or edits a file (see Saved in the requirements glossary).
+
+### Command-hook scripts
+
+- **secret-sentinel** (`scripts/secret-sentinel.sh`): reads the saved path from the hook event on STDIN, runs `gitleaks dir` on that file and a PII check (`scripts/pii_scan.py`) for e-mails, local home paths and IPv4 addresses, and prints `path:line: finding` for each hit. The PII check ignores documented placeholders: `example.com` and `example.org` addresses, `127.0.0.1`, `0.0.0.0`, the RFC 5737 documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) and placeholder paths such as `/home/<user>`. No LLM call.
+- **journal-keeper** (`scripts/journal-keeper.py`): on `Stop`, compares `git status --porcelain` with a snapshot taken at the start of the turn. When files other than `docs/kiro-journal.md` and `docs/prompt-history.md` changed and the journal was not touched, it returns `{"decision": "block", "reason": "<journal-keeper prompt>"}` once; it records that it asked, so it never asks twice in the same turn and the follow-up turn cannot loop.
+- **prompt-logger** (`scripts/prompt-logger.py`): on `UserPromptSubmit`, redacts the prompt first (gitleaks findings, e-mails, home paths, IPs, using the same placeholder rules), then appends the next numbered entry with `Outcome: _pending_`. The surface is `CLI` or `IDE` only when the event payload or environment identifies it reliably; otherwise `set by hand`. If redaction fails for any reason, nothing is written and a warning is printed. Shipped with `enabled: false`; once the developer enables it, it is the only writer of new entries.
 
 ### Custom agents
 
@@ -101,3 +111,4 @@ The MCP tool outputs reuse the `AutopsyReport` and `ModelManifest` schemas from 
 - Hypothesis property test for Property 1, generating paths with `..`, symlinks, absolute paths and Unicode.
 - Integration test for Property 2 against the engine's FastAPI `TestClient`.
 - Hooks: one manual dry run each, recorded in the journal with a screenshot of the output.
+- Command-hook scripts: unit tests in `scripts/tests/` (PII true and false positives, journal-keeper no-loop case, prompt-logger redaction-failure case).
