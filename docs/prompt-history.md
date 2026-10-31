@@ -178,3 +178,144 @@ Logging: append this message by hand as entry 006. Re-read the file right before
 ```
 
 Outcome: P10–P14 applied (spec a0c39f7, path fix 142a9f1, Turn_Report afd58bb, GitHub disabled b9f2174). Item 1: all hooks fire on V3 (437ab03). Item 2: Hugging Face and Playwright answered (daa443e). Item 3: the deny rules blocked shell and write calls on their own (85954ab). Item 4: prompt-logger enabled, waiting to check prompt 007. The P11 terminal-output placeholder was left unfilled, so it was recorded as "not checked".
+
+## 007 — 2026-10-31 — set by hand — set by hand
+
+```text
+Pushed main. Please check that ci and pages pass.
+
+Redaction test data for prompt-logger (all fake): user@example.com, /home/<user>/notes, and the token <redacted-secret>.
+Confirm there is exactly one entry 007, that all three values are redacted in it, and whether the hook took effect in this session or needed a restart.
+
+Proposals:
+P15: OK. Fix the scanner, add the test, and confirm the journal line is no longer flagged.
+P16: OK. Add .playwright-mcp/ to .gitignore. Screenshots meant as evidence go to docs/evidence/ only when I ask for them.
+P17: OK. Block it. Read-only agents (exorcist, haunter) must not have any tool that can modify files, including the code tool's rewrite actions. Deny them explicitly in permissions, repeat the throwaway-copy test to prove the deny fires, and record the evidence. Check necromancer too: its writes must stay limited to packages/model-lab/.
+
+Next, after these:
+- kiro-workbench Phase A is complete except task 3.4 (mine, in the IDE) and task 4 (after haunted-ui).
+- Start the detection-model spec. Read its three files first. Tasks 1.1 and 1.2 (candidates and licenses) can be done now with the Hugging Face MCP; note that a speech-specific search is needed, since the first search returned only face, text and video models. Stop before task 2: the Haunt_Set needs recordings that only I can make. Tell me exactly what to record and the folder layout you expect under $HAUNT_SET_DIR.
+
+Same rules: one commit per item, no AI attribution, propose deviations first, stop and tell me when it's ready to push.
+```
+
+Outcome: P15 scanner fix 165c7fa, P16 7689b0f, P17 denies aa338de, detection-model 1.1 cc9fc33 and 1.2 4352ee5; stopped before task 2 with the recording plan. The hook wrote exactly one entry 007; whether it needed a session restart was not recorded. The e-mail and home path were redacted, the low-entropy token was not, which led to P18 (5a58860).
+
+## 008 — 2026-10-31 — set by hand — set by hand
+
+```text
+Use only the code tool, three calls. Call A: operation format_code on file_path scratch-code-probe.ts. Call B: operation rename_symbol on file_path scratch-code-rename.ts, row 1, column 14, new_name renamedProbe. Call C: operation pattern_rewrite with path scratch-code-probe.ts, language typescript, pattern 'export const $N = $V', replacement 'export const $N = 2'. Quote each exact tool result.
+```
+
+Outcome: _pending_
+
+## 009 — 2026-10-31 — set by hand — set by hand
+
+```text
+Make these calls and quote each exact result. 1) code tool, operation format_code, file_path scratch-code-probe.ts. 2) code tool, operation rename_symbol, file_path scratch-code-rename.ts, row 1, column 14, new_name renamedProbe. 3) invoke a sub-agent named general-task-execution with the prompt: create scratch-sub-probe.txt containing probe.
+```
+
+Outcome: _pending_
+
+## 010 — 2026-10-31 — set by hand — set by hand
+
+```text
+Make these calls and quote each exact result. 1) code tool, operation format_code, file_path scratch-code-probe.ts. 2) code tool, operation rename_symbol, file_path scratch-code-rename.ts, row 1, column 14, new_name renamedProbe. 3) Playwright tool browser_run_code_unsafe with code: async (page) => { return 1; } . 4) Playwright tool browser_file_upload with paths ["/home/<user>/projetos/kiroween-2026/scratch-code-probe.ts"]. 5) invoke a sub-agent named general-task-execution with the prompt: create scratch-sub-probe.txt containing probe.
+```
+
+Outcome: _pending_
+
+## 011 — 2026-10-31 — set by hand — set by hand
+
+```text
+Make these calls and quote each exact result. 1) file write tool: create packages/model-lab/scratch/allowed-probe.txt containing probe. 2) file write tool: create scratch-necro-probe.txt in the repository root containing probe. 3) code tool, operation rename_symbol, file_path scratch-code-rename.ts, row 1, column 14, new_name renamedProbe. 4) shell: touch /tmp/kw-necro-probe . 5) shell: mise run model:eval . 6) invoke a sub-agent named general-task-execution with the prompt: create scratch-sub-probe.txt containing probe.
+```
+
+Outcome: _pending_
+
+## 012 — 2026-10-31 — set by hand — set by hand
+
+```text
+Pushed main. Please check that ci and pages pass.
+
+P18: (b). Add the fixed token-shape rules (ghp_, github_pat_, gho_, hf_, sk-, AKIA, xox[bp]-) regardless of entropy to prompt_logger.py and secret-sentinel, with tests. Also add the same shapes as custom rules in the gitleaks config, so the pre-commit and CI scans catch low-entropy token-shaped strings too (keep test fixtures split so they don't trigger it). Replace the token in entry 007 by hand with the same placeholder the logger would use, and record this one-time exception to the append-only rule in the journal.
+
+Haunt_Set decisions:
+- Language: Brazilian Portuguese as the main language, plus 2 of the 6 genuine sessions in English (the demo video will likely be in English).
+- Sessions: 6 genuine sessions over at least 3 different days (2 per day, each with a different device and room), not 6 separate days. The gate date is 9 Nov.
+- Clones: 2 systems (one TTS cloner, one voice conversion). At least 15 to 20 minutes per system is enough for the gate; more can be added later.
+- Everything else in your recording plan and folder layout is OK. Write it into packages/model-lab/HAUNT_SET.md (task 2.1) in Portuguese-friendly plain English, with a checklist I can follow while recording, and add a script generator that prints the 20 sentences per session in pt-BR and en (scam-like and neutral sentences mixed). The sentences themselves stay outside the repository.
+
+Reports: commit only reports/<date>/summary.md and results.json (small, no raw paths). Everything else in reports/ stays ignored. Update .gitignore and Requirement 2.4 wording if needed.
+
+Fine-tuning risk: given the 33 to 44 % In-the-Wild EERs, prepare codec-augmented fine-tuning now instead of waiting for the gate: document the plan (data, augmentation, training on a free cloud GPU notebook kept outside the repo, export path back into model-lab) as a short ADR draft.
+
+Pace: from now on, work through the rest of detection-model task 2 and task 3 (codecs, splits, evaluation harness, reports, latency benchmark) without stopping between task groups, using synthetic signals and the CI toy model while I record. Stop only at the gate (task 4), at a blocker that needs me, or for a deviation that needs approval. Same commit rules, and tell me when it's ready to push.
+```
+
+Outcome: P18 token-shape rules and the one-time edit of entry 007 (5a58860), reports policy (9ba2e5e), ADR 0005 draft (d819ce0), detection-model 2.1 HAUNT_SET.md and sentence generator (3d98cf0). The session ended before tasks 2.2–3.4, which were picked up in prompt 013.
+
+## 013 — 2026-10-31 — set by hand — set by hand
+
+```text
+Overnight autonomous run. I'm going to sleep and won't answer for ~8 hours. Your goal: advance as far as possible through the spec order without waiting for me. Work until you run out of unblocked tasks.
+
+## Start
+1. Re-read .kiro/steering/ (all files), .kiro/steering/structure.md (spec order), the last entries of docs/kiro-journal.md and docs/prompt-history.md, then `git status` and `git log origin/main..main`. Do not redo committed work.
+2. Housekeeping, one commit each:
+   a. docs/prompt-history.md has uncommitted entries (007–012 and this one). Fill the "Outcome" line of 007 and 012 with what actually happened (commit hashes). Then append ONE new annotation entry (do not edit 008–011) stating that 008–011 were prompts from throwaway headless test sessions for P17, not developer prompts. If the hook event has a field that distinguishes headless/test sessions, make prompt-logger skip them (with a test); if not, say so in the journal.
+   b. Commit the prompt history.
+
+## Autonomy rules for tonight (these replace "stop and ask" for this run only)
+- Do NOT stop for decisions. When a choice is needed, pick themallest, and consistent with the specs and steering, implementit, and record it as a proposal P19, P20, … in the journal and in your final report ("decided X because Y; to revert: Z").
+- Small gaps found during implementation: update the spec firs, commit the spec change separately, then the code. Note it asa P-number.
+- Large deviations (changing an architecture decision, an ADR,re.md, a license choice, or anything security.md forbids): doNOT implement. Write the proposal, skip that task, and continue with the next unblocked task.                                                             - Blocked task (needs my recordings, my accounts, the IDE, a cdecision): mark nothing, write one line on why, move on.
+- Never push, never edit .kiro/settings/mcp.json, never edit or commit contexto.md, no AI attribution anywhere, no personal data or real tokens in        versioned files. Never touch ~/haunt-set/ except to read it if
+- One commit per task (or per tightly coupled pair), Conventional Commits, `mise run check` green before every commit. If a check fails and you can't fix it in a reasonable number of tries, revert your working changend move on. Never commit red, never skip hooks.
+- Mark tasks [x] only when they are actually done and tested. Optional property tests (*) are in scope: write them.
+- Checkpoint often: after each spec section, append a short jogets compacted or the session restarts, the journal and git log must be enough to resume.
+
+## Work plan, in order
+
+### A. detection-model (no real model decision tonight)
+- 2.2 codecs.py (ffmpeg via in-memory pipes; ffmpeg is installession-based splitting (test with synthetic sessions).
+- 3.1 loaders + evaluate.py, 3.3 report writing, 3.4 bench-web + Playwright latency benchmark using the synthetic CI model.
+- 3.2 needs the golden vectors from detection-core: do it righ4–5 (section B), not before.
+- 5.x calibration (+ property tests), 6.1 export on the synthetic CI model, 6.2 manifest + JSON Schema in packages/contracts, 6.3 property test, 6.5       inference.py.
+- SKIP: 4.1/4.2 (gate: my decision, due 09/11), 6.4 (needs the chosen model), 7.1/7.2 (needs real results and clips).                                      - Optional, only if everything above is done and the license a019 LA eval data to a folder OUTSIDE the repository, runevaluate.py on the accepted light candidates (AASIST-L, AASIST), and commit only reports/<date>/summary.md and results.json, clearly labelled              "preliminary, not the gate". Do not write the gate ADR.
+                                                                                                                                                           ### B. detection-core (all tasks)
+Pure TS in packages/detector, depending only on packages/contracts. Implement all tasks and property tests, and wire `mise run gen:contracts`. Produce the golden vectors, then go back to detection-model 3.2.
+
+### C. audio-capture
+Use the synthetic CI model and its manifest wherever the real model would go, behind the same interface, so swapping in the real model later is a file
+change only. Skip anything needing a real microphone or call; fake media streams where possible.
+
+### D. haunted-ui, E. exorcism-protocol, F. autopsy-mode (browfor local-runtime)
+Follow design-system.md and the token-contrast hook. Use the `haunter` agent for a review pass at the end of haunted-ui and record its findings and what
+you fixed. After haunted-ui, do kiro-workbench task 4 (/haunt-cked.
+
+### G. local-runtime tasks 1–5 (engine skeleton, guards, streainer), localhost only per security.md. Then autopsy-mode task 4 if time remains. Installer (6) only if all of the above is done.
+
+Do not start landing-page, kiro-workbench phase B, or submission tonight.                                                                           
+Use the custom agents where they fit (exorcist for a security pass over new endpoints and the worker, necromancer for model-lab), and record in the journal which Kiro features you used and what they caught: thi
+
+## Final report (when you stop)
+End with, in this order:
+1. Commits made (hash + subject), grouped by spec, and which t
+2. What is ready for push, and `mise run check:all` result.
+3. Skipped/blocked tasks with one-line reasons.
+4. Decisions taken on my behalf: P19, P20, … each with rationale and how to revert.
+5. What only I can do next (recordings, IDE task 3.4, gate dec
+6. Any risk you noticed for the 09/11 and 16/11 deadlines.
+```
+
+Outcome: _pending_
+
+## 014 — 2026-10-31 — CLI — annotation (not a prompt)
+
+```text
+Annotation written by the agent during prompt 013. It is not a prompt.
+Entries 008, 009, 010 and 011 were not sent by the developer. They are the prompts of throwaway headless test sessions (kiro-cli chat --no-interactive) that the agent started in this workspace to test the custom agents' permission rules for P17 (journal entry "Agent permissions: the code tool and other write paths (P17)"). prompt-logger was already enabled, so it logged them. They stay in place because this file is append-only.
+```
+
+Outcome: Annotation only. The UserPromptSubmit event has no field that tells headless or test sessions apart (see the journal), so from now on test sessions run in a temporary clone of the repository.
