@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pii_scan
 import pytest
 
@@ -38,10 +40,18 @@ def test_true_positives(text: str, kind: str) -> None:
         "pins: pnpm@12.16.1 node@26.13.0 @doppelganger/detector",
         "version 26.13.0 and 1.2.3 are not addresses",
         "not an ip: 999.1.1.1",
+        # Quoting a path pattern, as the journal does about this scanner, is not a path.
+        "it reports its own regular expression (`/home/|`, `/Users/|…`) as home paths",
+        r"_HOME = re.compile(r'(?:/home/|/Users/|[A-Za-z]:\\Users\\)')",
     ],
 )
 def test_placeholders_and_lookalikes_are_ignored(text: str) -> None:
     assert pii_scan.find(text) == []
+
+
+def test_the_scanner_does_not_flag_its_own_source() -> None:
+    source = Path(pii_scan.__file__).read_text(encoding="utf-8")
+    assert pii_scan.find(source) == []
 
 
 def test_reports_line_numbers() -> None:
