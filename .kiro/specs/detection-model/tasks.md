@@ -18,11 +18,11 @@
     - _Requirements: 2.1, 4.1_
 
 - [ ] 3. Evaluation harness
-  - [ ] 3.1 Implement the ONNX candidate loader and `evaluate.py` with EER, AUC, false-alarm and detection rates per condition
+  - [x] 3.1 Implement the ONNX candidate loader and `evaluate.py` with EER, AUC, false-alarm and detection rates per condition
     - _Requirements: 2.1, 2.2, 2.5_
   - [ ] 3.2 Port the EMA and hysteresis logic for "after smoothing" metrics and assert parity with the golden vectors
     - _Requirements: 3.1_
-  - [ ] 3.3 Implement report writing (`results.json`, `summary.md`) without raw paths
+  - [x] 3.3 Implement report writing (`results.json`, `summary.md`) without raw paths
     - _Requirements: 2.4_
   - [ ] 3.4 Build `bench-web/` and the Playwright latency benchmark for ORT Web; add ORT CPU latency
     - _Requirements: 2.3_
@@ -34,7 +34,7 @@
     - _Requirements: 3.2_
 
 - [ ] 5. Calibration
-  - [ ] 5.1 Implement temperature scaling, ECE reporting and the golden calibration vectors
+  - [x] 5.1 Implement temperature scaling, ECE reporting and the golden calibration vectors
     - _Requirements: 4.1, 4.2, 4.3_
   - [x]* 5.2 Write property test for probability bounds
     - **Property 1: Calibrated output is a probability**

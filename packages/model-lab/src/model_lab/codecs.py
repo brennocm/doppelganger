@@ -80,6 +80,14 @@ def _from_raw(data: bytes) -> Audio:
     return np.frombuffer(data, dtype="<f4").astype(np.float32)
 
 
+def decode(data: bytes) -> Audio:
+    """Decode any ffmpeg-readable file content (WAV, FLAC, Opus...) to 16 kHz mono float32."""
+    if not data:
+        msg = "empty audio file"
+        raise CodecError(msg)
+    return _from_raw(_pipe(("-i", "pipe:0", *_RAW_OUT), data))
+
+
 def _opus(audio: Audio, bitrate_kbps: int) -> Audio:
     encoded = _pipe(
         (*_RAW_IN, "-c:a", "libopus", "-b:a", f"{bitrate_kbps}k", "-f", "ogg", "pipe:1"),

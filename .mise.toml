@@ -95,7 +95,10 @@ run = "scripts/gen-contracts.sh"
 
 [tasks."model:eval"]
 description = "Run the model evaluation harness"
-run = "echo 'model:eval: not implemented yet (detection-model spec)'"
+depends = ["deps"]
+# Datasets come from $HAUNT_SET_DIR and $BENCHMARK_DIR (outside the repository).
+# Extra arguments pass through, e.g. mise run model:eval -- --benchmark-limit 2000
+run = "uv run --locked python -m model_lab.evaluate"
 
 [tasks."model:export"]
 description = "Export, quantize and verify ONNX models; update the manifest"
