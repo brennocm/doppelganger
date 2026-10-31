@@ -45,7 +45,7 @@ def run_main(
 
 @pytest.mark.parametrize(
     ("value", "masked"),
-    [("someone@corp.test", "some…"), ("abcde", "abcd…"), ("abcd", "…"), ("ab", "…"), ("", "…")],
+    [("user@example.com", "user…"), ("abcde", "abcd…"), ("abcd", "…"), ("ab", "…"), ("", "…")],
 )
 def test_mask_keeps_at_most_the_first_4_characters(value: str, masked: str) -> None:
     assert fd.mask(value) == masked
