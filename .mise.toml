@@ -99,7 +99,9 @@ run = "echo 'model:eval: not implemented yet (detection-model spec)'"
 
 [tasks."model:export"]
 description = "Export, quantize and verify ONNX models; update the manifest"
-run = "echo 'model:export: not implemented yet (detection-model spec)'"
+depends = ["deps"]
+# Until the gate picks the Light_Model (detection-model 6.4), only the synthetic CI model.
+run = "uv run --locked python -m model_lab.export synthetic --out apps/web/public/models"
 
 [tasks."build:pages"]
 description = "Build landing (/) and app (/app/) into one Pages artifact"

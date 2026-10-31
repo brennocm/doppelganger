@@ -44,16 +44,16 @@
     - **Validates: Requirements 4.1**
 
 - [ ] 6. Export
-  - [ ] 6.1 Implement `export.py` (ONNX export, int8 quantization, parity check) and test it on the synthetic CI model
+  - [x] 6.1 Implement `export.py` (ONNX export, int8 quantization, parity check) and test it on the synthetic CI model
     - _Requirements: 5.1, 5.2, 5.3_
-  - [ ] 6.2 Implement `manifest.py` and the manifest JSON Schema in `packages/contracts`
+  - [x] 6.2 Implement `manifest.py` and the manifest JSON Schema in `packages/contracts`
     - _Requirements: 5.4_
-  - [ ]* 6.3 Write property test for manifest hash integrity
+  - [x]* 6.3 Write property test for manifest hash integrity
     - **Property 4: Manifest hash integrity**
     - **Validates: Requirements 5.4**
   - [ ] 6.4 Export the chosen Light_Model into `apps/web/public/models/`; publish the Pro_Model as a release asset
     - _Requirements: 5.5_
-  - [ ] 6.5 Implement `inference.py` (shared ONNX Runtime inference for the engine and MCP server)
+  - [x] 6.5 Implement `inference.py` (shared ONNX Runtime inference for the engine and MCP server)
     - _Requirements: 5.4_
 
 - [ ] 7. Model card and demo clips
