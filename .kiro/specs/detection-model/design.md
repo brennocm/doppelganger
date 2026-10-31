@@ -66,8 +66,11 @@ Temperature scaling on the spoof logit: `p = sigmoid(z / T)` for single-logit mo
 {
   "id": "aasist-l-codec-v1",
   "version": "1.0.0",
+  "role": "light",
   "file": "aasist-l-codec-v1.int8.onnx",
   "sha256": "<hex>",
+  "bytes": 123456,
+  "quantization": "int8",
   "sampleRate": 16000,
   "windowSamples": 64600,
   "hopSamples": 16000,
@@ -77,10 +80,15 @@ Temperature scaling on the spoof logit: `p = sigmoid(z / T)` for single-logit mo
   "spoofIndex": 1,
   "calibration": { "method": "temperature", "temperature": 1.7 },
   "thresholds": { "unease": 0.4, "possession": 0.7, "release": 0.5 },
-  "license": { "code": "MIT", "weights": "<verified>", "verifiedOn": "2026-11-05" },
+  "license": { "code": "MIT", "weights": "<verified>", "trainingData": "<verified>", "verifiedOn": "2026-11-05" },
   "source": "<repository URL and commit>"
 }
 ```
+
+- `role` is `light`, `pro` or `test`. `test` marks the synthetic CI model (a seeded linear layer that detects nothing). It is committed in `apps/web/public/models/` so the app pipeline can run before the gate picks the Light_Model; the UI must label it as a test model. Swapping in the real model replaces the two files and nothing else.
+- `bytes` and `sha256` are both checked before a model is loaded. `url` (optional, `https://` only) points to a release asset for the Pro_Model.
+- `license.trainingData` records the training-data license (Requirement 1.3).
+- The JSON Schema forbids unknown fields; TS uses `parseModelManifest` from `@doppelganger/contracts`, Python the generated Pydantic model.
 
 ## Correctness Properties
 
