@@ -44,6 +44,7 @@ run = [
   "uv run --locked mypy apps/engine/src packages/model-lab/src packages/doppelganger-mcp/src",
   "uv run --locked lint-imports --no-cache",
   { task = "lint:shell" },
+  "scripts/test.sh",
 ]
 
 [tasks."check:all"]
@@ -69,7 +70,8 @@ run = "echo 'dev:engine: not implemented yet (local-runtime spec)'"
 
 [tasks.test]
 description = "Tests; accepts a target, e.g. mise run test -- packages/detector"
-run = "echo 'test: not implemented yet (project-foundation task 3.4)'"
+depends = ["deps"]
+run = "scripts/test.sh"
 
 [tasks."gen:contracts"]
 description = "Regenerate TS and Python types from JSON Schema"
