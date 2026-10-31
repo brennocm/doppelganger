@@ -40,3 +40,31 @@ All candidates share the 64,600-sample window (~4.04 s), which matches the desig
 | ASVspoof 5 (track 1, eval) | [SpeechAntiSpoofingBenchmarks/ASVspoof5](https://hf.co/datasets/SpeechAntiSpoofingBenchmarks/ASVspoof5) | ODC-By 1.0 |
 
 ASVspoof 2019 LA is in-domain for every light candidate, so it shows little. ASVspoof 5 includes codec conditions and is the more useful public check. Both stay outside the repository, under `$BENCHMARK_DIR`.
+
+## License verification (Requirements 1.2 and 1.3)
+
+Checked on 2026-10-31. "Verified" means the license text or license field was read at the source given; nothing was taken from memory. A candidate is **rejected** when a license forbids redistribution or public demos, or when the license of its weights or training data cannot be established.
+
+| Candidate | Code | Weights | Training data | Status |
+| --- | --- | --- | --- | --- |
+| AASIST-L | MIT: clovaai/aasist `LICENSE` (GitHub license API) | MIT: the mirror's `LICENSE` is the NAVER Corp. MIT text, inherited from clovaai/aasist, which ships the pretrained models | ASVspoof 2019 LA: ODC-By, attribution required | **Accepted** |
+| AASIST | MIT (same) | MIT (same) | ASVspoof 2019 LA: ODC-By | **Accepted** |
+| LCNN v7 (CQT) | **Not verified**: the source repository has no license file (GitHub license API) | MIT (Hub metadata) | ASVspoof 2019 LA: ODC-By | **Rejected**: the model code needed to run the weights has no license. Can be reconsidered if the repository adds one. |
+| RawNet2 | MIT: eurecom-asp/rawnet2-antispoofing `LICENSE` | No official pretrained weights | ASVspoof 2019 LA: ODC-By | **Fallback only**: usable if we train it ourselves |
+| W2V2-AASIST | MIT: TakHemlata/SSL_Anti-spoofing `LICENSE`; fairseq MIT | MIT (mirror license field; upstream repository MIT). XLS-R 300M base: Apache-2.0 (`facebook/wav2vec2-xls-r-300m` card) | Fine-tuning: ASVspoof 2019 LA, ODC-By. XLS-R pretraining includes BABEL (LDC-licensed audio); this governs Meta's pretraining data, not the Apache-2.0 weights Meta released | **Accepted** |
+| SSL-AASIST (ShiftySpeech) | Apache-2.0 (Hub metadata, revision `6be33672`) | Apache-2.0 (Hub metadata) | WaveFake: dataset CC-BY-SA-4.0 (Zenodo record 5642694), code MIT; built from LJSpeech | **Pending**: ShareAlike might extend to weights trained on it, which is legally unclear. The model also loads with `trust_remote_code=True`; we would use our own network definition instead. Evaluation only, not shipped unless resolved. |
+| Spectra-AASIST | Not stated separately | **Conflicting**: Hub metadata says Apache-2.0, the README "License" section says MIT | **Not disclosed** | **Rejected**: training-data license cannot be checked, and the two license statements disagree |
+| Spectra-AASIST3 | Not stated separately | Apache-2.0 (Hub metadata and README) | **Not disclosed** (pre-release, unpublished) | **Rejected**: training-data license cannot be checked |
+| AASIST3 | Not stated separately | **CC-BY-NC-4.0** (Hub metadata); the README badge says CC BY-NC-ND 4.0 | MLAAD (gated, license not readable), ASVspoof 5, ASVspoof 2019 LA | **Rejected**: non-commercial, and "ND" forbids derivatives; an exported or quantized ONNX file is a derivative |
+| wav2vec2-base "Deepfake-audio-detection" | Apache-2.0 (Hub metadata) | Apache-2.0 | **Not disclosed** | **Rejected**: training-data license cannot be checked |
+
+Public benchmarks: ASVspoof 2019 LA and ASVspoof 5 are both ODC-By, which allows evaluation use and redistribution with attribution. Neither is redistributed by this project.
+
+### Obligations for the accepted candidates
+
+- **MIT (AASIST, AASIST-L, W2V2-AASIST, fairseq):** ship the copyright notice and license text with the model files: `apps/web/public/models/` for the light model and the release asset for the pro model.
+- **Apache-2.0 (XLS-R base):** keep the license and any NOTICE with the pro model.
+- **ODC-By (ASVspoof 2019 LA, ASVspoof 5):** attribute the datasets in `docs/model-card.md`.
+- **Requirement 1.3:** each shipped Model_Manifest records `license.code`, `license.weights`, the training-data license, `verifiedOn: 2026-10-31` (or the date of a later re-check) and `source` with the pinned Hub revision above. The re-check happens at export (detection-model task 6.2).
+
+Shortlist for evaluation: **AASIST-L** and **AASIST** (light), **W2V2-AASIST** (pro), and SSL-AASIST as an evaluation-only comparison. That leaves one accepted pro candidate, where Requirement 1.1 asks for at least two documented. The other five are documented but rejected or pending, so they count as documented, not shippable.

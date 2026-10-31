@@ -1,9 +1,9 @@
 # Implementation Plan
 
-- [ ] 1. Candidates and licenses
+- [x] 1. Candidates and licenses
   - [x] 1.1 Research candidates (use the Hugging Face and documentation MCP servers) and write `packages/model-lab/CANDIDATES.md`
     - _Requirements: 1.1_
-  - [ ] 1.2 Verify code, weights and training-data licenses; mark rejected candidates with reasons
+  - [x] 1.2 Verify code, weights and training-data licenses; mark rejected candidates with reasons
     - _Requirements: 1.2, 1.3_
 
 - [ ] 2. Data preparation (outside the repository)
