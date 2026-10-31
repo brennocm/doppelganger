@@ -9,6 +9,7 @@ node = "26.13.0"
 pnpm = "12.16.1"
 python = "3.12.16"
 uv = "0.13.6"
+shellcheck = "0.11.0"
 
 [env]
 # uv must use the mise-pinned Python, never download its own.
@@ -16,9 +17,30 @@ UV_PYTHON_DOWNLOADS = "never"
 # Base path for the Pages build: "/<repo>/" on GitHub Pages, "/" for custom domains and self-hosting.
 PAGES_BASE = "{{ get_env(name='PAGES_BASE', default='/') }}"
 
+[tasks.deps]
+description = "Install JS and Python dependencies from the committed lockfiles"
+hide = true
+run = [
+  "pnpm install --frozen-lockfile --silent",
+  "uv sync --locked --quiet",
+]
+
+[tasks."lint:shell"]
+description = "ShellCheck every tracked shell script"
+hide = true
+run = "git ls-files -z --cached --others --exclude-standard -- '*.sh' | xargs -0 -r shellcheck --severity=style"
+
 [tasks.check]
 description = "Definition of done: format, lint, typecheck, boundaries, unit and property tests"
-run = "echo 'check: not implemented yet (project-foundation task 3.1)'"
+depends = ["deps"]
+run = [
+  "pnpm exec biome ci .",
+  "pnpm -r run typecheck",
+  "uv run --locked ruff check .",
+  "uv run --locked ruff format --check .",
+  "uv run --locked mypy apps/engine/src packages/model-lab/src packages/doppelganger-mcp/src",
+  { task = "lint:shell" },
+]
 
 [tasks."check:all"]
 description = "check plus builds, E2E, audits, license check and full-history secret scan (CI)"
@@ -26,7 +48,12 @@ run = "echo 'check:all: not implemented yet (project-foundation tasks 4.1-4.2)'"
 
 [tasks.fix]
 description = "Apply every auto-fix"
-run = "echo 'fix: not implemented yet (project-foundation task 3.1)'"
+depends = ["deps"]
+run = [
+  "pnpm exec biome check --write .",
+  "uv run --locked ruff check --fix .",
+  "uv run --locked ruff format .",
+]
 
 [tasks.dev]
 description = "Web app and landing dev servers"
