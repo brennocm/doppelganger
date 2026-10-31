@@ -38,6 +38,9 @@ junit*.xml
 test-results/
 playwright-report/
 blob-report/
+# Playwright MCP output (snapshots, console logs, screenshots). Evidence screenshots
+# go to docs/evidence/ only when the developer asks for them.
+.playwright-mcp/
 reports/
 
 # --- Logs ---
