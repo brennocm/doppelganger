@@ -11,7 +11,7 @@
 - [ ] 2. Toolchain and workspaces
   - [x] 2.1 Create `.mise.toml` with pinned tools and every task listed in Requirement 1.2 (tasks that have no implementation yet print "not implemented" and exit 0)
     - _Requirements: 1.1, 1.2_
-  - [ ] 2.2 Configure the pnpm workspace (`pnpm-workspace.yaml`) and a shared strict `tsconfig.base.json`
+  - [x] 2.2 Configure the pnpm workspace (`pnpm-workspace.yaml`) and a shared strict `tsconfig.base.json`
     - _Requirements: 2.2_
   - [ ] 2.3 Configure the uv workspace (root `pyproject.toml`) with Ruff and mypy strict settings
     - _Requirements: 2.2_

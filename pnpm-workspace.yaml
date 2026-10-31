@@ -1,0 +1,25 @@
+# pnpm workspace for the TypeScript side of the monorepo.
+packages:
+  - apps/web
+  - apps/landing
+  - packages/detector
+  - packages/contracts
+  - packages/tokens
+
+# Supply chain (see .kiro/steering/security.md).
+# Explicitly set, so pnpm enforces it strictly: no version younger than 24 h is installed.
+minimumReleaseAge: 1440
+# Fail if a package's publishing trust level drops compared to earlier releases.
+trustPolicy: no-downgrade
+# Only direct dependencies may come from git or tarball URLs.
+blockExoticSubdeps: true
+# Dependency build scripts need explicit approval in allowBuilds.
+strictDepBuilds: true
+allowBuilds: {}
+# Fail when the running Node or pnpm does not match "engines".
+engineStrict: true
+# Exact versions only.
+saveExact: true
+# Never let a dependency link agent skills into this repository's agent folders.
+skills:
+  dirs: []
