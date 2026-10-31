@@ -43,6 +43,12 @@ Versions were checked against the official sources on 2026-10-30: nodejs.org `di
 | import-linter | 2.15 | `pyproject.toml` dev group | Latest stable. |
 | pip-audit | 2.10.1 | `pyproject.toml` dev group | Latest stable. Audits the hashed `uv export` of `uv.lock` without resolving anything. |
 | uv_build | 0.13.6 | each member's `[build-system]` | Same version as uv. |
+| NumPy | 2.5.4 | `packages/model-lab` dependencies | Latest stable (2026-10-31). Runtime dependency of the shared inference module. |
+| onnxruntime | 1.31.1 | `packages/model-lab` dependencies | Latest stable (2026-10-31). CPU inference for the model lab, engine and MCP server (detection-model). |
+| scikit-learn | 1.9.1 | `packages/model-lab` extra `lab` | Latest stable. ROC, AUC and EER in the evaluation harness. |
+| onnx | 1.23.2 | `packages/model-lab` extra `lab` | Latest stable. Needed by `quantize_dynamic` and to inspect exported graphs. |
+| PyTorch | 2.15.0 (`+cpu`) | `packages/model-lab` extra `lab`, CPU index `download.pytorch.org/whl/cpu` | Latest stable. Loads candidate checkpoints and exports them. The CPU index avoids several GB of CUDA wheels. Export uses the TorchScript exporter (`dynamo=False`), which needs no `onnxscript`. |
+| Hypothesis | 6.170.14 | root `dev` group | Latest stable. Property-based tests (MPL-2.0, development only, unmodified). |
 | github-mcp-server | 2.0.3 | `.mise.toml` (`github:` backend), `mise.lock` | Official GitHub MCP server (MIT), run locally over stdio so the version is pinned and checksum-verified, unlike the hosted endpoint. Started with `--toolsets=repos,issues,pull_requests --lockdown-mode`. |
 | @playwright/mcp | 0.0.83 | `.kiro/settings/mcp.json` (`npx -y`, exact version) | Microsoft's Playwright MCP server (Apache-2.0), latest release. It depends on a Playwright 1.64 alpha build, which is how Microsoft ships it. Runs `--headless --isolated --browser chromium`. |
 | @upstash/context7-mcp | 4.4.4 | `.kiro/settings/mcp.json` (`npx -y`, exact version) | Context7 documentation server (MIT), latest release. Works without an API key; reads `CONTEXT7_API_KEY` from the environment when set. |
@@ -54,7 +60,9 @@ Versions were checked against the official sources on 2026-10-30: nodejs.org `di
 
 The MCP servers started with `npx -y <package>@<version>` are pinned to an exact version but are not in `pnpm-lock.yaml`, so they get no lockfile integrity check, no 24 h release-age delay and no license-policy check; their licenses were checked by hand. The Hugging Face server is the hosted endpoint `https://huggingface.co/mcp`, which has no version to pin.
 
-The rest of the stack in the tech steering (`onnxruntime-web`, `fast-check`, Playwright, FastAPI, Uvicorn, `onnxruntime`, PyTorch, Hypothesis, the MCP SDK) is not installed yet. Each spec that first needs one of them pins it and adds a row to this table.
+The rest of the stack in the tech steering (`onnxruntime-web`, `fast-check`, Playwright, FastAPI, Uvicorn, the MCP SDK) is not installed yet. Each spec that first needs one of them pins it and adds a row to this table.
+
+The `lab` extra is installed by the root `dev` group, so `mise run check` and CI test the export pipeline, while the engine image installs `doppelganger-model-lab` without it. NumPy (Zlib in its expression) and PyTorch (BSL-1.0, Zlib and `Apache-2.0 WITH LLVM-exception`) required adding those three permissive IDs to the license allowlist (project-foundation Requirement 4.4).
 
 ### Why TypeScript 6, not 7
 

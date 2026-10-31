@@ -102,14 +102,20 @@ class _SpdxEvaluator:
             return value
         if current.upper() in {")", "AND", "OR", "WITH"}:
             raise ValueError
+        if (self._peek() or "").upper() == "WITH":
+            self._take()
+            exception = self._take()
+            if exception.upper() in {"(", ")", "AND", "OR", "WITH"}:
+                raise ValueError
+            return f"{current} WITH {exception}" in self.allowed
         return current in self.allowed
 
 
 def spdx_allowed(expression: str, allowed: frozenset[str]) -> bool:
     """Return True when the SPDX expression is satisfied by the allowed IDs.
 
-    Any construct other than AND, OR and parentheses (WITH, LicenseRef-, free text)
-    is not allowed.
+    "<id> WITH <exception>" counts as one ID and must be allowed as written. Anything
+    else (LicenseRef-, free text) is not allowed.
     """
     tokens = _TOKEN.findall(expression)
     if "".join(tokens) != re.sub(r"\s+", "", expression):

@@ -15,6 +15,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "doppelganger-model-lab[lab]",
+    "hypothesis==6.170.14",
     "import-linter==2.15",
     "pip-audit==2.10.1",
     "mypy==2.4.1",
@@ -33,6 +35,13 @@ members = ["apps/engine", "packages/model-lab", "packages/doppelganger-mcp"]
 doppelganger-engine = { workspace = true }
 doppelganger-model-lab = { workspace = true }
 doppelganger-mcp = { workspace = true }
+# CPU-only PyTorch wheels (the PyPI wheels pull in several GB of CUDA libraries).
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 # --- Ruff: one formatter and one linter for Python -------------------------
 [tool.ruff]
