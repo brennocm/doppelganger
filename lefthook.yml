@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://lefthook.dev/schema.json
+# Git hooks. Installed by `mise install` (see [hooks] in .mise.toml) or `lefthook install`.
+# Every job runs through `mise x` so the hook uses the pinned toolchain even when mise is not
+# activated in the committing shell.
+
+min_version: 2.2.2
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: forbidden-paths
+      run: scripts/check-forbidden-paths.sh --staged
+
+    - name: gitleaks
+      run: mise x -- gitleaks git --pre-commit --staged --redact --no-banner --verbose
+
+    - name: biome
+      glob: "*.{js,cjs,mjs,ts,tsx,json,jsonc,css,html}"
+      run: mise x -- pnpm exec biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+
+    - name: ruff
+      glob: "*.py"
+      run: mise x -- uv run --locked ruff check {staged_files} && mise x -- uv run --locked ruff format --check {staged_files}
