@@ -13,3 +13,21 @@ Template:
 ```
 
 ---
+
+## 2026-10-30 — project-foundation group 1: repository skeleton
+- Kiro surface: CLI
+- Feature used: spec | steering
+- What happened: Ran `git init -b main`, wrote `.gitignore` before the first commit so `.kiro/` stayed tracked, then created the folder layout, README stubs, MIT `LICENSE`, this journal and a model-card stub (tasks 1.1–1.3), one commit each.
+- Effect: The initial `.gitignore` also ignored `*.onnx` and other model weights. That was removed before committing, because the spec only asks to exclude datasets and the demo will need to serve model files; the detection-model spec decides how weights are handled. The MIT copyright line names "The Doppelgänger contributors" to keep personal names out of the repository.
+
+## 2026-10-30 — project-foundation group 2: toolchain and workspaces
+- Kiro surface: CLI
+- Feature used: spec | steering
+- What happened: Pinned Node 26.13.0, pnpm 12.16.1, Python 3.12.16 and uv 0.13.6 in `.mise.toml` after checking the official registries, generated `mise.lock` with per-platform checksums, and configured the pnpm workspace, the strict `tsconfig.base.json` and the uv workspace with Ruff and mypy strict (tasks 2.1–2.3).
+- Effect: The design's example pins (Node 22, pnpm 9, uv 0.5) were out of date, so the versions came from nodejs.org, npm and PyPI instead. The shell's system Node (25.8.1) failed pnpm's `engineStrict` check, which confirmed that commands must run through mise. Ruff's `CPY001` (per-file copyright header) was disabled because the root `LICENSE` covers it.
+
+## 2026-10-30 — project-foundation group 3: quality gates
+- Kiro surface: CLI
+- Feature used: spec | steering
+- What happened: Wired Biome, `tsc`, Ruff, mypy, dependency-cruiser, import-linter, ShellCheck and the smoke tests into `mise run check`, added lefthook with gitleaks, Biome, Ruff and a forbidden-path script, and proved each gate by committing deliberate violations (tasks 3.1–3.4).
+- Effect: Several problems came up. Biome 2.6 now formats Markdown and wanted to rewrite every spec and steering file, so Markdown was excluded from Biome (the prompt history is append-only). `pnpm -r --silent` hid `tsc` errors, against Requirement 1.4, so `--silent` was removed. TypeScript 7.0.2 (native compiler) has no stable JS API, so dependency-cruiser cannot use it; it parses with `@swc/core` instead, and a seeded-violation test confirmed every rule still fires. The design's `gitleaks protect --staged` is replaced by `gitleaks git --pre-commit --staged` in gitleaks 8.30. `check` runs in about 4 s.
