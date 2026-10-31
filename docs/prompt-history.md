@@ -92,4 +92,37 @@ Deploy result: ci passed, then pages deployed. Both https://brennocm.github.io/d
 Stop after Phase A task 3 and show me: the hooks and agents created (and which ones are pending for the IDE), the mcp.json without secrets, the environment variables I must export, and the journal entries.
 ```
 
+Outcome: Placeholders replaced and task 6 ticked after an independent check of the deploy (commit 51a2234, push left to the developer). Stopped before kiro-workbench to propose P1–P9, because the installed CLI is 2.24 (V2 engine) while the current hook and agent formats target IDE 1.x and CLI V3.
+
+## 004 — 2026-10-30 — CLI — kiro-workbench (Phase A)
+
+```text
+Decisions:
+
+Pushing: I'll push myself after each task group (git push origin main). Don't set up credentials. A human gate before anything becomes public is intended; note it in the journal. When you finish a group, tell me it's ready to push, then check ci and pages once I confirm.
+
+README sentence: keep it.
+
+P1: OK. Single source of truth: v1 files in .kiro/hooks/ only, with no V2 copies. Use `kiro-cli --v3` for the rest of the project, not only for the dry runs. Record in the journal why we moved from V2 to V3 and what differed.
+P2: OK. Implement privacy-audit as a manual steering file run as /privacy-audit. Update Requirement 2.3 and the design diagram. Use the same pattern for haunt-snapshots later.
+P3: OK. The PII check must ignore documented placeholders (example.com and example.org e-mails, 127.0.0.1, 0.0.0.0, RFC 5737 documentation IPs, paths like /home/<user>). Add a test with true positives and these false positives.
+P4: OK. Add the glossary line.
+P5: OK. It must not loop: block at most once per turn, and never when the only changed files are docs/kiro-journal.md or docs/prompt-history.md. Add a test for the no-loop case.
+P6: OK, with these rules:
+  - Surface: write "CLI" when the hook runs from kiro-cli and "IDE" from the IDE, if an environment variable or the event payload reliably tells them apart. Otherwise write "set by hand".
+  - Redaction runs before anything is written. If redaction fails for any reason, write nothing and print a warning. Never write the raw prompt.
+  - Keep it disabled in this repository for now. After I enable it, the hook is the only writer of new entries: you stop appending entries by hand and only fill in "Outcome" lines.
+P7: OK. If `agent validate` in 2.24 rejects the new schema, validate under --v3 and say so in the journal.
+P8: OK. Pin versions, check licenses, no @latest. Document least privilege for the tokens in the journal, and give me the setup steps:
+  - GITHUB_PERSONAL_ACCESS_TOKEN: fine-grained, only brennocm/doppelganger, read-only contents and metadata, read and write issues and pull requests, expiring 2026-12-31.
+  - HF_TOKEN: read-only.
+  - CONTEXT7_API_KEY: optional; leave it unset unless rate limits hit.
+  Tokens live in my shell environment, never in the repository. Tell me which variables to approve under "Mcp Approved Env Vars" in the IDE.
+P9: OK, leave it.
+
+Order: spec updates first, then hooks, MCP and agents, each with its own commit and check run. Stop at the end of Phase A task 3 as planned, and show me the hooks and agents (and which are pending), mcp.json, the environment variables, and the journal entries.
+
+Logging: append this message as entry 004 by hand (the prompt-logger is still disabled). Re-read the file right before editing.
+```
+
 Outcome: _pending_
