@@ -15,17 +15,17 @@
   - [x] 1.5 Implement `capture-processor.ts` (AudioWorklet) using the primitives, posting 1,600-sample transferable chunks
     - _Requirements: 3.2, 3.4_
 
-- [ ] 2. Inference worker
-  - [ ] 2.1 Self-host ONNX Runtime Web files and configure the WASM paths, SIMD and thread count
+- [x] 2. Inference worker
+  - [x] 2.1 Self-host ONNX Runtime Web files and configure the WASM paths, SIMD and thread count
     - _Requirements: 4.1_
-  - [ ] 2.2 Implement manifest and model loading with SHA-256 verification
+  - [x] 2.2 Implement manifest and model loading with SHA-256 verification
     - _Requirements: 4.2_
-  - [ ]* 2.3 Write property test for the integrity check
+  - [x]* 2.3 Write property test for the integrity check
     - **Property 4: Integrity check**
     - **Validates: Requirements 4.2**
-  - [ ] 2.4 Implement `OrtWebBackend` and wire `createDetector` inside the worker; report perf stats
+  - [x] 2.4 Implement `OrtWebBackend` and wire `createDetector` inside the worker; report perf stats
     - _Requirements: 4.3_
-  - [ ]* 2.5 Write property test that the main thread never receives audio
+  - [x]* 2.5 Write property test that the main thread never receives audio
     - **Property 5: Main thread never receives audio**
     - **Validates: Requirements 4.4**
 
