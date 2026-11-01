@@ -49,6 +49,16 @@ PCM16 decoding: `int16 / 32768.0`. The ring buffer is a preallocated NumPy array
 
 `soundfile` (libsndfile) reads from `io.BytesIO`. Ogg Opus support depends on the libsndfile version in the image; this is checked in a build-time test, and the supported formats are reported by `/healthz`.
 
+**P29 (replaces the paragraph above):** `soundfile` ships libsndfile, which is LGPL-2.1, and LGPL is outside the license allowlist (project-foundation Requirement 4.4). So the engine decodes WAV only, with the standard library `wave` module and NumPy, in memory: PCM 8/16/24/32-bit and 32-bit float, any channel count and any rate, then downmixed and resampled to 16 kHz. Any other format gets 415 with `supported: ["wav"]`, which `/healthz` also reports. The browser Autopsy still reads every format the browser can decode. To widen the engine's formats later, add an allowlisted decoder or accept LGPL; that is the developer's decision.
+
+### Implementation details (P29)
+
+- **Configuration** is a Pydantic `BaseModel` built from `os.environ`, not `pydantic-settings`, which would add a dependency for five variables. The Python package keeps its existing name, `doppelganger_engine`.
+- **Pipeline parity.** The stream session uses ports of the detector's windowing, voice activity check and scoring (`doppelganger_engine.pipeline`), plus `model_lab.haunting.Smoother` and `model_lab.inference`. `packages/contracts/fixtures/golden/stream.json`, written by the TS tests from `createDetector` with a fake single-logit model (logit = 40 × window mean), holds a PCM16 signal and the raw score per window; the engine test must match it to 1e-9 (Property 5). `pcm16.json` holds encode and decode vectors (Property 4). Encoding is `round(clamp(x) × 32768)` clamped to [−32768, 32767]; decoding is `n / 32768`.
+- **Stream messages** are TS types in `packages/contracts/src/stream-messages.ts` plus matching Pydantic models in the engine, not JSON Schemas: `hello { type, protocol: 1, token, sampleRate: 16000 }`, `ready { type, modelId, windowSamples, hopSamples }`, `score { type, windowIndex, raw, smoothed, modelId }`, `error { type, code: "bad-hello" | "bad-frame" | "rate-limited" }`.
+- **Rate limit.** A failed check costs one token from a per-client bucket of 10 per minute. The client key is the peer address; all local traffic shares one bucket, which is acceptable on a loopback-only service.
+- **Tests without Docker.** The engine is tested in-process with FastAPI's `TestClient` and the synthetic CI model. The container test (task 5.3) needs Docker in CI.
+
 ### Compose (`infra/docker/compose.yaml`)
 
 ```yaml
