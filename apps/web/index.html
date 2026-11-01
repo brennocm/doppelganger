@@ -100,7 +100,41 @@
       </div>
       <p id="notice-slow" class="note" role="status" hidden></p>
 
-      <section id="protocol-slot" class="protocol-slot" aria-label="Exorcism protocol" hidden></section>
+      <section id="protocol-slot" class="protocol" aria-labelledby="protocol-title" hidden>
+        <div class="protocol-head">
+          <h2 id="protocol-title" class="title">Exorcism protocol</h2>
+          <p id="protocol-done-line" class="note" hidden></p>
+          <button id="protocol-toggle" class="button button-secondary" type="button" aria-expanded="true" aria-controls="protocol-steps" hidden>Hide the steps</button>
+        </div>
+        <ol id="protocol-steps" class="protocol-steps">
+          <li>
+            <label class="step"><input type="checkbox" data-step="1" /><span class="step-title">Don't approve anything on this call</span></label>
+            <p class="step-line">No payment, transfer, PIX, password or code.</p>
+          </li>
+          <li>
+            <label class="step"><input type="checkbox" data-step="2" /><span class="step-title">Ask something only the real person would know</span></label>
+            <p class="step-line">The agreed code word or a shared detail.</p>
+            <p id="reminder-in-step" class="step-line reminder" hidden></p>
+          </li>
+          <li>
+            <label class="step"><input type="checkbox" data-step="3" /><span class="step-title">Hang up and call back</span></label>
+            <p class="step-line">Use a number you already have, not one given during this call.</p>
+          </li>
+          <li>
+            <label class="step"><input type="checkbox" data-step="4" /><span class="step-title">Tell your security team</span></label>
+            <p class="step-line">Copy or download the incident summary.</p>
+            <div class="actions">
+              <button id="copy-summary" class="button button-secondary" type="button">Copy summary</button>
+              <button id="download-summary" class="button button-secondary" type="button">Download summary</button>
+            </div>
+            <p id="summary-status" class="note" role="status"></p>
+            <div id="summary-fallback" class="summary-fallback" hidden>
+              <label for="summary-text" class="note">Press Ctrl+C to copy</label>
+              <textarea id="summary-text" class="summary-text" readonly rows="10"></textarea>
+            </div>
+          </li>
+        </ol>
+      </section>
 
       <section id="start-panel" class="start-panel" aria-labelledby="start-title">
         <h2 id="start-title" class="title">Start listening</h2>
@@ -125,6 +159,17 @@
           <div><dt>Recording</dt><dd>None</dd></div>
         </dl>
         <p id="test-model" class="note" hidden></p>
+        <details class="settings">
+          <summary>Code word reminder</summary>
+          <p class="note">Write a hint that reminds you which code word your team uses, not the code word itself. It stays in this browser only, and you can delete it at any time.</p>
+          <label class="note" for="reminder-input">Hint (up to 80 characters)</label>
+          <input id="reminder-input" class="input" type="text" maxlength="80" autocomplete="off" spellcheck="false" />
+          <div class="actions">
+            <button id="reminder-save" class="button button-secondary" type="button">Save hint</button>
+            <button id="reminder-delete" class="button button-secondary" type="button">Delete hint</button>
+          </div>
+          <p id="reminder-status" class="note" role="status"></p>
+        </details>
         <p class="legal"><a href="../">Back to the landing page</a> · Icons: Phosphor (MIT)</p>
       </footer>
     </main>

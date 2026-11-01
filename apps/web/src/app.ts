@@ -2,7 +2,8 @@
  * App bootstrap: capture, the Inference_Worker and the Main_View (haunted-ui design,
  * Architecture). Audio flows source → worklet → worker; this file sees only updates.
  */
-import type { DetectorUpdate, WorkerOutbound } from "@doppelganger/contracts";
+import type { DetectorUpdate, SessionStats, WorkerOutbound } from "@doppelganger/contracts";
+import { buildIncidentSummary } from "@doppelganger/detector";
 import { createCaptureController } from "./features/capture/capture-controller.ts";
 import workletUrl from "./features/capture/capture-processor.ts?worker&url";
 import {
@@ -25,6 +26,8 @@ import {
   tabSource,
 } from "./features/capture/sources.ts";
 import { parseTestState } from "./features/haunting/test-state.ts";
+import { createProtocolPanel } from "./features/protocol/protocol-panel.ts";
+import { bindReminderSettings } from "./features/protocol/reminder-settings.ts";
 import {
   loadClips,
   type ReplayClip,
@@ -75,6 +78,9 @@ export function startApp(base: string, mode: string): AppEvents {
   const listeners: ((u: DetectorUpdate) => void)[] = [];
   let hopSamples = 16000;
   let ready = false;
+  let model = { id: "unknown", version: "0.0.0" };
+  let session: { kind: CaptureSource["kind"]; label?: "genuine" | "synthetic" } = { kind: "tab" };
+  const statsWaiting: ((stats: SessionStats) => void)[] = [];
 
   const worker = new Worker(new URL("./features/capture/inference.worker.ts", import.meta.url), {
     type: "module",
@@ -115,11 +121,17 @@ export function startApp(base: string, mode: string): AppEvents {
     ui.alert.hidden = false;
   }
 
-  async function begin(source: CaptureSource, label = ""): Promise<void> {
+  async function begin(
+    source: CaptureSource,
+    label = "",
+    clipLabel?: "genuine" | "synthetic",
+  ): Promise<void> {
     ui.alert.hidden = true;
     if (!ready) return;
     try {
       await controller.start(source);
+      session =
+        clipLabel === undefined ? { kind: source.kind } : { kind: source.kind, label: clipLabel };
       setActive(source, label);
     } catch (error) {
       setActive(null);
@@ -135,6 +147,7 @@ export function startApp(base: string, mode: string): AppEvents {
       case "ready":
         ready = true;
         hopSamples = message.model.hopSamples;
+        model = { id: message.model.id, version: message.model.version };
         ui.modelId.textContent = `${message.model.id} ${message.model.version}`;
         ui.testModel.hidden = message.model.role !== "test";
         ui.tab.disabled = !tabOk;
@@ -142,6 +155,7 @@ export function startApp(base: string, mode: string): AppEvents {
         return;
       case "update":
         view.update(message.update);
+        protocol.show(message.update.state);
         for (const fn of listeners) fn(message.update);
         return;
       case "levels":
@@ -154,6 +168,7 @@ export function startApp(base: string, mode: string): AppEvents {
         showError(workerMessage(message.code), false);
         return;
       case "stats":
+        for (const resolve of statsWaiting.splice(0)) resolve(message.stats);
         return;
     }
   });
@@ -201,13 +216,40 @@ export function startApp(base: string, mode: string): AppEvents {
     },
   );
 
+  const stats = () =>
+    new Promise<SessionStats>((resolve) => {
+      statsWaiting.push(resolve);
+      worker.postMessage({ type: "stats" });
+    });
+  const completeProtocol = () => {
+    // Test_State_Mode has no detector session, so the forced state moves on in the page.
+    if (forced !== null) view.forceState("exorcised");
+    else worker.postMessage({ type: "protocol-completed" });
+  };
+  const protocol = createProtocolPanel({
+    onComplete: completeProtocol,
+    now: () => new Date(),
+    buildSummary: async (stepsDone) =>
+      buildIncidentSummary({
+        stats: await stats(),
+        source: session.kind,
+        ...(session.label === undefined ? {} : { replayLabel: session.label }),
+        model,
+        appVersion: __APP_VERSION__,
+        stepsDone,
+        endedAt: Date.now(),
+        timeZoneOffsetMinutes: -new Date().getTimezoneOffset(),
+      }),
+  });
+  bindReminderSettings(() => protocol.refreshReminder());
+  view.onForcedState((state) => protocol.show(state));
+  view.startProtocol.addEventListener("click", () => protocol.reveal());
+
   return {
     startProtocol: view.startProtocol,
     onUpdate(fn) {
       listeners.push(fn);
     },
-    completeProtocol() {
-      worker.postMessage({ type: "protocol-completed" });
-    },
+    completeProtocol,
   };
 }

@@ -117,7 +117,8 @@ export async function openPipWidget(
       root.dataset["state"] = update.state;
       headline.textContent = p.headline;
       value.value = p.score;
-      protocol.hidden = update.state !== "possession";
+      // The protocol stays reachable until the session ends (exorcism-protocol 1.4).
+      protocol.hidden = update.state !== "possession" && update.state !== "exorcised";
       if (update.state === "possession" && state !== "possession") live.textContent = p.headline;
       state = update.state;
     },

@@ -2,7 +2,7 @@
  * Main_View wiring (haunted-ui): the state view, the Spectre, motion preference, page
  * visibility, the floating widget and the optional sound cue.
  */
-import type { DetectorUpdate } from "@doppelganger/contracts";
+import type { DetectorUpdate, HauntingState } from "@doppelganger/contracts";
 import { DEFAULT_CONFIG } from "@doppelganger/detector";
 import { createHauntingView, playLowTone, TEAR_AT_MS } from "./features/haunting/haunting-view.ts";
 import { createSpectre, type Motion } from "./features/haunting/spectre.ts";
@@ -26,6 +26,10 @@ export interface MainView {
   update(update: DetectorUpdate): void;
   levels(bands: readonly number[]): void;
   readonly startProtocol: HTMLButtonElement;
+  /** Test_State_Mode only: move the forced state (for example after the protocol). */
+  forceState(state: HauntingState): void;
+  /** Called with the forced state at start and after forceState (Test_State_Mode). */
+  onForcedState(fn: (state: HauntingState) => void): void;
 }
 
 export interface MainViewOptions {
@@ -143,8 +147,21 @@ export function createMainView(opts: MainViewOptions): MainView {
     redraw();
   }
 
+  const forcedListeners: ((state: HauntingState) => void)[] = [];
   return {
     startProtocol,
+    forceState(state) {
+      if (opts.forced === null) return;
+      root.dataset["testState"] = state;
+      view.show(state, smoothed);
+      spectreState = state;
+      redraw();
+      for (const fn of forcedListeners) fn(state);
+    },
+    onForcedState(fn) {
+      forcedListeners.push(fn);
+      if (opts.forced !== null) fn(opts.forced.state);
+    },
     update(update) {
       if (opts.forced !== null) return;
       if (update.smoothed !== null) smoothed = update.smoothed;

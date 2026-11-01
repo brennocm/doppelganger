@@ -11,6 +11,7 @@ import type {
 } from "@doppelganger/contracts";
 import {
   createDetector,
+  createStatsTracker,
   type Detector,
   type InferenceBackend,
   resolveConfig,
@@ -138,7 +139,11 @@ export function createWorkerCore(deps: WorkerCoreDeps): WorkerCore {
           detector?.completeProtocol();
           return;
         case "stats":
-          if (detector) deps.post({ type: "stats", stats: detector.stats() });
+          // Always answer, so a summary never waits: before the model loads, the session is empty.
+          deps.post({
+            type: "stats",
+            stats: detector?.stats() ?? createStatsTracker(deps.clock()).snapshot(deps.clock()),
+          });
           return;
       }
     },

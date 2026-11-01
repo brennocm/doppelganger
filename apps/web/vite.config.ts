@@ -75,8 +75,13 @@ function selfHostedAssets(): Plugin {
   };
 }
 
+const PACKAGE = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as {
+  version: string;
+};
+
 export default defineConfig({
   plugins: [selfHostedAssets()],
+  define: { __APP_VERSION__: JSON.stringify(PACKAGE.version) },
   // ORT's "extern wasm" build loads its .mjs/.wasm from wasmPaths (our ort/ copy) instead
   // of bundling a second 15 MB copy through import.meta.url.
   resolve: { conditions: ["onnxruntime-web-use-extern-wasm", ...defaultClientConditions] },
