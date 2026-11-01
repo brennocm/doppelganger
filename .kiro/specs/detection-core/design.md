@@ -62,11 +62,13 @@ export interface InferenceBackend {
 // detector.ts
 export function createDetector(opts: {
   manifest: ModelManifest; backend: InferenceBackend; config: DetectorConfig; clock: () => number;
+  voiceActivity?: VoiceActivity; // backend is already loaded with manifest
 }): {
   push(chunk: Float32Array): void;
   start(): void; stop(): void; completeProtocol(): void;
   subscribe(fn: (update: DetectorUpdate) => void): () => void;
   stats(): SessionStats;
+  pendingWindows(): number; // waiting windows, for Property 13 and diagnostics
 };
 ```
 
