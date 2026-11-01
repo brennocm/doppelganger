@@ -1,0 +1,16 @@
+# Build context for infra/docker/Dockerfile: sources and lockfiles only.
+**/node_modules
+**/.venv
+**/dist
+**/test-results
+**/playwright-report
+**/__pycache__
+.git
+.mypy_cache
+.ruff_cache
+.pytest_cache
+.hypothesis
+.playwright-mcp
+.env
+.env.*
+packages/model-lab/reports

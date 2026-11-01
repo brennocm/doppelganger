@@ -11,7 +11,9 @@
       "**",
       "!**/generated",
       "!**/*.md",
-      "!packages/contracts/fixtures/golden/haunting.json"
+      "!packages/contracts/fixtures/golden/haunting.json",
+      "!packages/contracts/fixtures/golden/pcm16.json",
+      "!packages/contracts/fixtures/golden/stream.json"
     ]
   },
   "formatter": {

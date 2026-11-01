@@ -48,6 +48,10 @@ dev_only = ["MPL-2.0"]
 "genson==1.4.0" = "MIT"
 # https://raw.githubusercontent.com/python-grimp/grimp/v3.18/LICENSE
 "grimp==3.18" = "BSD-2-Clause"
+# https://raw.githubusercontent.com/python-hyper/h11/v0.16.0/LICENSE.txt
+"h11==0.16.0" = "MIT"
+# https://raw.githubusercontent.com/encode/httpx/0.28.1/LICENSE.md
+"httpx==0.28.1" = "BSD-3-Clause"
 # https://raw.githubusercontent.com/seddonym/import-linter/v2.15/LICENSE
 "import-linter==2.15" = "BSD-2-Clause"
 # https://raw.githubusercontent.com/pallets/jinja/3.1.6/LICENSE.txt

@@ -1,0 +1,32 @@
+# Doppelgänger Pro engine (local-runtime Requirement 5.2, 5.3).
+#   DOPPELGANGER_MODELS=/path/to/models MODEL_ID=<id> docker compose -p doppelganger up -d --build
+# The port is published on the loopback interface only; never on all host interfaces.
+services:
+  engine:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile
+    image: doppelganger-engine:local
+    ports:
+      - "127.0.0.1:${DOPPELGANGER_PORT:-8787}:8787"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "10001:10001"
+    mem_limit: 2g
+    cpus: 2
+    pids_limit: 256
+    volumes:
+      - type: bind
+        source: ${DOPPELGANGER_MODELS:?set DOPPELGANGER_MODELS to the model folder}
+        target: /models
+        read_only: true
+    environment:
+      MODEL_ID: ${MODEL_ID:?set MODEL_ID to the manifest ID}
+      ALLOWED_ORIGIN: http://127.0.0.1:${DOPPELGANGER_PORT:-8787}
+    restart: unless-stopped
+    stop_grace_period: 5s

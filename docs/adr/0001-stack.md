@@ -58,6 +58,11 @@ Versions were checked against the official sources on 2026-10-30: nodejs.org `di
 | fast-check | 4.10.2 | `packages/detector`, `apps/web` devDependencies | Latest stable (MIT, 2026-09-19). Property-based tests in TS; every property runs 200 times with a fixed seed (`packages/detector/src/property-runs.ts`). |
 | @phosphor-icons/core | 2.1.1 | `apps/web` devDependencies | Latest release (MIT) of the icon set the design-system steering names. Build-time only: a Vite `transformIndexHtml` step inlines the few SVGs the app uses, so no icon font or request ships. The release is from 2024; icon assets need little maintenance. |
 | @axe-core/playwright | 4.14.0 | `apps/web` devDependencies | Latest stable (MPL-2.0, development only, unmodified; allowed by project-foundation Requirement 4.4). Accessibility check of every haunting state in Playwright. |
+| FastAPI | 0.162.0 | `apps/engine` dependencies | Latest stable (MIT). The engine's HTTP and WebSocket routes. |
+| Uvicorn | 0.54.0 | `apps/engine` dependencies | Latest stable (BSD-3-Clause). ASGI server; plain install (no `[standard]` extras), with `timeout_graceful_shutdown` for SIGTERM. |
+| websockets | 17.4 | `apps/engine` dependencies | Latest stable (BSD-3-Clause). WebSocket protocol for Uvicorn (`ws="websockets"`). |
+| HTTPX | 0.28.1 | root `dev` group | Latest stable (BSD-3-Clause), needed by FastAPI's `TestClient`. Its metadata has no SPDX expression, so `license-policy.toml` overrides it (and `h11`) with a link to the license file. |
+| libsndfile / soundfile | not used | — | The design named `soundfile`, but it ships libsndfile, which is LGPL-2.1 and outside the allowlist. The engine decodes WAV with a small in-memory RIFF parser instead (P29). |
 | github-mcp-server | 2.0.3 | `.mise.toml` (`github:` backend), `mise.lock` | Official GitHub MCP server (MIT), run locally over stdio so the version is pinned and checksum-verified, unlike the hosted endpoint. Started with `--toolsets=repos,issues,pull_requests --lockdown-mode`. |
 | @playwright/mcp | 0.0.83 | `.kiro/settings/mcp.json` (`npx -y`, exact version) | Microsoft's Playwright MCP server (Apache-2.0), latest release. It depends on a Playwright 1.64 alpha build, which is how Microsoft ships it. Runs `--headless --isolated --browser chromium`. |
 | @upstash/context7-mcp | 4.4.4 | `.kiro/settings/mcp.json` (`npx -y`, exact version) | Context7 documentation server (MIT), latest release. Works without an API key; reads `CONTEXT7_API_KEY` from the environment when set. |
@@ -69,7 +74,7 @@ Versions were checked against the official sources on 2026-10-30: nodejs.org `di
 
 The MCP servers started with `npx -y <package>@<version>` are pinned to an exact version but are not in `pnpm-lock.yaml`, so they get no lockfile integrity check, no 24 h release-age delay and no license-policy check; their licenses were checked by hand. The Hugging Face server is the hosted endpoint `https://huggingface.co/mcp`, which has no version to pin.
 
-The rest of the stack in the tech steering (FastAPI, Uvicorn, the MCP SDK) is not installed yet. Each spec that first needs one of them pins it and adds a row to this table.
+The rest of the stack in the tech steering (the MCP SDK) is not installed yet. Each spec that first needs one of them pins it and adds a row to this table.
 
 The `lab` extra is installed by the root `dev` group, so `mise run check` and CI test the export pipeline, while the engine image installs `doppelganger-model-lab` without it. NumPy (Zlib in its expression) and PyTorch (BSL-1.0, Zlib and `Apache-2.0 WITH LLVM-exception`) required adding those three permissive IDs to the license allowlist (project-foundation Requirement 4.4).
 

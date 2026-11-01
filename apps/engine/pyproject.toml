@@ -4,7 +4,15 @@ version = "0.0.0"
 description = "Doppelgänger Pro engine: FastAPI app bound to localhost."
 requires-python = "==3.12.*"
 license = "MIT"
-dependencies = []
+dependencies = [
+  # Shared ONNX inference, the smoother port and the generated contracts (no lab extra).
+  "doppelganger-model-lab",
+  "doppelganger-contracts",
+  "fastapi==0.162.0",
+  "uvicorn==0.54.0",
+  # WebSocket protocol for uvicorn.
+  "websockets==17.4",
+]
 
 [build-system]
 requires = ["uv_build==0.13.6"]
@@ -12,3 +20,7 @@ build-backend = "uv_build"
 
 [tool.uv.build-backend]
 module-name = "doppelganger_engine"
+
+[tool.uv.sources]
+doppelganger-model-lab = { workspace = true }
+doppelganger-contracts = { workspace = true }

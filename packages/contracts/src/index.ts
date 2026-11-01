@@ -16,6 +16,13 @@ export {
 } from "./incident-summary.ts";
 export { MANIFEST_FIELDS, type ManifestResult, parseModelManifest } from "./manifest.ts";
 export type {
+  StreamError,
+  StreamHello,
+  StreamReady,
+  StreamScore,
+  StreamServerMessage,
+} from "./stream-messages.ts";
+export type {
   AudioChunkMessage,
   WorkerErrorCode,
   WorkerInbound,

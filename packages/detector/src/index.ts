@@ -38,6 +38,7 @@ export {
   SummaryInputError,
 } from "./incident-summary.ts";
 export type { InferenceBackend } from "./inference.ts";
+export { decodePcm16, encodePcm16, pcm16Bytes } from "./pcm16.ts";
 export { type ScoreResult, score, sigmoid } from "./scorer.ts";
 export { createStatsTracker, type StatsTracker } from "./session-stats.ts";
 export { createSmoother, type Smoother } from "./smoother.ts";
