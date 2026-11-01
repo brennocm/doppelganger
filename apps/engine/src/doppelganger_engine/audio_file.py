@@ -30,6 +30,13 @@ class UnsupportedAudioError(ValueError):
     """Not a WAV file this decoder reads."""
 
 
+class TooLongError(ValueError):
+    """The header says the recording is longer than the limit."""
+
+
+MAX_SECONDS: Final = 300
+
+
 def _chunks(data: bytes) -> dict[bytes, bytes]:
     if len(data) < _RIFF_HEADER or data[:4] != b"RIFF" or data[8:12] != b"WAVE":
         raise UnsupportedAudioError
@@ -46,8 +53,14 @@ def _chunks(data: bytes) -> dict[bytes, bytes]:
     return chunks
 
 
-def decode_wav(data: bytes) -> tuple[npt.NDArray[np.float64], int]:
-    """Return (frames-by-channels samples in [-1, 1], sample rate)."""
+def decode_wav(
+    data: bytes, max_seconds: float = MAX_SECONDS
+) -> tuple[npt.NDArray[np.float64], int]:
+    """Return (frames-by-channels samples in [-1, 1], sample rate).
+
+    The duration is checked from the header (data bytes / block align) before any sample is
+    converted, so a small low-rate file cannot expand into hours of audio in memory.
+    """
     chunks = _chunks(data)
     fmt = chunks[b"fmt "]
     if len(fmt) < _FMT_SIZE:
@@ -55,26 +68,34 @@ def decode_wav(data: bytes) -> tuple[npt.NDArray[np.float64], int]:
     tag, channels, rate, _, align, bits = struct.unpack_from("<HHIIHH", fmt)
     if tag == _EXTENSIBLE and len(fmt) >= _EXTENSIBLE_SIZE:
         (tag,) = struct.unpack_from("<H", fmt, 24)
+    if bits not in (_BITS_8, _BITS_16, _BITS_24, _BITS_32):
+        raise UnsupportedAudioError
     if channels < 1 or rate < _MIN_RATE or rate > _MAX_RATE or align != channels * (bits // 8):
         raise UnsupportedAudioError
     raw = chunks[b"data"]
+    if (len(raw) // align) / rate > max_seconds:
+        raise TooLongError
     usable = len(raw) - len(raw) % align
     raw = raw[:usable]
+    x = _samples(tag, bits, raw)
+    return np.clip(x, -1.0, 1.0).reshape(-1, channels), rate
+
+
+def _samples(tag: int, bits: int, raw: bytes) -> npt.NDArray[np.float64]:
+    """Whole-frame sample bytes as float64 in [-1, 1]."""
     if tag == _PCM and bits == _BITS_8:
-        x = (np.frombuffer(raw, dtype=np.uint8).astype(np.float64) - 128.0) / 128.0
-    elif tag == _PCM and bits == _BITS_16:
-        x = np.frombuffer(raw, dtype="<i2").astype(np.float64) / 32768.0
-    elif tag == _PCM and bits == _BITS_24:
+        return (np.frombuffer(raw, dtype=np.uint8).astype(np.float64) - 128.0) / 128.0
+    if tag == _PCM and bits == _BITS_16:
+        return np.frombuffer(raw, dtype="<i2").astype(np.float64) / 32768.0
+    if tag == _PCM and bits == _BITS_24:
         b = np.frombuffer(raw, dtype=np.uint8).reshape(-1, 3).astype(np.int32)
         v = b[:, 0] | (b[:, 1] << 8) | (b[:, 2] << 16)
-        x = np.where(v >= 1 << 23, v - (1 << 24), v).astype(np.float64) / float(1 << 23)
-    elif tag == _PCM and bits == _BITS_32:
-        x = np.frombuffer(raw, dtype="<i4").astype(np.float64) / float(1 << 31)
-    elif tag == _FLOAT and bits == _BITS_32:
-        x = np.nan_to_num(np.frombuffer(raw, dtype="<f4").astype(np.float64))
-    else:
-        raise UnsupportedAudioError
-    return np.clip(x, -1.0, 1.0).reshape(-1, channels), rate
+        return np.where(v >= 1 << 23, v - (1 << 24), v).astype(np.float64) / float(1 << 23)
+    if tag == _PCM and bits == _BITS_32:
+        return np.frombuffer(raw, dtype="<i4").astype(np.float64) / float(1 << 31)
+    if tag == _FLOAT and bits == _BITS_32:
+        return np.nan_to_num(np.frombuffer(raw, dtype="<f4").astype(np.float64))
+    raise UnsupportedAudioError
 
 
 def _blackman(x: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:

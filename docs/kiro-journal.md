@@ -275,3 +275,29 @@ Template:
   - View: a timeline canvas with thresholds, state segments and the playhead. It works as a keyboard slider, with the arrow keys moving one window and Enter for play/pause. Playback uses a Blob URL that is revoked on close. The view also shows the verdict with the "not proof" note and the model ID, and offers a JSON download.
   - Playwright: three tests with in-memory synthetic WAVs (no file on disk): the full flow, the size and decode refusals with the design's wording, and cancel. Total E2E: 40 tests.
 - Effect: The timeline first drew the default thresholds, while the worker's verdict uses the manifest's. The `ready` message now carries the manifest thresholds, so drawing and verdict always agree. A hand-made verdict mutant (`reachedUnease && reachedPossession`) survived. On inspection it is equivalent: a Possession entry always passes through Unease while the confirmation counts up. Two non-equivalent mutants (an off-by-one in the speech minimum, and Unease swapped for Mask) were both caught. Not done: section 4 (the Pro engine option) needs local-runtime. Task 5.1 needs the developer's replay clips (detection-model 7.2), and the verdicts recorded today come from the synthetic model, which detects nothing.
+
+## 2026-11-01 — local-runtime 1–4 (+ container files): the Pro engine (P29) and an exorcist pass
+- Kiro surface: CLI
+- Feature used: spec | PBT | custom agent | steering
+- What happened: The design gaps were written first, as **P29** (00fc4a9, bbdb320). The design named `soundfile`, but it ships libsndfile, which is LGPL-2.1 and outside the license allowlist. So the engine decodes WAV only, with a small in-memory RIFF parser; other formats get 415, and the browser Autopsy still reads everything the browser can. The decision to accept LGPL or add another decoder is left to the developer. Further gaps: configuration from `os.environ` through a Pydantic model; model-lab primitives re-exported by `model_lab.inference`, with a new import-linter contract so the engine imports nothing else from model-lab; and TS-written golden vectors for PCM16 and for stream parity. Then `apps/engine`:
+  - Config validation that names the bad variable, and JSON logs with whitelisted fields only.
+  - `/healthz`, plus the web app at `/app/` with the CSP, COOP/COEP and the other headers.
+  - A model hash check at startup (exit 1), and a launch URL with the token in the fragment.
+  - Origin, token and rate-limit guards (Properties 1–2) and the size guard (Property 3).
+  - `WS /v1/stream`, with a bounded windower (Property 6) and PCM16 (Property 4). It matches the TS detector's per-window raw and smoothed scores to 1e-9 on `stream.json`, for any chunking (Property 5).
+  - `POST /v1/autopsy`, returning the shared `AutopsyReport`.
+  - The web app moves `#token=…` to `sessionStorage` and cleans the URL.
+  - Container files: a multi-stage Dockerfile with every base pinned by digest (looked up on Docker Hub and GHCR) and UID 10001, plus a hardened `compose.yaml` and `.dockerignore`.
+
+  There are 55 engine tests, using `TestClient` and the committed synthetic model. Container tasks 5.1–5.3 stay unchecked: Docker is not available in this environment, so the image has never been built.
+- Effect: The **exorcist** agent found one high, one medium and six lows. All were fixed except L6, which is accepted and documented in the design. Each fix has a regression test.
+  - H1, a real denial-of-service bug: the 5-minute limit ran after resampling. A 20 MB 8-bit WAV at 1 kHz is about 5.8 hours of audio; upsampled ×16 it needed about 10 GB and would OOM-kill the container. The duration is now checked from the header before any sample is touched.
+  - M1: the shared per-address bucket charged Origin failures, so any website could keep the user locked out. Origin failures are now not charged, and a valid token is never refused.
+  - L1: an 8-bit-or-less header with block align 0 gave a ZeroDivisionError and a bare 500. Only 8/16/24/32-bit files are accepted, and errors now return a JSON 500 with the headers.
+  - L2: deeply nested JSON or a lone-surrogate token raised instead of closing 1008.
+  - L3: `.dockerignore` missed nested `.env` files and keys.
+  - L4: the image fetched `uv_build` without a hash; it is now installed by hash with `--no-build-isolation`.
+  - L5: no Host allowlist and no `frame-ancestors`; TrustedHost and `frame-ancestors 'none'` are added.
+  - L6: the token in the launch line, accepted and documented.
+
+  Adding TrustedHost broke 8 WebSocket tests, because Starlette's `websocket_connect` uses the host `testserver` regardless of `base_url`. The tests now connect with full `ws://127.0.0.1:8787/…` URLs.

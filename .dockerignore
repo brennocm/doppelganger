@@ -11,6 +11,11 @@
 .pytest_cache
 .hypothesis
 .playwright-mcp
-.env
-.env.*
+**/.env
+**/.env.*
+!**/.env.example
+**/*.pem
+**/*.key
+**/*.crt
+**/*.p12
 packages/model-lab/reports

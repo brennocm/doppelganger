@@ -29,7 +29,10 @@ def token_ok(candidate: object, token: str) -> bool:
     """Constant-time comparison with the session token (Property 2)."""
     if not isinstance(candidate, str):
         return False
-    return hmac.compare_digest(candidate.encode("utf-8"), token.encode("utf-8"))
+    # surrogatepass: a lone surrogate in untrusted JSON must not raise.
+    return hmac.compare_digest(
+        candidate.encode("utf-8", "surrogatepass"), token.encode("utf-8", "surrogatepass")
+    )
 
 
 def bearer(header: str | None) -> str | None:
@@ -41,7 +44,11 @@ def bearer(header: str | None) -> str | None:
 
 @dataclass
 class FailureLimiter:
-    """Token bucket per client: 10 failures per minute, then requests get 429."""
+    """Token bucket per client: 10 failed token checks per minute, then 429.
+
+    Only token failures from the allowed Origin are charged, and a request with the valid
+    token is never refused, so another website cannot lock the user out (exorcist M1).
+    """
 
     clock: Callable[[], float] = time.monotonic
     capacity: int = FAILURES_PER_MINUTE

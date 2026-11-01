@@ -15,9 +15,15 @@ from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from doppelganger_engine import autopsy, guards
-from doppelganger_engine.audio_file import SUPPORTED_FORMATS, UnsupportedAudioError, to_16k_mono
+from doppelganger_engine.audio_file import (
+    SUPPORTED_FORMATS,
+    TooLongError,
+    UnsupportedAudioError,
+    to_16k_mono,
+)
 from doppelganger_engine.pipeline import Audio, BadFrameError, StreamSession
 
 if TYPE_CHECKING:
@@ -34,8 +40,11 @@ CSP: Final = (
     "connect-src 'self'; img-src 'self' data:; style-src 'self'; media-src 'self' blob:; "
     "object-src 'none'; base-uri 'none'; form-action 'none'"
 )
+# Headers can carry frame-ancestors, unlike the Pages meta tag.
+HEADER_CSP: Final = f"{CSP}; frame-ancestors 'none'"
+ALLOWED_HOSTS: Final = ["127.0.0.1", "localhost"]
 SECURITY_HEADERS: Final = {
-    "Content-Security-Policy": CSP,
+    "Content-Security-Policy": HEADER_CSP,
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "no-referrer",
     # Cross-origin isolation, so ONNX Runtime Web may use WASM threads (Requirement 1.3).
@@ -97,18 +106,20 @@ class Engine:
     async def stream(self, ws: WebSocket) -> None:
         """WS /v1/stream: Origin before accept, token in the first message."""
         client = ws.client.host if ws.client else "unknown"
-        if self.limiter.blocked(client) or not guards.origin_ok(
-            ws.headers.get("origin"), self.allowed_origin
-        ):
-            self.limiter.fail(client)
+        # A foreign Origin is refused at once and is not charged to the limiter.
+        if not guards.origin_ok(ws.headers.get("origin"), self.allowed_origin):
             await ws.close(code=POLICY_VIOLATION)
             return
         await ws.accept()
         try:
             hello = json.loads(await asyncio.wait_for(ws.receive_text(), HELLO_TIMEOUT_S))
-        except (TimeoutError, ValueError, KeyError, WebSocketDisconnect):
-            hello = None
-        if not self.valid_hello(hello):
+            valid = self.valid_hello(hello)
+        except Exception:  # noqa: BLE001  (any malformed hello is one generic failure)
+            valid = False
+        if not valid:
+            if self.limiter.blocked(client):
+                await ws.close(code=POLICY_VIOLATION)
+                return
             self.limiter.fail(client)
             await ws.close(code=POLICY_VIOLATION)
             return
@@ -150,14 +161,26 @@ class Engine:
 
     def _refused(self, request: Request) -> Response | None:
         client = request.client.host if request.client else "unknown"
+        if not guards.origin_ok(request.headers.get("origin"), self.allowed_origin):
+            return JSONResponse(FORBIDDEN, status_code=403)
+        if guards.token_ok(guards.bearer(request.headers.get("authorization")), self.token):
+            return None
         if self.limiter.blocked(client):
             return JSONResponse({"error": "rate-limited"}, status_code=429)
-        origin = guards.origin_ok(request.headers.get("origin"), self.allowed_origin)
-        token = guards.token_ok(guards.bearer(request.headers.get("authorization")), self.token)
-        if not (origin and token):
-            self.limiter.fail(client)
-            return JSONResponse(FORBIDDEN, status_code=403)
-        return None
+        self.limiter.fail(client)
+        return JSONResponse(FORBIDDEN, status_code=403)
+
+    async def _decode(self, body: bytes) -> Audio | Response:
+        """16 kHz mono samples, or the error response for an unusable file."""
+        too_long = JSONResponse({"error": "too-long", "limitSeconds": MAX_SECONDS}, 413)
+        try:
+            samples = await run_in_threadpool(to_16k_mono, body)
+        except UnsupportedAudioError:
+            body_out = {"error": "unsupported-format", "supported": list(SUPPORTED_FORMATS)}
+            return JSONResponse(body_out, status_code=415)
+        except TooLongError:
+            return too_long
+        return too_long if samples.shape[0] > MAX_SECONDS * SAMPLE_RATE else samples
 
     async def autopsy(self, request: Request) -> Response:
         """POST /v1/autopsy: guards, size limits, in-memory decode, shared report."""
@@ -170,16 +193,10 @@ class Engine:
             body = await guards.read_limited(request.stream())
         except guards.TooLargeError:
             return JSONResponse(TOO_LARGE, status_code=413)
-        try:
-            samples = await run_in_threadpool(to_16k_mono, body)
-        except UnsupportedAudioError:
-            body_out = {"error": "unsupported-format", "supported": list(SUPPORTED_FORMATS)}
-            return JSONResponse(body_out, status_code=415)
-        finally:
-            # The upload was only ever in memory; drop it as soon as it is decoded.
-            del body
-        if samples.shape[0] > MAX_SECONDS * SAMPLE_RATE:
-            return JSONResponse({"error": "too-long", "limitSeconds": MAX_SECONDS}, 413)
+        samples = await self._decode(body)
+        del body  # the upload was only ever in memory; drop it once decoded
+        if isinstance(samples, Response):
+            return samples
         report = await run_in_threadpool(autopsy.analyze, samples, self.session())
         self.log.event("autopsy_done", modelId=self.manifest.id, windows=len(report.windows))
         return JSONResponse(report.model_dump(mode="json", by_alias=True))
@@ -193,10 +210,17 @@ def create_app(engine: Engine, web_dir: Path | None = None) -> FastAPI:
     async def security_headers(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        response = await call_next(request)
+        try:
+            response = await call_next(request)
+        except Exception:  # noqa: BLE001  (a JSON 500 that still carries the headers)
+            engine.log.event("internal_error", level="error")
+            response = JSONResponse({"error": "internal"}, status_code=500)
         for name, value in SECURITY_HEADERS.items():
             response.headers.setdefault(name, value)
         return response
+
+    # DNS rebinding: only the loopback host names are served.
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
 
     @app.get("/healthz")
     async def healthz() -> dict[str, object]:

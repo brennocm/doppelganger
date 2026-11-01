@@ -1,5 +1,6 @@
 import io
 import json
+import struct
 import wave
 from pathlib import Path
 
@@ -10,7 +11,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from doppelganger_contracts.generated.autopsy_report_schema import AutopsyReport
 from doppelganger_engine import guards
-from doppelganger_engine.app import CSP, Engine, create_app
+from doppelganger_engine.app import HEADER_CSP, Engine, create_app
 from doppelganger_engine.logs import JsonLog
 from doppelganger_engine.pipeline import encode_pcm16
 from model_lab.inference import OnnxModel
@@ -18,7 +19,7 @@ from model_lab.inference import OnnxModel
 REPO = Path(__file__).resolve().parents[3]
 MODEL = OnnxModel.from_manifest_file(REPO / "apps/web/public/models/ci-synthetic-linear.json")
 ORIGIN = "http://127.0.0.1:8787"
-OK, TOO_LARGE, UNSUPPORTED = 200, 413, 415
+OK, BAD_HOST, TOO_LARGE, UNSUPPORTED = 200, 400, 413, 415
 POLICY_VIOLATION = 1008
 TOKEN = "t" * 43
 
@@ -30,7 +31,7 @@ def setup(tmp_path: Path) -> tuple[TestClient, io.StringIO]:
     (web / "index.html").write_text("<!doctype html><title>app</title>", encoding="utf-8")
     logs = io.StringIO()
     engine = Engine(MODEL, TOKEN, ORIGIN, JsonLog("debug", logs))
-    return TestClient(create_app(engine, web_dir=web)), logs
+    return TestClient(create_app(engine, web_dir=web), base_url=ORIGIN), logs
 
 
 def voiced(seconds: float, rate: int = 16000) -> np.ndarray:
@@ -54,7 +55,8 @@ def test_healthz_and_security_headers(setup: tuple[TestClient, io.StringIO]) -> 
     assert health.json() == {"status": "ok", "modelId": "ci-synthetic-linear", "formats": ["wav"]}
     page = client.get("/app/")
     assert page.status_code == OK
-    assert page.headers["content-security-policy"] == CSP
+    assert page.headers["content-security-policy"] == HEADER_CSP
+    assert "frame-ancestors 'none'" in HEADER_CSP
     assert page.headers["cross-origin-opener-policy"] == "same-origin"
     assert page.headers["cross-origin-embedder-policy"] == "require-corp"
     assert page.headers["referrer-policy"] == "no-referrer"
@@ -67,7 +69,9 @@ def test_stream_rejects_a_foreign_origin_before_accepting(
     client, _ = setup
     with (
         pytest.raises(WebSocketDisconnect) as closed,
-        client.websocket_connect("/v1/stream", headers={"origin": "https://evil.example"}),
+        client.websocket_connect(
+            "ws://127.0.0.1:8787/v1/stream", headers={"origin": "https://evil.example"}
+        ),
     ):
         pass
     assert closed.value.code == POLICY_VIOLATION
@@ -86,7 +90,9 @@ def test_stream_rejects_a_bad_hello_without_saying_why(
     setup: tuple[TestClient, io.StringIO], hello: object
 ) -> None:
     client, _ = setup
-    with client.websocket_connect("/v1/stream", headers={"origin": ORIGIN}) as ws:
+    with client.websocket_connect(
+        "ws://127.0.0.1:8787/v1/stream", headers={"origin": ORIGIN}
+    ) as ws:
         ws.send_text(hello if isinstance(hello, str) else json.dumps(hello))
         with pytest.raises(WebSocketDisconnect) as closed:
             ws.receive_json()
@@ -95,7 +101,9 @@ def test_stream_rejects_a_bad_hello_without_saying_why(
 
 def test_stream_scores_pcm16_frames(setup: tuple[TestClient, io.StringIO]) -> None:
     client, logs = setup
-    with client.websocket_connect("/v1/stream", headers={"origin": ORIGIN}) as ws:
+    with client.websocket_connect(
+        "ws://127.0.0.1:8787/v1/stream", headers={"origin": ORIGIN}
+    ) as ws:
         ws.send_text(
             json.dumps({"type": "hello", "protocol": 1, "token": TOKEN, "sampleRate": 16000})
         )
@@ -176,3 +184,63 @@ def test_repeated_failures_are_rate_limited(setup: tuple[TestClient, io.StringIO
     ]
     assert codes[:10] == [403] * 10
     assert codes[10:] == [429, 429]
+
+
+def test_other_host_names_are_refused(setup: tuple[TestClient, io.StringIO]) -> None:
+    client, _ = setup
+    assert client.get("/healthz", headers={"host": "rebind.example:8787"}).status_code == BAD_HOST
+
+
+def header_only_wav(rate: int, data_bytes: int, bits: int = 8, channels: int = 1) -> bytes:
+    align = channels * (bits // 8)
+    fmt = struct.pack("<HHIIHH", 1, channels, rate, rate * max(align, 1), align, bits)
+    body = b"WAVE" + b"fmt " + struct.pack("<I", 16) + fmt + b"data" + struct.pack("<I", data_bytes)
+    return b"RIFF" + struct.pack("<I", len(body) + data_bytes) + body + b"\x80" * data_bytes
+
+
+def test_a_long_low_rate_file_is_refused_from_its_header(
+    setup: tuple[TestClient, io.StringIO],
+) -> None:
+    client, _ = setup
+    # 1 kHz, 8-bit: 19 MB of data is over 5 hours. Refused before decoding (exorcist H1).
+    response = client.post(
+        "/v1/autopsy", content=header_only_wav(1000, 19 * 1024 * 1024), headers=headers()
+    )
+    assert response.status_code == TOO_LARGE
+    assert response.json()["error"] == "too-long"
+
+
+def test_a_wav_with_odd_bit_depth_is_unsupported(setup: tuple[TestClient, io.StringIO]) -> None:
+    client, _ = setup
+    response = client.post(
+        "/v1/autopsy", content=header_only_wav(16000, 64, bits=4), headers=headers()
+    )
+    assert response.status_code == UNSUPPORTED
+
+
+@pytest.mark.parametrize(
+    "hello",
+    [
+        '{"type":"hello","protocol":1,"sampleRate":16000,"token":"\\ud800"}',
+        "[" * 30000 + "]" * 30000,
+    ],
+)
+def test_malformed_hellos_close_with_the_generic_code(
+    setup: tuple[TestClient, io.StringIO], hello: str
+) -> None:
+    client, _ = setup
+    with client.websocket_connect(
+        "ws://127.0.0.1:8787/v1/stream", headers={"origin": ORIGIN}
+    ) as ws:
+        ws.send_text(hello)
+        with pytest.raises(WebSocketDisconnect) as closed:
+            ws.receive_json()
+    assert closed.value.code == POLICY_VIOLATION
+
+
+def test_another_website_cannot_lock_the_user_out(setup: tuple[TestClient, io.StringIO]) -> None:
+    client, _ = setup
+    for _ in range(30):
+        client.post("/v1/autopsy", content=b"", headers={"origin": "https://evil.example"})
+    ok = client.post("/v1/autopsy", content=wav(voiced(5.0)), headers=headers())
+    assert ok.status_code == OK

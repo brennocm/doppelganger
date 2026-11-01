@@ -36,8 +36,16 @@ RUN uv export --locked --package doppelganger-engine --no-dev --no-emit-workspac
       --format requirements-txt --quiet > /tmp/requirements.txt \
  && uv venv /opt/venv --python /usr/local/bin/python3.12 \
  && uv pip install --python /opt/venv/bin/python --require-hashes --no-deps -r /tmp/requirements.txt \
- && uv pip install --python /opt/venv/bin/python --no-deps \
-      ./packages/contracts ./packages/model-lab ./apps/engine
+ # The workspace packages build with uv_build, installed by hash first (no unhashed fetch).
+ && printf '%s\n' 'uv-build==0.13.6 \' \
+      '  --hash=sha256:b23bbf1393acb47c1bd434f79daa91c158a14a504894485b5a9948f68d63170b \' \
+      '  --hash=sha256:806a7ba7998abc2f4002cd964545e9bf65a1534137c170b239a16a2bf8ac0a5f \' \
+      '  --hash=sha256:7ebe6657b95821dbd5cb0c73fe4c66d7a66f64b29d6df508478caa09768d0f1d' \
+      > /tmp/build.txt \
+ && uv pip install --python /opt/venv/bin/python --require-hashes -r /tmp/build.txt \
+ && uv pip install --python /opt/venv/bin/python --no-deps --no-build-isolation \
+      ./packages/contracts ./packages/model-lab ./apps/engine \
+ && uv pip uninstall --python /opt/venv/bin/python uv-build
 
 FROM python:3.12.16-slim-trixie@sha256:8523d6abeb48ceae0b7240d30c5808fc26cb79c1a635bacdf19cf3baecfbec07 AS runtime
 LABEL org.opencontainers.image.title="doppelganger-engine" \
