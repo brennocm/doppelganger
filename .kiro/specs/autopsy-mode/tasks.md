@@ -1,14 +1,14 @@
 # Implementation Plan
 
-- [ ] 1. Report model and verdict
-  - [ ] 1.1 Add the `AutopsyReport` schema to `packages/contracts`
+- [x] 1. Report model and verdict
+  - [x] 1.1 Add the `AutopsyReport` schema to `packages/contracts`
     - _Requirements: 3.5, 4.3_
-  - [ ] 1.2 Implement `deriveVerdict` by replaying the haunting machine
+  - [x] 1.2 Implement `deriveVerdict` by replaying the haunting machine
     - _Requirements: 2.4, 3.3_
-  - [ ]* 1.3 Write property test for verdict consistency
+  - [x]* 1.3 Write property test for verdict consistency
     - **Property 1: Verdict consistency with the state machine**
     - **Validates: Requirements 2.4, 3.3**
-  - [ ]* 1.4 Write property test for report size and schema
+  - [x]* 1.4 Write property test for report size and schema
     - **Property 3: Report has no audio**
     - **Validates: Requirements 3.5**
 
@@ -20,7 +20,7 @@
     - **Validates: Requirements 1.3**
   - [ ] 2.3 Add batch mode with progress and cancellation to the worker
     - _Requirements: 2.1, 2.2, 2.3_
-  - [ ]* 2.4 Write property test for batch equals streaming
+  - [x]* 2.4 Write property test for batch equals streaming
     - **Property 2: Batch equals streaming**
     - **Validates: Requirements 2.1**
 

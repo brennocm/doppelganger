@@ -2,6 +2,15 @@
 export const PACKAGE_NAME = "@doppelganger/detector";
 
 export {
+  type AutopsyOutcome,
+  type AutopsyRun,
+  type AutopsyRunnerOptions,
+  createAutopsyRunner,
+  deriveVerdict,
+  MIN_SCORED_WINDOWS,
+  PROGRESS_EVERY,
+} from "./autopsy.ts";
+export {
   createDetector,
   type Detector,
   type DetectorOptions,
