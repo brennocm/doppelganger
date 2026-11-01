@@ -6,16 +6,16 @@
   - [x] 1.2 Add golden vector fixtures for windowing and calibration
     - _Requirements: 3.3_
 
-- [ ] 2. Windower
-  - [ ] 2.1 Implement `createWindower`
+- [x] 2. Windower
+  - [x] 2.1 Implement `createWindower`
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
-  - [ ]* 2.2 Write property test for window count
+  - [x]* 2.2 Write property test for window count
     - **Property 1: Window count**
     - **Validates: Requirements 1.1**
-  - [ ]* 2.3 Write property test for chunking invariance
+  - [x]* 2.3 Write property test for chunking invariance
     - **Property 2: Chunking invariance**
     - **Validates: Requirements 1.1, 1.2**
-  - [ ]* 2.4 Write property test for bounded memory
+  - [x]* 2.4 Write property test for bounded memory
     - **Property 3: Bounded memory**
     - **Validates: Requirements 1.3**
 

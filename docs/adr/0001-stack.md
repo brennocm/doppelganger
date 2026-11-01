@@ -55,6 +55,7 @@ Versions were checked against the official sources on 2026-10-30: nodejs.org `di
 | onnxruntime-web | 1.31.1 | `packages/model-lab/bench-web` dependencies | Latest stable (MIT, 2026-10-26). Same release as the Python `onnxruntime`. The bench page loads `ort.wasm.min.mjs` and its WASM files from the package's `dist/` through a 127.0.0.1 test server, never from a CDN. Its dependency `protobufjs` has a `postinstall` that only prints a version-scheme warning, so `allowBuilds` sets it to `false`. |
 | @playwright/test | 1.64.1 | `packages/model-lab/bench-web` devDependencies | Latest stable (Apache-2.0). Drives headless Chromium for the ORT Web latency benchmark; CI installs the matching Chromium with `playwright install --with-deps chromium`. |
 | @types/node | 26.6.6 | `packages/model-lab/bench-web` devDependencies | Latest stable (MIT). Types for the benchmark's Node test server. |
+| fast-check | 4.10.2 | `packages/detector` devDependencies | Latest stable (MIT, 2026-09-19). Property-based tests in TS; every property runs 200 times with a fixed seed (`packages/detector/src/property-runs.ts`). |
 | github-mcp-server | 2.0.3 | `.mise.toml` (`github:` backend), `mise.lock` | Official GitHub MCP server (MIT), run locally over stdio so the version is pinned and checksum-verified, unlike the hosted endpoint. Started with `--toolsets=repos,issues,pull_requests --lockdown-mode`. |
 | @playwright/mcp | 0.0.83 | `.kiro/settings/mcp.json` (`npx -y`, exact version) | Microsoft's Playwright MCP server (Apache-2.0), latest release. It depends on a Playwright 1.64 alpha build, which is how Microsoft ships it. Runs `--headless --isolated --browser chromium`. |
 | @upstash/context7-mcp | 4.4.4 | `.kiro/settings/mcp.json` (`npx -y`, exact version) | Context7 documentation server (MIT), latest release. Works without an API key; reads `CONTEXT7_API_KEY` from the environment when set. |
@@ -66,7 +67,7 @@ Versions were checked against the official sources on 2026-10-30: nodejs.org `di
 
 The MCP servers started with `npx -y <package>@<version>` are pinned to an exact version but are not in `pnpm-lock.yaml`, so they get no lockfile integrity check, no 24 h release-age delay and no license-policy check; their licenses were checked by hand. The Hugging Face server is the hosted endpoint `https://huggingface.co/mcp`, which has no version to pin.
 
-The rest of the stack in the tech steering (`fast-check`, FastAPI, Uvicorn, the MCP SDK) is not installed yet. Each spec that first needs one of them pins it and adds a row to this table.
+The rest of the stack in the tech steering (FastAPI, Uvicorn, the MCP SDK) is not installed yet. Each spec that first needs one of them pins it and adds a row to this table.
 
 The `lab` extra is installed by the root `dev` group, so `mise run check` and CI test the export pipeline, while the engine image installs `doppelganger-model-lab` without it. NumPy (Zlib in its expression) and PyTorch (BSL-1.0, Zlib and `Apache-2.0 WITH LLVM-exception`) required adding those three permissive IDs to the license allowlist (project-foundation Requirement 4.4).
 
