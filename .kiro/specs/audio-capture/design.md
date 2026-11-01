@@ -67,8 +67,6 @@ Worker messages are discriminated unions defined in `packages/contracts` (`Worke
 - **Replay.** `clips.json` is `{ "clips": [{ "id", "file", "label": "genuine" | "synthetic", "title", "seconds" }] }`. Until detection-model 7.2 commits the clips, the list is empty and the Replay option says no clips are bundled yet. Nothing synthetic stands in for a real clip.
 - **Service worker.** `sw.js` is emitted by the same Vite plugin with the precache list (every emitted asset, plus `ort/` and `models/`). The cache name includes a hash of the list.
 
-## Data Models (continued)
-
 ## Correctness Properties
 
 ### Property 1: Resampler output length
