@@ -40,6 +40,14 @@ A canvas at full width, 160 px high: the smoothed score as a line, dashed lines 
 
 `AutopsyReport` JSON Schema in `packages/contracts/schemas/autopsy-report.json`, shared with the engine and the MCP server.
 
+## Implementation details (P28)
+
+- **Where the work happens.** `decodeAudioData` needs an `AudioContext`, which workers do not have. So decoding, downmix and resampling run on the main thread, with the audio-capture primitives, on audio the user already holds. The 16 kHz samples are then *transferred* to the worker (`{ type: "autopsy", samples }`), so the main thread keeps no copy. Audio still never travels from the worker to the main thread (audio-capture Property 5): the report holds only numbers. The original `File` stays in memory only for playback, through a Blob URL that is revoked when the report is closed or replaced.
+- **Batch runner.** `createAutopsyRunner` in `packages/detector` uses the same windower, voice activity check, scorer and smoother as `createDetector`. It skips the real-time queue, posts progress every 10 windows and yields to the event loop between those batches, so `autopsy-cancel` can arrive. Worker messages: inbound `autopsy` and `autopsy-cancel`; outbound `autopsy-progress { done, total }`, `autopsy-report { report }` and `autopsy-cancelled`. Autopsy is disabled while live capture runs, because both share one model session.
+- **Verdict.** `deriveVerdict` replays `transition`: each scored window becomes `window-scored` and each unvoiced or failed window becomes `silence`, at the window's start time. Reasons: "Not enough speech" (fewer than 3 scored windows), "Dissonance reached Possession", "Dissonance rose to Unease but never reached Possession" and "Dissonance stayed low". `states` merges consecutive windows in the same state into `{ from, to }` seconds.
+- **Limits.** 20 MB means 20 × 1024 × 1024 bytes, checked on `File.size` before the file is read. 5 minutes is checked on the decoded duration.
+- **Formats.** The list comes from `HTMLMediaElement.canPlayType` for WAV, MP3, Ogg Opus, WebM Opus, FLAC and AAC (M4A).
+
 ## Correctness Properties
 
 ### Property 1: Verdict consistency with the state machine
