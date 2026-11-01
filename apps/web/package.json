@@ -15,6 +15,12 @@
   "devDependencies": {
     "typescript": "6.0.3",
     "vite": "8.3.5",
-    "vitest": "5.0.5"
+    "vitest": "5.0.5",
+    "fast-check": "4.10.2"
+  },
+  "dependencies": {
+    "@doppelganger/contracts": "workspace:*",
+    "@doppelganger/detector": "workspace:*",
+    "onnxruntime-web": "1.31.1"
   }
 }

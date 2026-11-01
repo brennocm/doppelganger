@@ -1,18 +1,18 @@
 # Implementation Plan
 
-- [ ] 1. Audio processing primitives
-  - [ ] 1.1 Implement pure `downmix` and the polyphase resampler with carried state
+- [x] 1. Audio processing primitives
+  - [x] 1.1 Implement pure `downmix` and the polyphase resampler with carried state
     - _Requirements: 3.1, 3.3_
-  - [ ]* 1.2 Write property test for resampler output length
+  - [x]* 1.2 Write property test for resampler output length
     - **Property 1: Resampler output length**
     - **Validates: Requirements 3.3**
-  - [ ]* 1.3 Write property test for resampler output range
+  - [x]* 1.3 Write property test for resampler output range
     - **Property 2: Resampler output range**
     - **Validates: Requirements 3.3**
-  - [ ]* 1.4 Write property test for downmix
+  - [x]* 1.4 Write property test for downmix
     - **Property 3: Downmix preserves identical channels**
     - **Validates: Requirements 3.1**
-  - [ ] 1.5 Implement `capture-processor.ts` (AudioWorklet) using the primitives, posting 1,600-sample transferable chunks
+  - [x] 1.5 Implement `capture-processor.ts` (AudioWorklet) using the primitives, posting 1,600-sample transferable chunks
     - _Requirements: 3.2, 3.4_
 
 - [ ] 2. Inference worker

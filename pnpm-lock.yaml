@@ -189,7 +189,20 @@ importers:
         version: 5.0.5(@types/node@26.6.6)(vite@8.3.5(@types/node@26.6.6))
 
   apps/web:
+    dependencies:
+      '@doppelganger/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@doppelganger/detector':
+        specifier: workspace:*
+        version: link:../../packages/detector
+      onnxruntime-web:
+        specifier: 1.31.1
+        version: 1.31.1
     devDependencies:
+      fast-check:
+        specifier: 4.10.2
+        version: 4.10.2
       typescript:
         specifier: 6.0.3
         version: 6.0.3
