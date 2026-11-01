@@ -136,3 +136,14 @@ def test_committed_calibration_golden_vectors_are_current() -> None:
             case["logits"], case["outputKind"], case["spoofIndex"], case["temperature"]
         )
         assert got == pytest.approx(case["score"], abs=golden.TOLERANCE)
+
+
+def test_committed_windowing_golden_vectors_are_current() -> None:
+    committed = json.loads((golden.GOLDEN_DIR / "windowing.json").read_text(encoding="utf-8"))
+    assert committed == golden.windowing_vectors()
+    for case in committed["cases"]:
+        assert all(sum(split) == len(case["signal"]) for split in case["chunkings"])
+        signal = case["signal"]
+        for window in case["windows"]:
+            start = window["startSample"]
+            assert window["samples"] == signal[start : start + case["windowSamples"]]

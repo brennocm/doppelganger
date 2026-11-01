@@ -11,7 +11,10 @@ import json
 from pathlib import Path
 from typing import Final
 
+import numpy as np
+
 from model_lab.calibration import OutputKind, calibrate
+from model_lab.windows import frame
 
 GOLDEN_DIR: Final = Path(__file__).resolve().parents[4] / "packages/contracts/fixtures/golden"
 TOLERANCE: Final = 1e-12
@@ -59,7 +62,50 @@ def render(vectors: dict[str, object]) -> str:
     return json.dumps(vectors, indent=2) + "\n"
 
 
-FILES: Final = {"calibration.json": calibration_vectors}
+# (samples, windowSamples, hopSamples, chunk lengths). Chunk lengths sum to samples; the
+# TS Windower is fed each split and must emit the same windows (detection-core 1.2).
+_WINDOWING_INPUTS: Final[list[tuple[int, int, int, list[list[int]]]]] = [
+    (0, 4, 2, [[]]),
+    (3, 4, 2, [[3], [1, 1, 1]]),
+    (4, 4, 2, [[4], [0, 4, 0]]),
+    (11, 4, 2, [[11], [1] * 11, [5, 6], [3, 0, 8]]),
+    (12, 4, 4, [[12], [7, 5]]),
+    (15, 3, 5, [[15], [2, 2, 2, 2, 2, 2, 3], [14, 1]]),
+    (9, 5, 1, [[9], [4, 1, 4]]),
+    (20, 6, 3, [[20], [19, 1], [1, 19], [6, 6, 6, 2]]),
+]
+
+
+def golden_signal(samples: int) -> list[float]:
+    """A deterministic test signal whose values are exact in float32 (multiples of 1/64)."""
+    return [((i * 37) % 101 - 50) / 64 for i in range(samples)]
+
+
+def windowing_vectors() -> dict[str, object]:
+    """Inputs and expected windows for the Windower (detection-core Requirement 1)."""
+    cases = []
+    for samples, window, hop, splits in _WINDOWING_INPUTS:
+        signal = golden_signal(samples)
+        framed = frame(np.asarray(signal, dtype=np.float32), window, hop)
+        cases.append(
+            {
+                "windowSamples": window,
+                "hopSamples": hop,
+                "signal": signal,
+                "chunkings": splits,
+                "windows": [
+                    {"index": i, "startSample": i * hop, "samples": [float(v) for v in row]}
+                    for i, row in enumerate(framed)
+                ],
+            }
+        )
+    return {
+        "description": "Window i is signal[i*hop : i*hop + windowSamples] (detection-core design)",
+        "cases": cases,
+    }
+
+
+FILES: Final = {"calibration.json": calibration_vectors, "windowing.json": windowing_vectors}
 
 
 def main() -> int:

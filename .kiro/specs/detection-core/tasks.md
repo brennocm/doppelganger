@@ -3,7 +3,7 @@
 - [ ] 1. Contracts
   - [x] 1.1 Add JSON Schemas for `ModelManifest`, `DetectorUpdate`, `SessionStats` and the haunting config to `packages/contracts`; generate TS and Python types
     - _Requirements: 6.1, 7.1_
-  - [ ] 1.2 Add golden vector fixtures for windowing and calibration
+  - [x] 1.2 Add golden vector fixtures for windowing and calibration
     - _Requirements: 3.3_
 
 - [ ] 2. Windower
