@@ -5,6 +5,7 @@
 import type { DetectorUpdate, SessionStats, WorkerOutbound } from "@doppelganger/contracts";
 import { buildIncidentSummary, DEFAULT_CONFIG } from "@doppelganger/detector";
 import { createAutopsyView } from "./features/autopsy/autopsy-view.ts";
+import { detectEngine, engineAutopsy } from "./features/autopsy/engine-autopsy.ts";
 import { createCaptureController } from "./features/capture/capture-controller.ts";
 import workletUrl from "./features/capture/capture-processor.ts?worker&url";
 import {
@@ -26,6 +27,7 @@ import {
   tabAudioSupported,
   tabSource,
 } from "./features/capture/sources.ts";
+import { TOKEN_KEY } from "./features/engine/session-token.ts";
 import { parseTestState } from "./features/haunting/test-state.ts";
 import { createProtocolPanel } from "./features/protocol/protocol-panel.ts";
 import { bindReminderSettings } from "./features/protocol/reminder-settings.ts";
@@ -110,10 +112,17 @@ export function startApp(base: string, mode: string): AppEvents {
   const autopsy = createAutopsyView({
     analyze: (samples) => worker.postMessage({ type: "autopsy", samples }, [samples.buffer]),
     cancel: () => worker.postMessage({ type: "autopsy-cancel" }),
+    analyzeOnEngine: (file) =>
+      engineAutopsy(file, location.origin, engineToken ?? "", (u, i) => fetch(u, i)),
     model: () => model,
     thresholds: () => thresholds,
   });
   autopsy.setEnabled(false);
+  // The Pro engine option exists only when this page is served by the local engine.
+  const engineToken = sessionStorage.getItem(TOKEN_KEY);
+  void detectEngine(location.origin, engineToken, (u, i) => fetch(u, i)).then((info) =>
+    autopsy.offerEngine(info !== null),
+  );
   const stop = () => void controller.stop().then(() => setActive(null));
   // import.meta.env.MODE is replaced at build time, so production drops this branch entirely.
   const forced =

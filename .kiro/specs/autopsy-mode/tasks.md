@@ -30,10 +30,10 @@
   - [x] 3.2 Implement the verdict block and JSON download
     - _Requirements: 3.4, 3.5_
 
-- [ ] 4. Pro engine option (after local-runtime)
-  - [ ] 4.1 Detect same-origin engine availability and show the model choice
+- [x] 4. Pro engine option (after local-runtime)
+  - [x] 4.1 Detect same-origin engine availability and show the model choice
     - _Requirements: 4.1_
-  - [ ] 4.2 Upload to the engine Autopsy endpoint with the session token; render the shared report
+  - [x] 4.2 Upload to the engine Autopsy endpoint with the session token; render the shared report
     - _Requirements: 4.2, 4.3_
 
 - [ ] 5. Verification

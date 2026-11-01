@@ -16,6 +16,10 @@ function el<T extends HTMLElement>(id: string): T {
 export interface AutopsyDeps {
   /** Sends 16 kHz samples to the worker; the buffer is transferred. */
   analyze(samples: Float32Array): void;
+  /** Analyzes the file on the local engine, when the user chose it (autopsy-mode 4). */
+  analyzeOnEngine?: (
+    file: File,
+  ) => Promise<{ ok: true; report: AutopsyReport } | { ok: false; message: string }>;
   cancel(): void;
   model(): { id: string; version: string };
   thresholds(): { unease: number; possession: number };
@@ -26,6 +30,8 @@ export interface AutopsyView {
   report(report: AutopsyReport): void;
   cancelled(): void;
   setEnabled(enabled: boolean): void;
+  /** Shows the browser/engine choice (only when served by the engine). */
+  offerEngine(available: boolean): void;
 }
 
 const SEGMENT_FILL: Partial<Record<HauntingState, string>> = {
@@ -137,11 +143,31 @@ export function createAutopsyView(deps: AutopsyDeps): AutopsyView {
     draw();
   }
 
+  function engineChosen(): boolean {
+    const choice = document.querySelector<HTMLInputElement>(
+      'input[name="autopsy-backend"]:checked',
+    );
+    return choice?.value === "engine" && deps.analyzeOnEngine !== undefined;
+  }
+
   async function analyzeFile(next: File): Promise<void> {
     if (busy) return;
     release();
     reportBox.hidden = true;
     current = null;
+    if (engineChosen() && deps.analyzeOnEngine !== undefined) {
+      busy = true;
+      status.textContent = "Sending the file to the local engine on this computer";
+      const result = await deps.analyzeOnEngine(next);
+      busy = false;
+      if (!result.ok) {
+        status.textContent = result.message;
+        return;
+      }
+      file = next;
+      view.report(result.report);
+      return;
+    }
     status.textContent = "Reading the file in this tab";
     busy = true;
     const result = await intake(next, async (bytes) =>
@@ -213,7 +239,7 @@ export function createAutopsyView(deps: AutopsyDeps): AutopsyView {
   audio.addEventListener("timeupdate", draw);
   addEventListener("resize", draw);
 
-  return {
+  const view: AutopsyView = {
     setEnabled(enabled) {
       input.disabled = !enabled;
     },
@@ -246,5 +272,9 @@ export function createAutopsyView(deps: AutopsyDeps): AutopsyView {
       release();
       status.textContent = MESSAGES.cancelled;
     },
+    offerEngine(available) {
+      el("autopsy-backend").hidden = !available;
+    },
   };
+  return view;
 }

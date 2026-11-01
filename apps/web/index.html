@@ -155,6 +155,11 @@
       <section id="autopsy" class="autopsy" aria-labelledby="autopsy-title">
         <h2 id="autopsy-title" class="title">Autopsy</h2>
         <p class="note">Check a recorded voice message. The file is read in this tab and never uploaded.</p>
+        <fieldset id="autopsy-backend" class="backend-choice" hidden>
+          <legend class="note">Analyze with</legend>
+          <label class="toggle"><input type="radio" name="autopsy-backend" value="browser" checked /> This browser (light model)</label>
+          <label class="toggle"><input type="radio" name="autopsy-backend" value="engine" /> Local engine (pro model)</label>
+        </fieldset>
         <div id="drop-zone" class="drop-zone">
           <label class="button button-secondary" for="autopsy-file">Choose a recording</label>
           <input id="autopsy-file" class="visually-hidden" type="file" accept="audio/*" />
