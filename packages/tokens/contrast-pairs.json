@@ -1,11 +1,36 @@
 {
   "$description": "Foreground/background pairs the token build asserts (WCAG 2.x). Targets: 4.5 text, 3 large text, icons, controls and graphics.",
   "pairs": [
-    { "fg": "text", "bg": "bg", "target": 4.5, "use": "headlines and body on the page" },
-    { "fg": "text-secondary", "bg": "bg", "target": 4.5, "use": "secondary text" },
-    { "fg": "text-body", "bg": "bg", "target": 4.5, "use": "supporting lines" },
-    { "fg": "text-muted", "bg": "bg", "target": 4.5, "use": "Idle accent, footer facts" },
-    { "fg": "text-body", "bg": "surface-input", "target": 4.5, "use": "text in inputs" },
+    {
+      "fg": "text",
+      "bg": "bg",
+      "target": 4.5,
+      "use": "headlines and body on the page"
+    },
+    {
+      "fg": "text-secondary",
+      "bg": "bg",
+      "target": 4.5,
+      "use": "secondary text"
+    },
+    {
+      "fg": "text-body",
+      "bg": "bg",
+      "target": 4.5,
+      "use": "supporting lines"
+    },
+    {
+      "fg": "text-muted",
+      "bg": "bg",
+      "target": 4.5,
+      "use": "Idle accent, footer facts"
+    },
+    {
+      "fg": "text-body",
+      "bg": "surface-input",
+      "target": 4.5,
+      "use": "text in inputs"
+    },
     {
       "fg": "text-placeholder",
       "bg": "surface-input",
@@ -24,22 +49,167 @@
       "target": 3,
       "use": "focused input border (contrast fix)"
     },
-    { "fg": "text-subtle", "bg": "bg", "target": 3, "use": "icons only" },
-    { "fg": "on-purple", "bg": "purple", "target": 4.5, "use": "primary button label" },
-    { "fg": "purple", "bg": "bg", "target": 4.5, "use": "Mask accent text and the focus ring" },
-    { "fg": "purple", "bg": "surface-control", "target": 3, "use": "focus ring on controls" },
-    { "fg": "text", "bg": "surface-control", "target": 4.5, "use": "secondary button label" },
-    { "fg": "info-chip-text", "bg": "bg", "target": 4.5, "use": "Listening accent" },
-    { "fg": "info-chip-text", "bg": "info-chip", "target": 4.5, "use": "info chips" },
-    { "fg": "info-line", "bg": "info-surface", "target": 3, "use": "Exorcised accent graphic" },
-    { "fg": "info-chip-text", "bg": "info-surface", "target": 4.5, "use": "Exorcised state label" },
-    { "fg": "text", "bg": "info-surface", "target": 4.5, "use": "Exorcised text" },
-    { "fg": "ember", "bg": "ember-deep", "target": 4.5, "use": "Unease accent text on its tint" },
-    { "fg": "text", "bg": "ember-deep", "target": 4.5, "use": "Unease text" },
-    { "fg": "ember", "bg": "bg", "target": 4.5, "use": "Unease accent on the page" },
-    { "fg": "blood", "bg": "blood-deep", "target": 4.5, "use": "Possession alert text" },
-    { "fg": "text", "bg": "blood-deep", "target": 4.5, "use": "Possession text" },
-    { "fg": "ecto", "bg": "blood-deep", "target": 3, "use": "Possession waveform" },
-    { "fg": "on-ecto", "bg": "ecto", "target": 4.5, "use": "text on ecto" }
+    {
+      "fg": "text-subtle",
+      "bg": "bg",
+      "target": 3,
+      "use": "icons only"
+    },
+    {
+      "fg": "on-purple",
+      "bg": "purple",
+      "target": 4.5,
+      "use": "primary button label"
+    },
+    {
+      "fg": "purple",
+      "bg": "bg",
+      "target": 4.5,
+      "use": "Mask accent text and the focus ring"
+    },
+    {
+      "fg": "purple",
+      "bg": "surface-control",
+      "target": 3,
+      "use": "focus ring on controls"
+    },
+    {
+      "fg": "text",
+      "bg": "surface-control",
+      "target": 4.5,
+      "use": "secondary button label"
+    },
+    {
+      "fg": "info-chip-text",
+      "bg": "bg",
+      "target": 4.5,
+      "use": "Listening accent"
+    },
+    {
+      "fg": "info-chip-text",
+      "bg": "info-chip",
+      "target": 4.5,
+      "use": "info chips"
+    },
+    {
+      "fg": "info-line",
+      "bg": "info-surface",
+      "target": 3,
+      "use": "Exorcised accent graphic"
+    },
+    {
+      "fg": "info-chip-text",
+      "bg": "info-surface",
+      "target": 4.5,
+      "use": "Exorcised state label"
+    },
+    {
+      "fg": "text",
+      "bg": "info-surface",
+      "target": 4.5,
+      "use": "Exorcised text"
+    },
+    {
+      "fg": "ember",
+      "bg": "ember-deep",
+      "target": 4.5,
+      "use": "Unease accent text on its tint"
+    },
+    {
+      "fg": "text",
+      "bg": "ember-deep",
+      "target": 4.5,
+      "use": "Unease text"
+    },
+    {
+      "fg": "ember",
+      "bg": "bg",
+      "target": 4.5,
+      "use": "Unease accent on the page"
+    },
+    {
+      "fg": "blood",
+      "bg": "blood-deep",
+      "target": 4.5,
+      "use": "Possession alert text"
+    },
+    {
+      "fg": "text",
+      "bg": "blood-deep",
+      "target": 4.5,
+      "use": "Possession text"
+    },
+    {
+      "fg": "ecto",
+      "bg": "blood-deep",
+      "target": 3,
+      "use": "Possession waveform"
+    },
+    {
+      "fg": "on-ecto",
+      "bg": "ecto",
+      "target": 4.5,
+      "use": "text on ecto"
+    },
+    {
+      "fg": "text-body",
+      "bg": "ember-deep",
+      "target": 4.5,
+      "use": "Unease supporting line"
+    },
+    {
+      "fg": "text-body",
+      "bg": "blood-deep",
+      "target": 4.5,
+      "use": "Possession supporting line"
+    },
+    {
+      "fg": "text-body",
+      "bg": "info-surface",
+      "target": 4.5,
+      "use": "Exorcised supporting line"
+    },
+    {
+      "fg": "text-secondary",
+      "bg": "surface-sidebar",
+      "target": 4.5,
+      "use": "start panel notes"
+    },
+    {
+      "fg": "text-secondary",
+      "bg": "blood-deep",
+      "target": 4.5,
+      "use": "Possession score label"
+    },
+    {
+      "fg": "text-secondary",
+      "bg": "surface-control",
+      "target": 4.5,
+      "use": "error messages"
+    },
+    {
+      "fg": "purple",
+      "bg": "blood-deep",
+      "target": 3,
+      "use": "focus ring on the Possession card"
+    },
+    {
+      "fg": "purple",
+      "bg": "ember-deep",
+      "target": 3,
+      "use": "focus ring on the Unease card"
+    },
+    {
+      "fg": "text-muted",
+      "bg": "bg-deep",
+      "target": 4.5,
+      "use": "footer at the bottom of the gradient"
+    },
+    {
+      "fg": "text-muted",
+      "bg": "bg-top",
+      "target": 4.5,
+      "use": "footer at the top of the gradient"
+    }
   ]
 }

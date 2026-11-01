@@ -41,7 +41,7 @@
   - [ ] 3.4 Try at least one custom agent in the Kiro CLI and one in the IDE; record the differences
     - _Requirements: 9.1_
 
-- [ ] 4. Create the `haunt-snapshots` manual steering command (once `haunted-ui` task 2 exists)
+- [x] 4. Create the `haunt-snapshots` manual steering command (once `haunted-ui` task 2 exists)
   - Run as `/haunt-snapshots`; uses Playwright MCP against `?test-state=<state>` URLs
   - _Requirements: 4.1, 4.2_
 

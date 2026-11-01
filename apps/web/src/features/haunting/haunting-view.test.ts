@@ -39,8 +39,10 @@ function timers() {
 describe("createHauntingView", () => {
   it("writes headline, line, score and a polite announcement for ordinary states", () => {
     const el = elements();
-    const view = createHauntingView(el);
+    const t = timers();
+    const view = createHauntingView(el, { setTimer: t.set });
     view.show("mask", 0.123);
+    t.runUntil(0);
     expect(el.root.dataset["state"]).toBe("mask");
     expect(el.headline.textContent).toBe("Sounds human");
     expect(el.score.value).toBe("12");
@@ -72,7 +74,9 @@ describe("createHauntingView", () => {
 
   it("renders Possession at once in Test_State_Mode", () => {
     const el = elements();
-    createHauntingView(el, { instant: true }).show("possession", 0.9);
+    const t = timers();
+    createHauntingView(el, { instant: true, setTimer: t.set }).show("possession", 0.9);
+    t.runUntil(0);
     expect(el.root.dataset["sequence"]).toBeUndefined();
     expect(el.assertive.textContent).toContain("Doppelgänger detected");
   });

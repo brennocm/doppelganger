@@ -27,16 +27,19 @@ export interface WidgetHandlers {
 export interface Widget {
   update(update: DetectorUpdate): void;
   levels(bands: Float32Array, intensity: number): void;
+  setMotion(motion: Motion): void;
   close(): void;
 }
 
-/** Copy the app's stylesheets into the PiP document (same origin, no inline styles). */
+/**
+ * Copy the app's styles into the PiP document: <link> sheets in a build, <style> elements
+ * in vite dev. Both come from 'self', so the CSP still holds.
+ */
 function copyStyles(from: Document, to: Document): void {
-  for (const link of from.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')) {
-    const copy = to.createElement("link");
-    copy.rel = "stylesheet";
-    copy.href = link.href;
-    to.head.append(copy);
+  for (const node of from.querySelectorAll<HTMLLinkElement | HTMLStyleElement>(
+    'link[rel="stylesheet"], style',
+  )) {
+    to.head.append(to.importNode(node, true));
   }
 }
 
@@ -83,13 +86,20 @@ export async function openPipWidget(
     handlers.showProtocol();
   });
   actions.append(protocol, stop);
+  const row = doc.createElement("div");
+  row.className = "readout-row";
+  row.append(score, actions);
   const live = doc.createElement("div");
   live.className = "visually-hidden";
   live.setAttribute("aria-live", "assertive");
-  root.append(headline, canvas, score, actions, live);
+  root.append(headline, canvas, row, live);
   doc.body.append(root);
   const spectre: Spectre = createSpectre(canvas, motion);
   let state = "idle";
+  doc.addEventListener("visibilitychange", () => {
+    if (doc.hidden) spectre.pause();
+    else spectre.resume();
+  });
 
   // Closing the window ends the widget only; the session in the Main_View continues.
   pip.addEventListener(
@@ -113,6 +123,10 @@ export async function openPipWidget(
     },
     levels(bands, intensity) {
       spectre.draw({ bands, state: root.dataset["state"] as DetectorUpdate["state"], intensity });
+    },
+    setMotion(next) {
+      root.dataset["motion"] = next;
+      spectre.setMotion(next);
     },
     close() {
       pip.close();

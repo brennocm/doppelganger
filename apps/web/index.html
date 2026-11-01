@@ -51,7 +51,7 @@
         </div>
         <p id="session-label" class="chip session-label" hidden></p>
         <div id="indicator" class="indicator" hidden>
-          <p class="indicator-text"><span class="dot" aria-hidden="true"></span>Listening to <span id="source-name"></span></p>
+          <p class="indicator-text"><span class="dot" aria-hidden="true"></span><span>Listening to <span id="source-name"></span></span></p>
           <button id="stop" class="button button-secondary" type="button">Stop listening</button>
         </div>
       </header>
@@ -72,10 +72,17 @@
         <p id="state-line" class="supporting">Choose a call tab to start.</p>
         <div class="spectre-frame">
           <canvas id="spectre" class="spectre" width="960" height="200" aria-hidden="true"></canvas>
-          <p class="spectre-fallback" aria-hidden="true"><!--icon:user-sound--></p>
+          <p class="spectre-fallback" aria-hidden="true">
+            <span class="state-glyph" data-for="idle"><!--icon:microphone-slash--></span>
+            <span class="state-glyph" data-for="listening"><!--icon:ear--></span>
+            <span class="state-glyph" data-for="mask"><!--icon:user-sound--></span>
+            <span class="state-glyph" data-for="unease"><!--icon:warning--></span>
+            <span class="state-glyph" data-for="possession"><!--icon:skull--></span>
+            <span class="state-glyph" data-for="exorcised"><!--icon:shield-check--></span>
+          </p>
         </div>
         <div class="readout">
-          <p class="score">Dissonance <output id="score" class="score-value" for="state-headline">–</output></p>
+          <p class="score">Dissonance <output id="score" class="score-value" aria-live="off">–</output></p>
           <div class="actions">
             <button id="start-protocol" class="button button-primary" type="button" hidden>Start the protocol</button>
             <button id="float" class="button button-secondary" type="button" disabled><!--icon:picture-in-picture-->Float over the call</button>
@@ -87,7 +94,7 @@
       <div id="live-polite" class="visually-hidden" aria-live="polite"></div>
       <div id="live-assertive" class="visually-hidden" aria-live="assertive"></div>
 
-      <div id="alert" class="alert" role="alert" hidden>
+      <div id="alert" class="alert" role="status" hidden>
         <p></p>
         <button id="alert-replay" class="button button-secondary" type="button" hidden>Try a replay</button>
       </div>

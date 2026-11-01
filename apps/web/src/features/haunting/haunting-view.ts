@@ -7,8 +7,22 @@ import { type Presentation, present } from "./presentation.ts";
 
 /** Possession entrance length; the sequence runs once per entry. */
 export const POSSESSION_SEQUENCE_MS = 1500;
+/** When the Spectre tears within the sequence. */
+export const TEAR_AT_MS = 150;
 /** When the headline is announced within the sequence. */
 export const HEADLINE_AT_MS = 700;
+
+/** Clear, then set on the next task, so a repeated identical message is announced again. */
+function announce(
+  region: HTMLElement,
+  message: string,
+  setTimer: (fn: () => void, ms: number) => unknown,
+): void {
+  region.textContent = "";
+  setTimer(() => {
+    region.textContent = message;
+  }, 0);
+}
 
 export interface ViewElements {
   root: HTMLElement;
@@ -60,8 +74,7 @@ export function createHauntingView(el: ViewElements, opts: ViewOptions = {}): Ha
       if (!entering || opts.instant) {
         delete el.root.dataset["sequence"];
         text(p);
-        if (entering) el.assertive.textContent = `${p.headline}. ${p.line}`;
-        else el.polite.textContent = `${p.headline}. ${p.line}`;
+        announce(entering ? el.assertive : el.polite, `${p.headline}. ${p.line}`, setTimer);
         if (entering) opts.onPossession?.();
         return;
       }
@@ -70,6 +83,7 @@ export function createHauntingView(el: ViewElements, opts: ViewOptions = {}): Ha
       el.root.dataset["sequence"] = "possession";
       text(p);
       opts.onPossession?.();
+      el.assertive.textContent = "";
       setTimer(() => {
         if (id === sequence && current === "possession")
           el.assertive.textContent = `${p.headline}. ${p.line}`;

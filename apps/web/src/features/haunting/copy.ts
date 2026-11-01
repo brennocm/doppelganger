@@ -29,7 +29,7 @@ export const STATE_COPY: Readonly<Record<HauntingState, StateCopy>> = {
   exorcised: {
     headline: "Protocol completed",
     line: "Stay alert for the rest of the call.",
-    icon: "Protocol completed",
+    icon: "Exorcised",
   },
 };
 

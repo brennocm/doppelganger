@@ -102,6 +102,12 @@ export function startApp(base: string, mode: string): AppEvents {
   const forced =
     import.meta.env.MODE === "production" ? null : parseTestState(location.search, mode);
   const view = createMainView({ forced, stop });
+  if (forced !== null && forced.state !== "idle") {
+    // Test_State_Mode shows the active layout of the forced state (one primary action).
+    ui.indicator.hidden = false;
+    ui.startPanel.hidden = true;
+    ui.sourceName.textContent = SOURCE_NAMES.tab;
+  }
 
   function showError(text: string, replay: boolean): void {
     ui.alert.querySelector("p")?.replaceChildren(text);

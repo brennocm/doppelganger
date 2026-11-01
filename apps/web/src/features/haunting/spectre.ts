@@ -10,6 +10,7 @@ import {
   mirror,
   type Point,
   type Slice,
+  TEAR_GAP,
   tear,
   wavePoints,
 } from "./spectre-geometry.ts";
@@ -47,16 +48,31 @@ function curve(ctx: CanvasRenderingContext2D, points: readonly Point[]): void {
   }
 }
 
-/** A gentle breathing shape for Listening (low, slow). */
-function breath(n: number, t: number): Float32Array {
-  const level = 0.06 + 0.04 * Math.sin((2 * Math.PI * t) / 4000);
-  return new Float32Array(n).fill(level);
+/**
+ * The shape per state, so the waveform differs even where colors are close: Idle flat,
+ * Listening a slow breath, Exorcised a damped version settling back to calm.
+ */
+export function shapeFor(
+  state: HauntingState,
+  bands: Float32Array,
+  t: number,
+  motion: Motion,
+): Float32Array {
+  if (state === "idle") return new Float32Array(bands.length);
+  if (state === "listening") {
+    const phase = motion === "full" ? Math.sin((2 * Math.PI * t) / 4000) : 0;
+    return new Float32Array(bands.length).fill(0.14 + 0.08 * phase);
+  }
+  if (state === "exorcised") return bands.map((v) => v * 0.45);
+  return bands;
 }
 
 export function createSpectre(
   canvas: HTMLCanvasElement,
   initialMotion: Motion,
   now: () => number = () => performance.now(),
+  /** Called each time a new tear is drawn (tests and diagnostics). */
+  onTear: (t: number) => void = () => undefined,
 ): Spectre {
   const ctx = canvas.getContext("2d");
   let motion = initialMotion;
@@ -86,9 +102,8 @@ export function createSpectre(
     ctx.clearRect(0, 0, w, h);
     ctx.lineWidth = 2 * Math.min(2, globalThis.devicePixelRatio || 1);
     ctx.strokeStyle = stroke;
-    const bands = frame.state === "listening" ? breath(frame.bands.length, t) : frame.bands;
-    let upper =
-      frame.state === "idle" ? wavePoints(new Float32Array(64), w, h) : wavePoints(bands, w, h);
+    const bands = shapeFor(frame.state, frame.bands, t, motion);
+    let upper = wavePoints(bands, w, h);
     if (frame.state === "unease") {
       const seed = motion === "full" ? Math.floor(t / JITTER_MS) : STATIC_SEED;
       upper = jitter(upper, frame.intensity, seed);
@@ -101,18 +116,33 @@ export function createSpectre(
       ctx.stroke();
       return;
     }
-    // Possession: torn slices. New displacement at most every 340 ms (≤ 3 per second);
-    // under reduced motion a single static tear.
-    if (slices.length === 0 || (motion === "full" && scheduler.tick(t))) {
+    // Possession: torn slices. The scheduler is the only gate for a new tear (at most one
+    // every 340 ms, so ≤ 3 per second), whatever the state or motion did before; under
+    // reduced motion the first tear stays. Until the first tear, the wave is drawn whole.
+    if ((slices.length === 0 || motion === "full") && scheduler.tick(t)) {
       tearSeed = motion === "full" ? Math.floor(t) + 1 : STATIC_SEED;
       slices = tear(h, tearSeed);
+      onTear(t);
     }
+    if (slices.length === 0) {
+      ctx.beginPath();
+      curve(ctx, upper);
+      curve(ctx, lower);
+      ctx.stroke();
+      return;
+    }
+    const scale = w / Math.max(1, canvas.clientWidth);
     for (const slice of slices) {
       ctx.save();
       ctx.beginPath();
-      ctx.rect(0, slice.top, w, slice.bottom - slice.top);
+      ctx.rect(
+        0,
+        slice.top + TEAR_GAP * scale,
+        w,
+        Math.max(0, slice.bottom - slice.top - TEAR_GAP * scale),
+      );
       ctx.clip();
-      ctx.translate(slice.dx * (w / Math.max(1, canvas.clientWidth)), 0);
+      ctx.translate(slice.dx * scale, slice.dy * scale);
       ctx.beginPath();
       curve(ctx, upper);
       curve(ctx, lower);
@@ -142,10 +172,9 @@ export function createSpectre(
 
   return {
     draw(next) {
-      if (frame?.state !== next.state) {
-        slices = [];
-        scheduler.reset();
-      }
+      // A state change starts a fresh tear, but the scheduler keeps its history, so
+      // leaving and re-entering Possession can never exceed 3 tears per second.
+      if (frame?.state !== next.state) slices = [];
       frame = next;
       lastDraw = Number.NEGATIVE_INFINITY;
       schedule();

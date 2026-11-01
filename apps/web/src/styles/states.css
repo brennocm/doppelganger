@@ -133,7 +133,7 @@
 }
 
 .app[data-motion="full"][data-sequence="possession"] .twin-body {
-  animation: twin-turn 300ms var(--ease-ui) 400ms both;
+  animation: twin-turn var(--duration-turn) var(--ease-ui) 400ms both;
 }
 
 .app[data-motion="full"][data-sequence="possession"] .headline,
@@ -146,10 +146,8 @@
   animation: headline-in var(--duration-ui) var(--ease-ui) 1000ms both;
 }
 
+/* No "from": the tint starts from the current surface (for example Unease). */
 @keyframes possession-tint {
-  from {
-    background-color: var(--color-bg);
-  }
   to {
     background-color: var(--color-blood-deep);
   }
@@ -174,8 +172,9 @@
 }
 
 /* Reduced motion: a single cross-fade, no turning, no tearing updates. */
-.app[data-motion="reduced"][data-sequence="possession"] .state {
-  animation: headline-in var(--duration-ui) linear both;
+.app[data-motion="reduced"][data-sequence="possession"] .headline,
+.app[data-motion="reduced"][data-sequence="possession"] .supporting {
+  animation: headline-in var(--duration-ui) var(--ease-ui) both;
 }
 
 .app[data-motion="reduced"] .twin-body {

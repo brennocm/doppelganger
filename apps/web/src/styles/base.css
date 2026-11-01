@@ -264,14 +264,15 @@ ul {
   color: var(--color-text-secondary);
 }
 
+/* Capture and model errors: neutral, so they never look like a haunting state. */
 .alert {
   display: grid;
   gap: var(--space-2);
   justify-items: start;
   padding: var(--space-4);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-ember);
-  background: var(--color-ember-deep);
+  border: 1px solid var(--color-line-strong);
+  background: var(--color-surface-control);
   color: var(--color-text);
 }
 
@@ -345,7 +346,15 @@ ul {
   gap: var(--space-2);
 }
 
-.app[data-layout="compact"] .start-panel,
+/* Compact keeps the primary action: only the rest of the start panel goes. */
+.app[data-layout="compact"] .start-panel {
+  padding: var(--space-2);
+  border: none;
+  background: none;
+}
+
+.app[data-layout="compact"] .start-panel > :not(.start-actions),
+.app[data-layout="compact"] #start-mic,
 .app[data-layout="compact"] .facts,
 .app[data-layout="compact"] .supporting {
   display: none;
@@ -353,6 +362,32 @@ ul {
 
 .app[data-layout="compact"] .spectre {
   height: 56px;
+}
+
+/* The Document Picture-in-Picture window: 320 × 180. */
+.widget {
+  padding: var(--space-2);
+  gap: var(--space-1);
+}
+
+.widget .headline {
+  font: var(--type-title);
+}
+
+.widget .spectre {
+  height: 48px;
+}
+
+.widget .readout-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.widget .button {
+  min-height: 28px;
+  padding: var(--space-1) var(--space-2);
 }
 
 @media (max-width: 480px) {

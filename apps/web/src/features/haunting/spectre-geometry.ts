@@ -47,9 +47,13 @@ export interface Slice {
   top: number;
   bottom: number;
   dx: number;
+  dy: number;
 }
 
-/** Possession: 6 to 10 horizontal slices, each displaced by up to 24 px. */
+/** Gap left between torn slices, in px, so the tear reads at a glance. */
+export const TEAR_GAP = 3;
+
+/** Possession: 6 to 10 horizontal slices, each displaced by up to 24 px across and 8 px down. */
 export function tear(height: number, seed: number): Slice[] {
   const next = seeded(seed);
   const count = 6 + Math.floor(next() * 5);
@@ -59,6 +63,7 @@ export function tear(height: number, seed: number): Slice[] {
     top: edges[i] ?? 0,
     bottom,
     dx: (next() * 2 - 1) * 24,
+    dy: (next() * 2 - 1) * 8,
   }));
 }
 

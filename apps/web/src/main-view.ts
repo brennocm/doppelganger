@@ -4,7 +4,7 @@
  */
 import type { DetectorUpdate } from "@doppelganger/contracts";
 import { DEFAULT_CONFIG } from "@doppelganger/detector";
-import { createHauntingView, playLowTone } from "./features/haunting/haunting-view.ts";
+import { createHauntingView, playLowTone, TEAR_AT_MS } from "./features/haunting/haunting-view.ts";
 import { createSpectre, type Motion } from "./features/haunting/spectre.ts";
 import { uneaseIntensity } from "./features/haunting/spectre-geometry.ts";
 import type { ForcedState } from "./features/haunting/test-state.ts";
@@ -76,10 +76,13 @@ export function createMainView(opts: MainViewOptions): MainView {
 
   root.dataset["motion"] = motion();
   if (canvas.getContext("2d") === null) root.dataset["canvas"] = "none";
-  const spectre = createSpectre(canvas, motion());
+  // Test_State_Mode draws one deterministic frame: the static (reduced) treatment.
+  const spectreMotion = (): Motion => (opts.forced !== null ? "reduced" : motion());
+  const spectre = createSpectre(canvas, spectreMotion());
   reduced.addEventListener("change", () => {
     root.dataset["motion"] = motion();
-    spectre.setMotion(motion());
+    spectre.setMotion(spectreMotion());
+    widget?.setMotion(motion());
   });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) spectre.pause();
@@ -89,9 +92,11 @@ export function createMainView(opts: MainViewOptions): MainView {
   let bands = restingBands();
   let smoothed = 0;
   let widget: Widget | null = null;
+  // The Spectre's state; on Possession entry it switches 150 ms after the tint starts.
+  let spectreState = view.state;
   const intensity = () => uneaseIntensity(smoothed, thresholds.unease, thresholds.possession);
   const redraw = () => {
-    spectre.draw({ bands, state: view.state, intensity: intensity() });
+    spectre.draw({ bands, state: spectreState, intensity: intensity() });
     widget?.levels(bands, intensity());
   };
 
@@ -132,6 +137,7 @@ export function createMainView(opts: MainViewOptions): MainView {
       opts.forced.state,
       opts.forced.state === "idle" || opts.forced.state === "listening" ? null : smoothed,
     );
+    spectreState = view.state;
     redraw();
   } else {
     redraw();
@@ -145,7 +151,18 @@ export function createMainView(opts: MainViewOptions): MainView {
       const before = view.state;
       view.show(update.state, update.smoothed);
       widget?.update(update);
-      if (before !== update.state) redraw();
+      if (before === update.state) return;
+      if (update.state === "possession" && motion() === "full") {
+        // Possession sequence: the Spectre tears at 150 ms (haunted-ui design).
+        setTimeout(() => {
+          if (view.state !== "possession") return;
+          spectreState = "possession";
+          redraw();
+        }, TEAR_AT_MS);
+        return;
+      }
+      spectreState = update.state;
+      redraw();
     },
     levels(next) {
       if (opts.forced !== null) return;

@@ -106,6 +106,7 @@ export const tokens = {
   },
   "motion": {
     "duration-ui": "200ms",
+    "duration-turn": "300ms",
     "duration-tint": "400ms",
     "ease-ui": "cubic-bezier(0.23, 1, 0.32, 1)"
   },

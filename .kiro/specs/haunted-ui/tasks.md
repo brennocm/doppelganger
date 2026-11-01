@@ -58,5 +58,5 @@
     - _Requirements: 6.1, 7.2_
   - [ ] 6.2 Create the `haunt-snapshots` hook (kiro-workbench task 4) and run it
     - _Requirements: 6.1_
-  - [ ] 6.3 Run the `haunter` agent review; fix findings; record before/after screenshots in the journal
+  - [x] 6.3 Run the `haunter` agent review; fix findings; record before/after screenshots in the journal
     - _Requirements: 1.1, 3.2, 6.3_

@@ -40,7 +40,10 @@ describe("Spectre geometry", () => {
         expect(slices.length).toBeLessThanOrEqual(10);
         expect(slices[0]?.top).toBe(0);
         expect(slices.at(-1)?.bottom).toBe(height);
-        for (const s of slices) expect(Math.abs(s.dx)).toBeLessThanOrEqual(24);
+        for (const s of slices) {
+          expect(Math.abs(s.dx)).toBeLessThanOrEqual(24);
+          expect(Math.abs(s.dy)).toBeLessThanOrEqual(8);
+        }
       }),
       RUNS,
     );
