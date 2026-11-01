@@ -57,6 +57,18 @@ Precache list generated at build time (Vite plugin, hashed file names). Cache-fi
 
 Worker messages are discriminated unions defined in `packages/contracts` (`WorkerInbound`, `WorkerOutbound`).
 
+## Implementation details (P25)
+
+- **Worker messages.** They are hand-written TS types in `packages/contracts/src/worker-messages.ts`, not JSON Schemas, because they carry a `MessagePort` and only TS uses them. Inbound: `init` (manifest URL), `audio-port` (the worklet's port in `event.ports[0]`), `start`, `stop`, `protocol-completed`, `stats`. Outbound: `ready` (model id, role, version), `update`, `perf` (p50, p95, windows), `stats`, `error` (`model-integrity`, `model-load`, `wasm-unsupported`). Audio travels only on the worklet→worker port, as `{ type: "chunk", samples: Float32Array }`.
+- **Worker core.** `worker-core.ts` holds the message handling with injected `post`, model loader, backend factory and clock, so Property 5 tests it without a browser. `inference.worker.ts` only binds it to `self` and ONNX Runtime Web. Perf is posted every 10 scored windows. The clock is `Date.now()`, because the UI shows wall-clock times.
+- **Resampler.** For a source rate `r`, `L = 16000 / gcd(r, 16000)` and `M = r / gcd(r, 16000)`. Output k is the windowed-sinc (Blackman, 32 taps, cutoff 0.46 × min(1, L/M) cycles per input sample, each phase normalized to unit DC gain) centred 16 input samples before input position `k·M/L`. Then it is causal, and output k is emitted as soon as input `floor(k·M/L)` has arrived. After n inputs exactly `ceil(n·L/M)` samples have been emitted, which is within ±1 of `round(n × 16000 / r)`. The 16-sample delay is 0.33 ms at 48 kHz. Phases are precomputed when `L ≤ 1024`, and computed per sample otherwise.
+- **ONNX Runtime Web files.** The worker imports `onnxruntime-web/wasm`. A Vite plugin in `apps/web/vite.config.ts` copies `ort-wasm-simd-threaded.wasm` and `.mjs` from the installed package to `ort/` in the build, and serves them in dev. `wasmPaths` is `<base>ort/`.
+- **Models.** The worker loads `models/<id>.json` through `parseModelManifest`, then the model, checking `bytes` and SHA-256 before `InferenceSession.create`. Until detection-model 6.4 ships the Light_Model, the default is `ci-synthetic-linear`; its `role: "test"` makes the UI show "Test model: it detects nothing".
+- **Replay.** `clips.json` is `{ "clips": [{ "id", "file", "label": "genuine" | "synthetic", "title", "seconds" }] }`. Until detection-model 7.2 commits the clips, the list is empty and the Replay option says no clips are bundled yet. Nothing synthetic stands in for a real clip.
+- **Service worker.** `sw.js` is emitted by the same Vite plugin with the precache list (every emitted asset, plus `ort/` and `models/`). The cache name includes a hash of the list.
+
+## Data Models (continued)
+
 ## Correctness Properties
 
 ### Property 1: Resampler output length
