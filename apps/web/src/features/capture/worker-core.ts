@@ -15,6 +15,7 @@ import {
   type InferenceBackend,
   resolveConfig,
 } from "@doppelganger/detector";
+import { bandLevels } from "./levels.ts";
 import { IntegrityError } from "./model-loader.ts";
 
 export const PERF_EVERY = 10;
@@ -49,6 +50,7 @@ function percentile(sorted: number[], q: number): number {
 
 export function createWorkerCore(deps: WorkerCoreDeps): WorkerCore {
   let detector: Detector | null = null;
+  let capturing = false;
   const timings: number[] = [];
   let runs = 0;
 
@@ -118,15 +120,18 @@ export function createWorkerCore(deps: WorkerCoreDeps): WorkerCore {
           if (port === undefined) return;
           port.onmessage = (event) => {
             if (event.data?.type === "chunk" && event.data.samples instanceof Float32Array) {
+              if (capturing) deps.post({ type: "levels", bands: bandLevels(event.data.samples) });
               detector?.push(event.data.samples);
             }
           };
           return;
         }
         case "start":
+          capturing = detector !== null;
           detector?.start();
           return;
         case "stop":
+          capturing = false;
           detector?.stop();
           return;
         case "protocol-completed":

@@ -1,0 +1,367 @@
+/* Main_View layout and browser surfaces (haunted-ui Requirements 6 and 7). Values come only
+   from @doppelganger/tokens; no raw colors here. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  background: var(--color-bg-deep);
+  scrollbar-color: var(--color-surface-avatar) var(--color-bg);
+  accent-color: var(--color-purple);
+  caret-color: var(--color-purple);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--page-background);
+  color: var(--color-text-body);
+  font: var(--type-body);
+}
+
+::selection {
+  background: var(--color-purple-deep);
+  color: var(--color-text);
+}
+
+:focus-visible {
+  outline: var(--focus-width) solid var(--color-purple);
+  outline-offset: var(--focus-offset);
+}
+
+a {
+  color: var(--color-purple);
+}
+
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+ul {
+  margin: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-12);
+  display: grid;
+  gap: var(--space-6);
+}
+
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.brand-name {
+  font: var(--type-title);
+  color: var(--color-text);
+}
+
+.indicator {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.indicator-text {
+  font: var(--type-label);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--state-accent);
+}
+
+.chip {
+  font: var(--type-small);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-info-chip);
+  color: var(--color-info-chip-text);
+}
+
+.state {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--state-line);
+  background: var(--state-surface);
+  transition:
+    background-color var(--duration-ui) var(--ease-ui),
+    border-color var(--duration-ui) var(--ease-ui);
+}
+
+.state-icon {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--type-label);
+  color: var(--state-accent);
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+.headline {
+  font: var(--type-display);
+  color: var(--color-text);
+}
+
+.supporting {
+  color: var(--color-text-body);
+  max-width: 60ch;
+}
+
+.title {
+  font: var(--type-title);
+  color: var(--color-text);
+}
+
+.spectre-frame {
+  position: relative;
+  margin: var(--space-4) 0;
+}
+
+.spectre {
+  display: block;
+  width: 100%;
+  height: 120px;
+}
+
+.spectre-fallback {
+  display: none;
+  color: var(--state-accent);
+}
+
+.spectre-fallback .icon {
+  width: 64px;
+  height: 64px;
+}
+
+.app[data-canvas="none"] .spectre {
+  display: none;
+}
+
+.app[data-canvas="none"] .spectre-fallback {
+  display: block;
+}
+
+.readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.score {
+  font: var(--type-label);
+  color: var(--color-text-secondary);
+}
+
+.score-value,
+.mono {
+  font: var(--type-chip-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.score-value {
+  margin-left: var(--space-2);
+  color: var(--color-text);
+}
+
+.actions,
+.start-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font: var(--type-label);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-ui) var(--ease-ui),
+    border-color var(--duration-ui) var(--ease-ui);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  color: var(--color-text-muted);
+}
+
+.button-primary {
+  background: var(--color-purple);
+  color: var(--color-on-purple);
+  border: 1px solid var(--color-purple);
+}
+
+.button-primary:disabled {
+  background: var(--color-surface-control);
+  border-color: var(--color-line-strong);
+}
+
+.button-secondary {
+  background: var(--color-surface-control);
+  color: var(--color-text);
+  border: 1px solid var(--color-line-strong);
+}
+
+.button-secondary:hover:not(:disabled) {
+  background: var(--color-surface-chip);
+}
+
+.note,
+.privacy-notice {
+  font: var(--type-small);
+  color: var(--color-text-secondary);
+}
+
+.alert {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-ember);
+  background: var(--color-ember-deep);
+  color: var(--color-text);
+}
+
+.start-panel {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-surface-chip);
+  background: var(--color-surface-sidebar);
+}
+
+.replay {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.clips {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--type-small);
+  color: var(--color-text-secondary);
+}
+
+.toggle input {
+  width: 16px;
+  height: 16px;
+}
+
+.facts {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font: var(--type-small);
+}
+
+.facts-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+}
+
+.facts-list div {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.facts-list dt {
+  color: var(--color-text-muted);
+}
+
+.facts-list dd {
+  color: var(--color-text-secondary);
+}
+
+.legal {
+  font: var(--type-legal);
+}
+
+/* Compact in-page layout (haunted-ui Requirement 5.2). */
+.app[data-layout="compact"] {
+  max-width: 360px;
+  gap: var(--space-2);
+}
+
+.app[data-layout="compact"] .start-panel,
+.app[data-layout="compact"] .facts,
+.app[data-layout="compact"] .supporting {
+  display: none;
+}
+
+.app[data-layout="compact"] .spectre {
+  height: 56px;
+}
+
+@media (max-width: 480px) {
+  .app {
+    padding: var(--space-4) var(--space-2) var(--space-8);
+  }
+
+  .state,
+  .start-panel {
+    padding: var(--space-4);
+  }
+}

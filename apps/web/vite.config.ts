@@ -13,12 +13,23 @@ import { defaultClientConditions, defineConfig, type Plugin } from "vite";
 const ORT_DIST = fileURLToPath(new URL("./node_modules/onnxruntime-web/dist/", import.meta.url));
 export const ORT_FILES = ["ort-wasm-simd-threaded.wasm", "ort-wasm-simd-threaded.mjs"] as const;
 const SW_SOURCE = fileURLToPath(new URL("./src/features/offline/sw-template.js", import.meta.url));
+const PHOSPHOR = fileURLToPath(
+  new URL("./node_modules/@phosphor-icons/core/assets/regular/", import.meta.url),
+);
 
 function selfHostedAssets(): Plugin {
   let base = "/";
   let publicDir = "";
   return {
     name: "self-hosted-assets",
+    // Inline Phosphor icons (MIT) for <!--icon:name--> markers: no icon font, no requests.
+    transformIndexHtml(html) {
+      return html.replace(/<!--icon:([a-z-]+)-->/g, (_, name: string) =>
+        readFileSync(`${PHOSPHOR}${name}.svg`, "utf8")
+          .trim()
+          .replace("<svg ", '<svg class="icon" aria-hidden="true" focusable="false" '),
+      );
+    },
     configResolved(config) {
       base = config.base;
       publicDir = config.publicDir;

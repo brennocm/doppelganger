@@ -19,11 +19,14 @@
     "vitest": "5.0.5",
     "fast-check": "4.10.2",
     "@playwright/test": "1.64.1",
-    "@types/node": "26.6.6"
+    "@types/node": "26.6.6",
+    "@phosphor-icons/core": "2.1.1",
+    "@axe-core/playwright": "4.14.0"
   },
   "dependencies": {
     "@doppelganger/contracts": "workspace:*",
     "@doppelganger/detector": "workspace:*",
-    "onnxruntime-web": "1.31.1"
+    "onnxruntime-web": "1.31.1",
+    "@doppelganger/tokens": "workspace:*"
   }
 }

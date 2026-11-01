@@ -77,6 +77,19 @@ describe("worker core", () => {
     expect(updates.at(-1)).toMatchObject({ update: { windowIndex: 0, raw: expect.any(Number) } });
   });
 
+  it("posts band levels as plain numbers while capturing, and none before start", async () => {
+    const { core, posted, port, send } = setup();
+    await core.handle({ type: "init", manifestUrl: "https://app.example/m.json" });
+    await core.handle({ type: "audio-port" }, [port]);
+    send(voiced());
+    expect(posted.filter((m) => m.type === "levels")).toEqual([]);
+    await core.handle({ type: "start" });
+    send(voiced());
+    const levels = posted.filter((m) => m.type === "levels");
+    expect(levels).toHaveLength(1);
+    expect(Array.isArray(levels[0]?.type === "levels" && levels[0].bands)).toBe(true);
+  });
+
   it("posts perf every PERF_EVERY scored windows", async () => {
     const { core, posted, port, send } = setup();
     await core.handle({ type: "init", manifestUrl: "https://app.example/m.json" });

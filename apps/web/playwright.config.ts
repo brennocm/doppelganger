@@ -11,7 +11,7 @@ export default defineConfig({
   globalSetup: "./e2e/fake-audio.ts",
   // Production build, served by vite preview on the loopback interface only.
   webServer: {
-    command: `pnpm exec vite build --outDir dist/e2e --emptyOutDir && pnpm exec vite preview --outDir dist/e2e --host 127.0.0.1 --port ${PORT} --strictPort`,
+    command: `pnpm exec vite build --mode e2e --outDir dist/e2e --emptyOutDir && pnpm exec vite preview --outDir dist/e2e --host 127.0.0.1 --port ${PORT} --strictPort`,
     url: `http://127.0.0.1:${PORT}/`,
     reuseExistingServer: false,
     timeout: 120_000,

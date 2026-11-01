@@ -32,6 +32,7 @@
     { "fg": "info-chip-text", "bg": "bg", "target": 4.5, "use": "Listening accent" },
     { "fg": "info-chip-text", "bg": "info-chip", "target": 4.5, "use": "info chips" },
     { "fg": "info-line", "bg": "info-surface", "target": 3, "use": "Exorcised accent graphic" },
+    { "fg": "info-chip-text", "bg": "info-surface", "target": 4.5, "use": "Exorcised state label" },
     { "fg": "text", "bg": "info-surface", "target": 4.5, "use": "Exorcised text" },
     { "fg": "ember", "bg": "ember-deep", "target": 4.5, "use": "Unease accent text on its tint" },
     { "fg": "text", "bg": "ember-deep", "target": 4.5, "use": "Unease text" },

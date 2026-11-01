@@ -11,53 +11,114 @@
     <script type="module" src="./src/main.ts"></script>
   </head>
   <body>
-    <main id="app" data-state="idle">
+    <main id="app" class="app" data-state="idle" data-motion="full" data-layout="full">
       <header class="app-header">
-        <p class="brand">Doppelgänger</p>
-        <p id="session-label" class="session-label" hidden></p>
+        <div class="brand">
+          <svg id="twin" class="twin" viewBox="0 0 120 140" aria-hidden="true" focusable="false">
+            <g class="twin-body">
+              <path class="twin-sheet" d="M60 8C33 8 16 29 16 56v62c0 6 6 9 11 5l8-7 9 9c3 3 7 3 10 0l6-7 6 7c3 3 7 3 10 0l9-9 8 7c5 4 11 1 11-5V56C104 29 87 8 60 8Z" />
+              <g class="twin-face" data-face="idle">
+                <path class="twin-line" d="M38 58h14M68 58h14" />
+                <path class="twin-line" d="M54 82h12" />
+              </g>
+              <g class="twin-face" data-face="listening">
+                <circle class="twin-eye" cx="45" cy="58" r="6" />
+                <circle class="twin-eye" cx="75" cy="58" r="6" />
+                <circle class="twin-line" cx="60" cy="84" r="4" />
+              </g>
+              <g class="twin-face" data-face="mask">
+                <path class="twin-line" d="M38 60q7-7 14 0M68 60q7-7 14 0" />
+                <path class="twin-line" d="M48 80q12 10 24 0" />
+              </g>
+              <g class="twin-face" data-face="unease">
+                <path class="twin-line" d="M36 48l14 4M84 48l-14 4" />
+                <circle class="twin-eye" cx="45" cy="62" r="5" />
+                <circle class="twin-eye" cx="75" cy="62" r="5" />
+                <path class="twin-line" d="M46 86q5-5 9 0t9 0 9 0" />
+              </g>
+              <g class="twin-face twin-possessed" data-face="possession">
+                <path class="twin-hollow" d="M34 50l20 6-4 12-16-4ZM86 50l-20 6 4 12 16-4Z" />
+                <path class="twin-line" d="M40 84l6 8 6-8 6 8 6-8 6 8 6-8 6 8" />
+              </g>
+              <g class="twin-face" data-face="exorcised">
+                <path class="twin-line" d="M38 60q7 6 14 0M68 60q7 6 14 0" />
+                <path class="twin-line" d="M50 82q10 6 20 0" />
+                <path class="twin-halo" d="M36 14q24-12 48 0" />
+              </g>
+            </g>
+          </svg>
+          <p class="brand-name">Doppelgänger</p>
+        </div>
+        <p id="session-label" class="chip session-label" hidden></p>
         <div id="indicator" class="indicator" hidden>
-          <p>Listening to <span id="source-name"></span></p>
-          <button id="stop" type="button">Stop listening</button>
+          <p class="indicator-text"><span class="dot" aria-hidden="true"></span>Listening to <span id="source-name"></span></p>
+          <button id="stop" class="button button-secondary" type="button">Stop listening</button>
         </div>
       </header>
 
       <section class="state" aria-labelledby="state-headline">
-        <p id="state-icon" class="state-icon">Idle</p>
-        <h1 id="state-headline">Not listening</h1>
-        <p id="state-line">Choose a call tab to start.</p>
-        <p class="score">Dissonance <output id="score" for="state-headline">–</output></p>
+        <p class="state-icon">
+          <span class="icon-set" aria-hidden="true">
+            <span class="state-glyph" data-for="idle"><!--icon:microphone-slash--></span>
+            <span class="state-glyph" data-for="listening"><!--icon:ear--></span>
+            <span class="state-glyph" data-for="mask"><!--icon:user-sound--></span>
+            <span class="state-glyph" data-for="unease"><!--icon:warning--></span>
+            <span class="state-glyph" data-for="possession"><!--icon:skull--></span>
+            <span class="state-glyph" data-for="exorcised"><!--icon:shield-check--></span>
+          </span>
+          <span id="state-icon" class="state-icon-label">Idle</span>
+        </p>
+        <h1 id="state-headline" class="headline">Not listening</h1>
+        <p id="state-line" class="supporting">Choose a call tab to start.</p>
+        <div class="spectre-frame">
+          <canvas id="spectre" class="spectre" width="960" height="200" aria-hidden="true"></canvas>
+          <p class="spectre-fallback" aria-hidden="true"><!--icon:user-sound--></p>
+        </div>
+        <div class="readout">
+          <p class="score">Dissonance <output id="score" class="score-value" for="state-headline">–</output></p>
+          <div class="actions">
+            <button id="start-protocol" class="button button-primary" type="button" hidden>Start the protocol</button>
+            <button id="float" class="button button-secondary" type="button" disabled><!--icon:picture-in-picture-->Float over the call</button>
+          </div>
+        </div>
+        <p id="float-note" class="note" hidden></p>
       </section>
+
+      <div id="live-polite" class="visually-hidden" aria-live="polite"></div>
+      <div id="live-assertive" class="visually-hidden" aria-live="assertive"></div>
 
       <div id="alert" class="alert" role="alert" hidden>
         <p></p>
-        <button id="alert-replay" type="button" hidden>Try a replay</button>
+        <button id="alert-replay" class="button button-secondary" type="button" hidden>Try a replay</button>
       </div>
-      <p id="notice-slow" class="notice" role="status" hidden></p>
+      <p id="notice-slow" class="note" role="status" hidden></p>
+
+      <section id="protocol-slot" class="protocol-slot" aria-label="Exorcism protocol" hidden></section>
 
       <section id="start-panel" class="start-panel" aria-labelledby="start-title">
-        <h2 id="start-title">Start listening</h2>
+        <h2 id="start-title" class="title">Start listening</h2>
         <p id="privacy-notice" class="privacy-notice"></p>
-        <button id="start-tab" type="button" disabled>Listen to a call tab</button>
-        <p id="tab-unsupported" hidden></p>
-        <button id="start-mic" type="button" disabled>Use microphone</button>
+        <div class="start-actions">
+          <button id="start-tab" class="button button-primary" type="button" disabled>Listen to a call tab</button>
+          <button id="start-mic" class="button button-secondary" type="button" disabled>Use microphone</button>
+        </div>
+        <p id="tab-unsupported" class="note" hidden></p>
         <section class="replay" aria-labelledby="replay-title">
-          <h3 id="replay-title">Replay</h3>
-          <p id="no-clips" hidden></p>
-          <ul id="clips"></ul>
+          <h3 id="replay-title" class="title">Replay</h3>
+          <p id="no-clips" class="note" hidden></p>
+          <ul id="clips" class="clips"></ul>
         </section>
+        <label class="toggle"><input id="sound-cue" type="checkbox" /> Play a low tone when a doppelgänger is detected</label>
       </section>
 
       <footer class="facts">
-        <dl>
-          <dt>Model</dt>
-          <dd id="model-id">Loading</dd>
-          <dt>Runs on</dt>
-          <dd>This device</dd>
-          <dt>Recording</dt>
-          <dd>None</dd>
+        <dl class="facts-list">
+          <div><dt>Model</dt><dd id="model-id" class="mono">Loading</dd></div>
+          <div><dt>Runs on</dt><dd>This device</dd></div>
+          <div><dt>Recording</dt><dd>None</dd></div>
         </dl>
-        <p id="test-model" hidden></p>
-        <p><a href="../">Back to the landing page</a></p>
+        <p id="test-model" class="note" hidden></p>
+        <p class="legal"><a href="../">Back to the landing page</a> · Icons: Phosphor (MIT)</p>
       </footer>
     </main>
   </body>

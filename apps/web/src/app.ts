@@ -1,5 +1,5 @@
 /**
- * App bootstrap: capture, the Inference_Worker and the views (haunted-ui design,
+ * App bootstrap: capture, the Inference_Worker and the Main_View (haunted-ui design,
  * Architecture). Audio flows source → worklet → worker; this file sees only updates.
  */
 import type { DetectorUpdate, WorkerOutbound } from "@doppelganger/contracts";
@@ -24,18 +24,21 @@ import {
   tabAudioSupported,
   tabSource,
 } from "./features/capture/sources.ts";
-import { displayScore, STATE_COPY } from "./features/haunting/copy.ts";
+import { parseTestState } from "./features/haunting/test-state.ts";
 import {
   loadClips,
   type ReplayClip,
   replayLabel,
   replaySource,
 } from "./features/replay/replay-source.ts";
+import { createMainView } from "./main-view.ts";
 
 export interface AppEvents {
-  /** Every update from the worker, for the haunting views. */
+  /** Every update from the worker, for features such as the protocol panel. */
   onUpdate(fn: (update: DetectorUpdate) => void): void;
   completeProtocol(): void;
+  /** The "Start the protocol" button (primary action in Possession). */
+  readonly startProtocol: HTMLButtonElement;
 }
 
 function el<T extends HTMLElement>(id: string): T {
@@ -46,13 +49,8 @@ function el<T extends HTMLElement>(id: string): T {
 
 const SOURCE_NAMES = { tab: "a call tab", mic: "the microphone", replay: "a replay" } as const;
 
-export function startApp(base: string): AppEvents {
-  const root = el<HTMLElement>("app");
+export function startApp(base: string, mode: string): AppEvents {
   const ui = {
-    headline: el("state-headline"),
-    line: el("state-line"),
-    icon: el("state-icon"),
-    score: el<HTMLOutputElement>("score"),
     notice: el("privacy-notice"),
     tab: el<HTMLButtonElement>("start-tab"),
     tabUnsupported: el("tab-unsupported"),
@@ -91,27 +89,24 @@ export function startApp(base: string): AppEvents {
     createChannel: () => new MessageChannel(),
   });
 
-  function render(update: DetectorUpdate): void {
-    const copy = STATE_COPY[update.state];
-    root.dataset["state"] = update.state;
-    ui.headline.textContent = copy.headline;
-    ui.line.textContent = copy.line;
-    ui.icon.textContent = copy.icon;
-    ui.score.value = update.smoothed === null ? "–" : String(displayScore(update.smoothed));
-  }
-
-  function showError(text: string, replay: boolean): void {
-    ui.alert.querySelector("p")?.replaceChildren(text);
-    ui.alertReplay.hidden = !replay;
-    ui.alert.hidden = false;
-  }
-
   function setActive(source: CaptureSource | null, label = ""): void {
     ui.indicator.hidden = source === null;
     ui.startPanel.hidden = source !== null;
     ui.sourceName.textContent = source ? SOURCE_NAMES[source.kind] : "";
     ui.sessionLabel.textContent = label;
     ui.sessionLabel.hidden = label === "";
+  }
+
+  const stop = () => void controller.stop().then(() => setActive(null));
+  // import.meta.env.MODE is replaced at build time, so production drops this branch entirely.
+  const forced =
+    import.meta.env.MODE === "production" ? null : parseTestState(location.search, mode);
+  const view = createMainView({ forced, stop });
+
+  function showError(text: string, replay: boolean): void {
+    ui.alert.querySelector("p")?.replaceChildren(text);
+    ui.alertReplay.hidden = !replay;
+    ui.alert.hidden = false;
   }
 
   async function begin(source: CaptureSource, label = ""): Promise<void> {
@@ -127,6 +122,7 @@ export function startApp(base: string): AppEvents {
     }
   }
 
+  const tabOk = tabAudioSupported(navigator as Navigator & { userAgentData?: never });
   worker.addEventListener("message", (event: MessageEvent<WorkerOutbound>) => {
     const message = event.data;
     switch (message.type) {
@@ -135,12 +131,15 @@ export function startApp(base: string): AppEvents {
         hopSamples = message.model.hopSamples;
         ui.modelId.textContent = `${message.model.id} ${message.model.version}`;
         ui.testModel.hidden = message.model.role !== "test";
-        ui.tab.disabled = !tabAudioSupported(navigator as Navigator & { userAgentData?: never });
+        ui.tab.disabled = !tabOk;
         ui.mic.disabled = false;
         return;
       case "update":
-        render(message.update);
+        view.update(message.update);
         for (const fn of listeners) fn(message.update);
+        return;
+      case "levels":
+        view.levels(message.bands);
         return;
       case "perf":
         ui.slow.hidden = !isSlowDevice(message.p95, hopSamples);
@@ -158,16 +157,14 @@ export function startApp(base: string): AppEvents {
   });
 
   const devices = navigator.mediaDevices;
-  if (!tabAudioSupported(navigator as Navigator & { userAgentData?: never })) {
+  if (!tabOk) {
     ui.tab.hidden = true;
     ui.tabUnsupported.textContent = TAB_UNSUPPORTED;
     ui.tabUnsupported.hidden = false;
   }
   ui.tab.addEventListener("click", () => void begin(tabSource(devices)));
   ui.mic.addEventListener("click", () => void begin(micSource(devices)));
-  ui.stop.addEventListener("click", () => {
-    void controller.stop().then(() => setActive(null));
-  });
+  ui.stop.addEventListener("click", stop);
   ui.alertReplay.addEventListener("click", () => {
     ui.alert.hidden = true;
     ui.clips.closest("section")?.scrollIntoView({ block: "nearest" });
@@ -183,15 +180,14 @@ export function startApp(base: string): AppEvents {
       for (const clip of clips) {
         const button = document.createElement("button");
         button.type = "button";
+        button.className = "button button-secondary";
         button.textContent = `${clip.title} (${replayLabel(clip)})`;
-        button.addEventListener(
-          "click",
-          () =>
-            void begin(
-              replaySource(clip, replayFolder, (u) => fetch(u)),
-              replayLabel(clip),
-            ),
-        );
+        button.addEventListener("click", () => {
+          void begin(
+            replaySource(clip, replayFolder, (u) => fetch(u)),
+            replayLabel(clip),
+          );
+        });
         const item = document.createElement("li");
         item.append(button);
         ui.clips.append(item);
@@ -200,6 +196,7 @@ export function startApp(base: string): AppEvents {
   );
 
   return {
+    startProtocol: view.startProtocol,
     onUpdate(fn) {
       listeners.push(fn);
     },

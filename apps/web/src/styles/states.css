@@ -1,0 +1,190 @@
+/* State presentation keyed on data-state (design-system "State → color mapping").
+   Each state also changes its headline, icon and Spectre shape, never only color. */
+
+.app {
+  --state-accent: var(--color-text-muted);
+  --state-surface: var(--color-bg);
+  --state-line: var(--color-surface-chip);
+  --spectre-stroke: var(--color-text-muted);
+}
+
+.app[data-state="listening"] {
+  --state-accent: var(--color-info-chip-text);
+  --spectre-stroke: var(--color-info-chip-text);
+}
+
+.app[data-state="mask"] {
+  --state-accent: var(--color-purple);
+  --state-line: var(--color-purple-line);
+  --spectre-stroke: var(--color-purple);
+}
+
+.app[data-state="unease"] {
+  --state-accent: var(--color-ember);
+  --state-surface: var(--color-ember-deep);
+  --state-line: var(--color-ember);
+  --spectre-stroke: var(--color-ember);
+}
+
+.app[data-state="possession"] {
+  --state-accent: var(--color-blood);
+  --state-surface: var(--color-blood-deep);
+  --state-line: var(--color-blood);
+  --spectre-stroke: var(--color-ecto);
+}
+
+.app[data-state="exorcised"] {
+  --state-accent: var(--color-info-line);
+  --state-label: var(--color-info-chip-text);
+  --state-surface: var(--color-info-surface);
+  --state-line: var(--color-info-line);
+  --spectre-stroke: var(--color-info-line);
+}
+
+/* The label is text, so it needs 4.5:1; info-line (3.4:1) is for the glyph only. */
+.state-icon-label {
+  color: var(--state-label, var(--state-accent));
+}
+
+.app[data-state="possession"] .headline {
+  color: var(--color-blood);
+}
+
+/* One glyph per state. */
+.state-glyph {
+  display: none;
+}
+
+.app[data-state="idle"] .state-glyph[data-for="idle"],
+.app[data-state="listening"] .state-glyph[data-for="listening"],
+.app[data-state="mask"] .state-glyph[data-for="mask"],
+.app[data-state="unease"] .state-glyph[data-for="unease"],
+.app[data-state="possession"] .state-glyph[data-for="possession"],
+.app[data-state="exorcised"] .state-glyph[data-for="exorcised"] {
+  display: inline-flex;
+}
+
+/* The Twin: one expression per state. */
+.twin {
+  width: 32px;
+  height: 38px;
+  color: var(--state-accent);
+  transition: color var(--duration-ui) var(--ease-ui);
+}
+
+.twin-sheet {
+  fill: var(--color-surface-avatar);
+  stroke: currentColor;
+  stroke-width: 4;
+}
+
+.twin-line,
+.twin-halo {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.twin-halo {
+  stroke: var(--color-info-line);
+}
+
+.twin-eye {
+  fill: var(--color-text);
+}
+
+.twin-hollow {
+  fill: var(--color-bg-deep);
+  stroke: var(--color-blood);
+  stroke-width: 3;
+}
+
+.app[data-state="possession"] .twin-line {
+  stroke: var(--color-ecto);
+}
+
+.twin-face {
+  display: none;
+}
+
+.app[data-state="idle"] .twin-face[data-face="idle"],
+.app[data-state="listening"] .twin-face[data-face="listening"],
+.app[data-state="mask"] .twin-face[data-face="mask"],
+.app[data-state="unease"] .twin-face[data-face="unease"],
+.app[data-state="possession"] .twin-face[data-face="possession"],
+.app[data-state="exorcised"] .twin-face[data-face="exorcised"] {
+  display: inline;
+}
+
+.twin-body {
+  transform-origin: 60px 70px;
+  transform-box: view-box;
+}
+
+.app[data-state="possession"] .twin-body {
+  transform: rotate(-12deg) scaleX(-1);
+}
+
+/* Possession entrance (haunted-ui Requirement 3): 1.5 s, one time per entry. */
+.app[data-motion="full"][data-sequence="possession"] .state {
+  animation: possession-tint var(--duration-tint) var(--ease-ui) both;
+}
+
+.app[data-motion="full"][data-sequence="possession"] .twin-body {
+  animation: twin-turn 300ms var(--ease-ui) 400ms both;
+}
+
+.app[data-motion="full"][data-sequence="possession"] .headline,
+.app[data-motion="full"][data-sequence="possession"] .supporting {
+  animation: headline-in var(--duration-ui) var(--ease-ui) 700ms both;
+}
+
+.app[data-motion="full"][data-sequence="possession"] .protocol-slot,
+.app[data-motion="full"][data-sequence="possession"] #start-protocol {
+  animation: headline-in var(--duration-ui) var(--ease-ui) 1000ms both;
+}
+
+@keyframes possession-tint {
+  from {
+    background-color: var(--color-bg);
+  }
+  to {
+    background-color: var(--color-blood-deep);
+  }
+}
+
+@keyframes twin-turn {
+  from {
+    transform: none;
+  }
+  to {
+    transform: rotate(-12deg) scaleX(-1);
+  }
+}
+
+@keyframes headline-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion: a single cross-fade, no turning, no tearing updates. */
+.app[data-motion="reduced"][data-sequence="possession"] .state {
+  animation: headline-in var(--duration-ui) linear both;
+}
+
+.app[data-motion="reduced"] .twin-body {
+  transition: none;
+}
+
+/* Test_State_Mode: final presentation, nothing animated, so screenshots are stable. */
+.app[data-test-state] *,
+.app[data-test-state] {
+  animation: none !important;
+  transition: none !important;
+}

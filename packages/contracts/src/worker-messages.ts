@@ -24,6 +24,8 @@ export type WorkerOutbound =
   | { type: "update"; update: DetectorUpdate }
   | { type: "perf"; p50: number; p95: number; windows: number }
   | { type: "stats"; stats: SessionStats }
+  /** 64 band levels in [0, 1] per 100 ms chunk, as plain numbers (haunted-ui 3.1). */
+  | { type: "levels"; bands: number[] }
   | { type: "error"; code: WorkerErrorCode };
 
 /** Worklet → worker, on the dedicated audio port only. */
