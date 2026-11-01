@@ -309,7 +309,7 @@ End with, in this order:
 6. Any risk you noticed for the 09/11 and 16/11 deadlines.
 ```
 
-Outcome: _pending_
+Outcome: Housekeeping and P19 (94ffa26), then detection-model 2.2–2.4, 3.1, 3.3, 5.x, 6.1–6.3, 6.5 and detection-core 1.1 (982aaaa … 20ed40d). The run stopped at 04:58 in the middle of 3.4 with `mise run check` red and no final report; it was resumed in prompt 015.
 
 ## 014 — 2026-10-31 — CLI — annotation (not a prompt)
 
@@ -319,3 +319,22 @@ Entries 008, 009, 010 and 011 were not sent by the developer. They are the promp
 ```
 
 Outcome: Annotation only. The UserPromptSubmit event has no field that tells headless or test sessions apart (see the journal), so from now on test sessions run in a temporary clone of the repository.
+
+## 015 — 2026-11-01 — set by hand — set by hand
+
+```text
+Resuming the overnight run. You stopped around 04:58 in the middle of detection-model 3.4 without a final report. The same autonomy rules from prompt 013 still apply (decide reversible things and record them as P-numbers, skip big deviations and blocked tasks, never push, never commit red).
+
+Reviewer findings to fix first, one commit each:
+1. Finish 3.4. `mise run check` fails in the working tree: dependency-cruiser reports `not-to-unresolvable` for `packages/model-lab/bench-web/page/bench.mjs → /ort/ort.wasm.min.mjs`. Resolve it the narrowest correct way (for example a scoped exclusion for the server-served ORT path, with a comment), keep the ci.yml/.mise.toml/pnpm changes only if they are needed, then commit.
+2. `packages/model-lab/tests/test_evaluate.py:127` contains `/home/<user>/...`, which `scripts/pii_scan.py` flags. Build it from pieces like the existing `"/" + "tmp/x"` case.
+3. Number the spec changes you made without a proposal: P20 = b6bb35c (license allowlist: Zlib, BSL-1.0, Apache-2.0 WITH LLVM-exception), P21 = 9a71cb7 (ONNX-export evaluation, loaders moved to 4.1), P22 = cd5c828 + 4250aa7 (design details). For each: rationale and how to revert.
+4. Write the missing journal entries for 2.2–2.4, 3.1, 3.3, 5.x, 6.1–6.3, 6.5 and detection-core 1.1 (what happened, what tests or hooks caught). From now on, one journal entry per finished spec section.
+5. prompt-logger still writes the surface as "set by hand — set by hand" (entry 013). Find why and fix it with a test, or explain why the event cannot provide it.
+
+Then continue the plan from prompt 013: detection-core from 1.2 to the end (golden vectors), then detection-model 3.2, then audio-capture, haunted-ui (+ haunter review, then kiro-workbench task 4), exorcism-protocol, autopsy-mode browser parts, local-runtime 1–5.
+
+End with the same six-part final report as prompt 013.
+```
+
+Outcome: Reviewer findings 1–5 fixed (a18c590, 848be9f, c08406c, 762e3c8, 66a31b7), then detection-core (all), detection-model 3.2, audio-capture, haunted-ui (+ haunter review, kiro-workbench task 4), exorcism-protocol, autopsy-mode browser and engine parts, and local-runtime 1–4 with the container files: 39 commits from a18c590 to 3f4d468, P23–P30, and `mise run check:all` green. See the journal entries dated 2026-11-01.

@@ -301,3 +301,18 @@ Template:
   - L6: the token in the launch line, accepted and documented.
 
   Adding TrustedHost broke 8 WebSocket tests, because Starlette's `websocket_connect` uses the host `testserver` regardless of `base_url`. The tests now connect with full `ws://127.0.0.1:8787/…` URLs.
+
+## 2026-11-01 — End of the resumed overnight run: check:all green, pip-audit and PyTorch (P30)
+- Kiro surface: CLI
+- Feature used: hook | steering
+- What happened: The first `mise run check:all` of the session failed in `scripts/audit.sh`. pip-audit `--strict` cannot find `torch==2.15.0+cpu` on PyPI. That failure dates from 982aaaa (the model-lab pins), and the overnight run never ran `check:all`, so nobody saw it. **P30:** the audit now rewrites the CPU build's local label (`+cpu`) to the public version before pip-audit queries advisories. The hashes stay as locked. To revert, remove the `sed` line in `scripts/audit.sh`; check:all then fails again until torch is audited some other way. After the fix, `mise run check:all` exits 0 with these results:
+  - Unit tests: 109 web, 136 detector, 53 contracts, 39 tokens, 270 Python.
+  - E2E: 40 in Playwright, plus the bench-web latency run.
+  - Pages: `verify-pages` passes on 3 HTML files and 5 scripts.
+  - Audits: pnpm and pip-audit find no vulnerabilities; the license check passes 137 packages with 0 violations.
+  - The full-history gitleaks scan passes.
+- Effect: Hooks fired throughout the session. `zero-disk-guard` reviewed every saved source file; `spec-lint` checked each spec edit; `token-contrast` rebuilt the tokens after each tokens change; `prompt-logger` logged prompt 015. The specs were changed before the code eleven times, P23–P30, each in its own commit. The custom agents found real bugs that tests and hooks had missed:
+  - **exorcist** (×3): the worker accepted a cross-origin manifest; the summary misreported a synthetic replay as genuine; a crafted 20 MB WAV could OOM the engine.
+  - **haunter**: the first Possession frame could tear twice within 33 ms, which breaks the ≤ 3 flashes per second rule.
+
+  Each of these now has a regression test. Not run in this environment: the Docker image (no Docker in this WSL distro), `/haunt-snapshots` (the shell tool refuses to start a preview server), and anything that needs the developer's recordings or a real call.
