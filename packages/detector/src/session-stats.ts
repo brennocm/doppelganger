@@ -30,7 +30,10 @@ export function createStatsTracker(createdAt: number): StatsTracker {
     transitions: [],
     droppedWindows: 0,
     failedWindows: 0,
+    scoredWindows: 0,
+    meanSmoothed: null,
   };
+  let sum = 0;
   let state: HauntingState = "idle";
   let since = createdAt;
 
@@ -44,7 +47,10 @@ export function createStatsTracker(createdAt: number): StatsTracker {
         transitions: [],
         droppedWindows: 0,
         failedWindows: 0,
+        scoredWindows: 0,
+        meanSmoothed: null,
       };
+      sum = 0;
       state = "idle";
       since = at;
     },
@@ -56,8 +62,11 @@ export function createStatsTracker(createdAt: number): StatsTracker {
     },
     voiced(ms, smoothed) {
       stats.voicedMs += ms;
-      if (smoothed !== null && (stats.peak === null || smoothed > stats.peak))
-        stats.peak = smoothed;
+      if (smoothed === null) return;
+      if (stats.peak === null || smoothed > stats.peak) stats.peak = smoothed;
+      sum += smoothed;
+      stats.scoredWindows += 1;
+      stats.meanSmoothed = sum / stats.scoredWindows;
     },
     dropped() {
       stats.droppedWindows += 1;

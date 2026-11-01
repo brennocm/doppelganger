@@ -1,17 +1,17 @@
 # Implementation Plan
 
-- [ ] 1. Incident summary
-  - [ ] 1.1 Add the `IncidentSummary` schema to `packages/contracts` and regenerate types
+- [x] 1. Incident summary
+  - [x] 1.1 Add the `IncidentSummary` schema to `packages/contracts` and regenerate types
     - _Requirements: 3.1, 3.2_
-  - [ ] 1.2 Implement `buildIncidentSummary` (text and JSON) in `packages/detector`
+  - [x] 1.2 Implement `buildIncidentSummary` (text and JSON) in `packages/detector`
     - _Requirements: 3.1, 3.4, 3.5_
-  - [ ]* 1.3 Write property test for forbidden data exclusion
+  - [x]* 1.3 Write property test for forbidden data exclusion
     - **Property 1: Summary excludes forbidden data**
     - **Validates: Requirements 3.2**
-  - [ ]* 1.4 Write property test for determinism
+  - [x]* 1.4 Write property test for determinism
     - **Property 2: Summary is deterministic**
     - **Validates: Requirements 3.1**
-  - [ ]* 1.5 Write property test for replay disclosure
+  - [x]* 1.5 Write property test for replay disclosure
     - **Property 3: Replay is always disclosed**
     - **Validates: Requirements 3.5**
 

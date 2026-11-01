@@ -12,23 +12,52 @@
     "msInState",
     "transitions",
     "droppedWindows",
-    "failedWindows"
+    "failedWindows",
+    "scoredWindows",
+    "meanSmoothed"
   ],
   "properties": {
-    "startedAt": { "type": ["number", "null"] },
-    "voicedMs": { "type": "number", "minimum": 0 },
-    "peak": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "startedAt": {
+      "type": ["number", "null"]
+    },
+    "voicedMs": {
+      "type": "number",
+      "minimum": 0
+    },
+    "peak": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1
+    },
     "msInState": {
       "type": "object",
       "additionalProperties": false,
       "required": ["idle", "listening", "mask", "unease", "possession", "exorcised"],
       "properties": {
-        "idle": { "type": "number", "minimum": 0 },
-        "listening": { "type": "number", "minimum": 0 },
-        "mask": { "type": "number", "minimum": 0 },
-        "unease": { "type": "number", "minimum": 0 },
-        "possession": { "type": "number", "minimum": 0 },
-        "exorcised": { "type": "number", "minimum": 0 }
+        "idle": {
+          "type": "number",
+          "minimum": 0
+        },
+        "listening": {
+          "type": "number",
+          "minimum": 0
+        },
+        "mask": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unease": {
+          "type": "number",
+          "minimum": 0
+        },
+        "possession": {
+          "type": "number",
+          "minimum": 0
+        },
+        "exorcised": {
+          "type": "number",
+          "minimum": 0
+        }
       }
     },
     "transitions": {
@@ -47,11 +76,28 @@
             "type": "string",
             "enum": ["idle", "listening", "mask", "unease", "possession", "exorcised"]
           },
-          "at": { "type": "number" }
+          "at": {
+            "type": "number"
+          }
         }
       }
     },
-    "droppedWindows": { "type": "integer", "minimum": 0 },
-    "failedWindows": { "type": "integer", "minimum": 0 }
+    "droppedWindows": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "failedWindows": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "scoredWindows": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "meanSmoothed": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1
+    }
   }
 }

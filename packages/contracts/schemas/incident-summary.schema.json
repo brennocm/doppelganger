@@ -1,0 +1,176 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://doppelganger.invalid/schemas/incident-summary.schema.json",
+  "title": "IncidentSummary",
+  "description": "Incident report of one session (exorcism-protocol Requirement 3). No audio, levels, URLs, titles or file names.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "replay",
+    "startedAt",
+    "endedAt",
+    "source",
+    "voicedSeconds",
+    "dissonance",
+    "secondsInState",
+    "transitions",
+    "model",
+    "appVersion",
+    "stepsDone",
+    "note"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "enum": [1]
+    },
+    "replay": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "title": "ReplayInfo",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["label"],
+          "properties": {
+            "label": {
+              "type": "string",
+              "enum": ["genuine", "synthetic"]
+            }
+          }
+        }
+      ]
+    },
+    "startedAt": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{3})?[+-][0-9]{2}:[0-9]{2}$"
+        }
+      ]
+    },
+    "endedAt": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{3})?[+-][0-9]{2}:[0-9]{2}$"
+    },
+    "source": {
+      "type": "string",
+      "enum": ["tab", "mic", "replay"]
+    },
+    "voicedSeconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "dissonance": {
+      "title": "DissonanceSummary",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["peak", "mean"],
+      "properties": {
+        "peak": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "mean": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "secondsInState": {
+      "title": "SecondsInState",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idle", "listening", "mask", "unease", "possession", "exorcised"],
+      "properties": {
+        "idle": {
+          "type": "number",
+          "minimum": 0
+        },
+        "listening": {
+          "type": "number",
+          "minimum": 0
+        },
+        "mask": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unease": {
+          "type": "number",
+          "minimum": 0
+        },
+        "possession": {
+          "type": "number",
+          "minimum": 0
+        },
+        "exorcised": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "title": "SummaryTransition",
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to", "at"],
+        "properties": {
+          "from": {
+            "type": "string",
+            "enum": ["idle", "listening", "mask", "unease", "possession", "exorcised"]
+          },
+          "to": {
+            "type": "string",
+            "enum": ["idle", "listening", "mask", "unease", "possession", "exorcised"]
+          },
+          "at": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{3})?[+-][0-9]{2}:[0-9]{2}$"
+          }
+        }
+      }
+    },
+    "model": {
+      "title": "SummaryModel",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]{0,63}$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        }
+      }
+    },
+    "appVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "stepsDone": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "integer",
+        "enum": [1, 2, 3, 4]
+      },
+      "description": "Protocol steps marked done; unique, so at most 4."
+    },
+    "note": {
+      "type": "string"
+    }
+  }
+}

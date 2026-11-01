@@ -18,6 +18,8 @@ export interface SessionStats {
   transitions: StateTransition[];
   droppedWindows: number;
   failedWindows: number;
+  scoredWindows: number;
+  meanSmoothed: number | null;
 }
 export interface StateTransition {
   from: "idle" | "listening" | "mask" | "unease" | "possession" | "exorcised";

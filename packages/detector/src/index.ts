@@ -19,6 +19,15 @@ export {
   transition,
   validateConfig,
 } from "./haunting-machine.ts";
+export {
+  buildIncidentSummary,
+  duration,
+  isoWithOffset,
+  type Step,
+  SUMMARY_NOTE,
+  type SummaryInput,
+  SummaryInputError,
+} from "./incident-summary.ts";
 export type { InferenceBackend } from "./inference.ts";
 export { type ScoreResult, score, sigmoid } from "./scorer.ts";
 export { createStatsTracker, type StatsTracker } from "./session-stats.ts";

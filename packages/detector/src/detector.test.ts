@@ -174,6 +174,8 @@ describe("session statistics (Requirement 6.1)", () => {
     expect(stats.startedAt).toBe(100);
     expect(stats.voicedMs).toBeCloseTo(3 * (4 / 16), 12);
     expect(stats.peak).toBeCloseTo(0.9, 6);
+    expect(stats.scoredWindows).toBe(3);
+    expect(stats.meanSmoothed).toBeCloseTo(0.9, 6);
     expect(stats.transitions).toEqual([
       { from: "idle", to: "listening", at: 100 },
       { from: "listening", to: "unease", at: 1100 },

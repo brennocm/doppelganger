@@ -56,3 +56,5 @@ class SessionStats(BaseModel):
     transitions: list[StateTransition]
     droppedWindows: int = Field(..., ge=0)
     failedWindows: int = Field(..., ge=0)
+    scoredWindows: int = Field(..., ge=0)
+    meanSmoothed: float | None = Field(..., ge=0.0, le=1.0)
