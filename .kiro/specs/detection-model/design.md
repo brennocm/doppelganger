@@ -50,7 +50,7 @@ Window length equals the model's native input (for AASIST, 64,600 samples). Hop 
 - Splits: Haunt_Set is split by **recording session** (not by window) into dev (calibration and threshold tuning) and eval (reported numbers), so no session leaks between them.
 - Metrics computed with NumPy and scikit-learn; EER by ROC interpolation.
 - The latency benchmark for ORT Web uses a tiny HTML page in `packages/model-lab/bench-web/`, driven by Playwright in headless Chromium.
-- The "after smoothing" false-alarm rate replays window scores through the same EMA and hysteresis as `packages/detector` (implemented in Python from the golden vectors and checked for parity).
+- The "after smoothing" false-alarm rate replays window scores through the same EMA and hysteresis as `packages/detector` (implemented in Python from the golden vectors and checked for parity). Each item is replayed as one capture: `capture-started`, then one `window-scored` per window in time order, all treated as voiced (the clips are speech). `alpha`, `confirmWindows` and `releaseWindows` use the detector defaults, and the thresholds come from the manifest. `falseAlarmRateSmoothed` is the share of genuine windows during which the machine is in Possession, and `detectionRateSmoothed` the share of synthetic windows. The gate (Requirement 3.1) uses `falseAlarmRateSmoothed`. (P24)
 
 ### Calibration
 
