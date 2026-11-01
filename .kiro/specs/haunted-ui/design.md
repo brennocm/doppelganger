@@ -93,6 +93,15 @@ At most 2 luminance changes in the sequence, all within the Spectre's area (well
 
 `SpectreFrame` levels come from the worker as a 64-element `Float32Array` of band energies. These are derived features, not audio, and are allowed on the main thread by the audio-capture spec. The worker message schema in `packages/contracts` is updated to include `{ type: "levels", bands }`.
 
+## Implementation details (P26)
+
+- **Levels message.** `bands` travels as a plain `number[]`, not a `Float32Array`, so audio-capture Property 5 (no typed arrays reach the main thread) still holds. The Spectre converts it to the `Float32Array` of `SpectreFrame`. The worker computes it once per 100 ms chunk (10 per second): a 512-point FFT with a Hann window over the chunk's last 512 samples, 64 log-spaced bands from 80 Hz to 8 kHz, then dB mapped from [−80, −10] to [0, 1].
+- **Tokens location.** The token build writes `packages/tokens/generated/tokens.css` and `generated/tokens.ts`; both are committed, and a test fails when they are stale, as with the contracts. The app imports `@doppelganger/tokens/tokens.css`, so `apps/web/src/styles/` holds only `base.css` and `states.css`. The build script lives in `packages/tokens/build/` and runs on Node's type stripping; `src/` keeps no runtime dependencies.
+- **Test_State_Mode.** It is enabled when `import.meta.env.MODE !== "production"`. Playwright builds with `vite build --mode e2e`; the Pages build uses the default production mode, where the branch is removed at build time. In this mode the Spectre draws one deterministic frame and no animation, and Possession shows its final presentation, so screenshots are stable.
+- **Screenshots.** Playwright's `toHaveScreenshot` baselines for the 6 states × 375/1440 px × full/reduced motion are committed under `apps/web/e2e/`. Accessibility is checked with `@axe-core/playwright` (MPL-2.0, development only, unmodified).
+- **Twin.** One inline SVG in `index.html`. Each expression is a group shown by CSS keyed on `data-state`, so no inline styles are needed under the CSP.
+- **Sound cue.** A 220 Hz sine for 250 ms through Web Audio, enabled by a checkbox that is off on every load. The preference is not stored.
+
 ## Correctness Properties
 
 ### Property 1: State presentation is total
