@@ -22,7 +22,9 @@ export function validateReminder(input: string): ReminderResult {
 export function loadReminder(storage: StorageLike): string | null {
   try {
     const value = storage.getItem(REMINDER_KEY);
-    return value !== null && validateReminder(value).ok ? value : null;
+    if (value === null) return null;
+    const result = validateReminder(value);
+    return result.ok ? result.value : null;
   } catch {
     return null;
   }

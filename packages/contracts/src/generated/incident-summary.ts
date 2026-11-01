@@ -19,7 +19,7 @@ export interface IncidentSummary {
    * Protocol steps marked done; unique, so at most 4.
    */
   stepsDone: (1 | 2 | 3 | 4)[];
-  note: string;
+  note: "The dissonance score is a probabilistic estimate that the voice was synthetic. It is not proof.";
 }
 export interface ReplayInfo {
   label: "genuine" | "synthetic";

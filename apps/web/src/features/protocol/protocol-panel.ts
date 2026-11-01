@@ -61,7 +61,7 @@ export function createProtocolPanel(deps: PanelDeps): ProtocolPanel {
     try {
       await navigator.clipboard.writeText(text);
       fallback.hidden = true;
-      status.textContent = "Summary copied.";
+      status.textContent = "Summary copied. Your system clipboard may keep a copy in its history.";
     } catch {
       // Clipboard unavailable or denied: show the text, selected, to copy by hand.
       fallbackText.value = text;
@@ -82,8 +82,8 @@ export function createProtocolPanel(deps: PanelDeps): ProtocolPanel {
     document.body.append(link);
     link.click();
     link.remove();
-    // Revoke after the click has started the download.
-    setTimeout(() => URL.revokeObjectURL(url), 0);
+    // Revoke once the download has started (some browsers need a moment).
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     status.textContent = "Summary downloaded.";
   });
 

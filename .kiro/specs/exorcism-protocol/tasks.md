@@ -35,8 +35,8 @@
     - **Property 5: Reminder length bound**
     - **Validates: Requirements 2.1**
 
-- [ ] 4. Verification
+- [x] 4. Verification
   - [x] 4.1 Playwright journey: Possession → all steps → Exorcised → copy and download summary
     - _Requirements: 1.3, 3.3_
-  - [ ] 4.2 Run the `exorcist` agent on the feature and record the findings in the journal
+  - [x] 4.2 Run the `exorcist` agent on the feature and record the findings in the journal
     - _Requirements: 3.2_

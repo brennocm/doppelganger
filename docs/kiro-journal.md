@@ -248,3 +248,20 @@ Template:
   - L1–L9: the tint starts from the current surface, and the design note about luminance was corrected; the Twin turn uses a `duration-turn` token; reduced motion is a text cross-fade with the UI easing; repeated announcements are re-announced; errors use `role="status"` and neutral colors; the PiP Spectre pauses and follows motion changes; the fallback shows the state glyph; the tear starts at 150 ms; 10 more contrast pairs were added. All pass.
 
   After: the baselines in this commit. Before: the baselines in ac72ba4 (`git show ac72ba4:apps/web/e2e/states.spec.ts-snapshots/possession-375-no-preference-linux.png`). The `/haunt-snapshots` command (kiro-workbench task 4) is written as a manual steering file that uses the Playwright MCP server. It was **not run**: this session's shell tool refuses to start a preview server, and the command needs one. So haunted-ui 6.2 stays open. The Playwright suite already covers the same 24 views.
+
+## 2026-11-01 — exorcism-protocol: incident summary, protocol panel, code word reminder (P27)
+- Kiro surface: CLI
+- Feature used: spec | PBT | custom agent | hook
+- What happened: The gaps were written into the specs first, as **P27** (b18f288). That covers the summary fields, a new `meanSmoothed`/`scoredWindows` pair in `SessionStats` (the requirement asks for mean dissonance, which the stats did not track), validated-only input strings, a fixed time zone offset for determinism, the panel lifetime, and protocol completion in Test_State_Mode. Then:
+  - Contracts: the `IncidentSummary` schema plus `parseIncidentSummary`, with a test that keeps them in sync.
+  - Detector: `buildIncidentSummary` with Properties 1–3; the text matches the design's example line for line.
+  - App: an in-page checklist with native checkboxes and Property 4; a collapsed "Protocol completed at HH:MM" line in Exorcised; Copy with a selected textarea fallback; Download through a Blob URL; and the reminder setting with Property 5.
+  - Playwright: a keyboard-only journey from Possession to Exorcised, then copy (clipboard text checked) and download (JSON checked with the validator); plus the clipboard-blocked fallback and the reminder round trip.
+- Effect: The first journey run failed for two reasons. The test expected the last checkbox to stay visible, but completing the protocol collapses the panel. And the summary waited forever when the worker had no detector to answer `stats`; the worker now always answers. The **exorcist** agent found no critical or high issues, two mediums and five lows:
+  - M1, a real honesty bug: a synthetic replay was summarized as "clip labelled genuine", because the clip label was never passed and the builder defaulted to genuine. Fixed at the call site, and the builder now refuses a replay without a label. A test covers the synthetic case.
+  - M2: on GitHub Pages every project of one account shares an origin, so other pages can read the reminder. The settings note now says so, and the claim "stays in this browser only" was removed.
+  - L1: a stored reminder is now returned trimmed.
+  - L2: the builder now checks its own JSON against the validator and fails closed.
+  - L3: `note` is pinned with `const`.
+  - L4: the copy status mentions clipboard history.
+  - L5: Blob URL revocation waits 1 s.

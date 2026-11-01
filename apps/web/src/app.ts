@@ -207,6 +207,7 @@ export function startApp(base: string, mode: string): AppEvents {
           void begin(
             replaySource(clip, replayFolder, (u) => fetch(u)),
             replayLabel(clip),
+            clip.label,
           );
         });
         const item = document.createElement("li");

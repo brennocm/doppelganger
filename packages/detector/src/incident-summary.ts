@@ -3,7 +3,12 @@
  * No audio, levels, URLs, titles or file names; the only input strings are validated IDs
  * and versions, so nothing user-supplied can reach it.
  */
-import type { HauntingState, IncidentSummary, SessionStats } from "@doppelganger/contracts";
+import {
+  type HauntingState,
+  type IncidentSummary,
+  parseIncidentSummary,
+  type SessionStats,
+} from "@doppelganger/contracts";
 import { HAUNTING_STATES } from "./haunting-machine.ts";
 
 export type Step = 1 | 2 | 3 | 4;
@@ -71,9 +76,16 @@ function check(input: SummaryInput): void {
 
 export function buildIncidentSummary(input: SummaryInput): { text: string; json: IncidentSummary } {
   check(input);
+  if (input.source === "replay" && input.replayLabel === undefined) {
+    // Never guess a clip's label: a wrong label would misreport the demo.
+    throw new SummaryInputError("a replay summary needs the clip label");
+  }
   const { stats, timeZoneOffsetMinutes: tz } = input;
   const steps = [...new Set(input.stepsDone)].sort() as Step[];
-  const replay = input.source === "replay" ? { label: input.replayLabel ?? "genuine" } : null;
+  const replay =
+    input.source === "replay" && input.replayLabel !== undefined
+      ? { label: input.replayLabel }
+      : null;
   const secondsInState = Object.fromEntries(
     HAUNTING_STATES.map((s) => [s, Math.round(stats.msInState[s] / 100) / 10]),
   ) as Record<HauntingState, number>;
@@ -96,6 +108,10 @@ export function buildIncidentSummary(input: SummaryInput): { text: string; json:
     stepsDone: steps,
     note: SUMMARY_NOTE,
   };
+  // Fail closed: the summary leaves the page only if it matches its schema.
+  const checked = parseIncidentSummary(json);
+  if (!checked.ok)
+    throw new SummaryInputError(`summary does not match its schema (${checked.error})`);
 
   const lines: string[] = [];
   lines.push(

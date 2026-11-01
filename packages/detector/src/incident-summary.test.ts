@@ -95,6 +95,18 @@ describe("buildIncidentSummary", () => {
     expect(() => buildIncidentSummary({ ...base, ...override })).toThrow(SummaryInputError);
   });
 
+  it("names the clip label of a synthetic replay and refuses a replay without one", () => {
+    const { text } = buildIncidentSummary({ ...base, source: "replay", replayLabel: "synthetic" });
+    expect(text.split("\n")[0]).toContain("clip labelled synthetic");
+    expect(() => buildIncidentSummary({ ...base, source: "replay" })).toThrow(SummaryInputError);
+  });
+
+  it("fails closed when the stats would break the schema", () => {
+    expect(() => buildIncidentSummary({ ...base, stats: stats({ voicedMs: Number.NaN }) })).toThrow(
+      SummaryInputError,
+    );
+  });
+
   it("formats offsets and durations", () => {
     expect(isoWithOffset(Date.UTC(2026, 0, 1, 0, 0, 0), 330)).toBe("2026-01-01T05:30:00+05:30");
     expect(isoWithOffset(Date.UTC(2026, 0, 1, 0, 0, 0), 0)).toBe("2026-01-01T00:00:00+00:00");

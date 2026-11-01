@@ -39,7 +39,7 @@ test("the protocol leads from Possession to Exorcised and produces a clean summa
   for (const step of STEPS) await expect(page.getByRole("checkbox", { name: step })).toBeChecked();
 
   await page.getByRole("button", { name: "Copy summary" }).click();
-  await expect(page.getByText("Summary copied.")).toBeVisible();
+  await expect(page.getByText(/^Summary copied\./)).toBeVisible();
   const text = await page.evaluate(() => navigator.clipboard.readText());
   expect(text.split("\n")[0]).toBe("Doppelgänger incident summary");
   expect(text).toContain("Protocol steps done: 1, 2, 3, 4");

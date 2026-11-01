@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from enum import IntEnum, StrEnum
 from pydantic import BaseModel, ConfigDict, Field, RootModel
+from typing import Literal
 
 
 class SchemaVersion(IntEnum):
@@ -110,4 +111,4 @@ class IncidentSummary(BaseModel):
     model: SummaryModel = Field(..., title='SummaryModel')
     appVersion: str = Field(..., pattern='^[0-9]+\\.[0-9]+\\.[0-9]+$')
     stepsDone: list[StepsDoneEnum] = Field(..., description='Protocol steps marked done; unique, so at most 4.')
-    note: str
+    note: Literal['The dissonance score is a probabilistic estimate that the voice was synthetic. It is not proof.']

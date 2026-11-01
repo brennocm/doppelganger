@@ -170,7 +170,8 @@
       "description": "Protocol steps marked done; unique, so at most 4."
     },
     "note": {
-      "type": "string"
+      "type": "string",
+      "const": "The dissonance score is a probabilistic estimate that the voice was synthetic. It is not proof."
     }
   }
 }

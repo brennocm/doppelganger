@@ -5,6 +5,10 @@ export type SummaryResult = { ok: true; summary: IncidentSummary } | { ok: false
 
 type Check = (value: unknown) => boolean;
 
+/** The fixed note; the schema pins it with "const", so no free text can ride in it. */
+export const SUMMARY_NOTE_TEXT =
+  "The dissonance score is a probabilistic estimate that the voice was synthetic. It is not proof.";
+
 const STATES = ["idle", "listening", "mask", "unease", "possession", "exorcised"] as const;
 const ISO =
   /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{3})?[+-][0-9]{2}:[0-9]{2}$/;
@@ -53,7 +57,7 @@ export const SUMMARY_FIELDS: Readonly<Record<string, Check>> = {
   model: object({ id: str(MODEL_ID), version: str(VERSION) }),
   appVersion: str(VERSION),
   stepsDone: (v) => Array.isArray(v) && new Set(v).size === v.length && v.every(oneOf(1, 2, 3, 4)),
-  note: (v) => typeof v === "string",
+  note: oneOf(SUMMARY_NOTE_TEXT),
 };
 
 /** Validate JSON (for example a downloaded summary) as an IncidentSummary. */

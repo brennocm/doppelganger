@@ -72,6 +72,12 @@ describe("Code_Word_Reminder", () => {
     expect(loadReminder(storage)).toBeNull();
   });
 
+  it("returns a stored value trimmed, so padding cannot slip past the limit", () => {
+    const storage = memoryStorage();
+    storage.setItem(REMINDER_KEY, `${" ".repeat(10_000)}x`);
+    expect(loadReminder(storage)).toBe("x");
+  });
+
   it("ignores a stored value that is too long", () => {
     const storage = memoryStorage();
     storage.setItem(REMINDER_KEY, "x".repeat(81));

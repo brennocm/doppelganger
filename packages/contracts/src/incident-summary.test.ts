@@ -51,6 +51,7 @@ describe("parseIncidentSummary", () => {
     ["model", { id: "Model/../x", version: "1.0.0" }],
     ["transitions", [{ from: "idle", to: "listening", at: 5 }]],
     ["secondsInState", { idle: 0 }],
+    ["note", "Call me back at +1 555 0100"],
   ])("rejects an invalid %s", (key, value) => {
     expect(parseIncidentSummary({ ...example, [key]: value })).toEqual({
       ok: false,
