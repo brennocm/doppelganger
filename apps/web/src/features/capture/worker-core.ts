@@ -10,6 +10,7 @@ import type {
   WorkerOutbound,
 } from "@doppelganger/contracts";
 import {
+  createAutopsyRunner,
   createDetector,
   createStatsTracker,
   type Detector,
@@ -32,6 +33,8 @@ export interface WorkerCoreDeps {
   wasmSupported: boolean;
   /** The worker's own origin; manifests from anywhere else are refused. */
   origin: string;
+  /** Yields to the event loop between autopsy batches, so a cancel message can arrive. */
+  yieldNow?: () => Promise<void>;
 }
 
 export interface PortLike {
@@ -52,6 +55,9 @@ function percentile(sorted: number[], q: number): number {
 export function createWorkerCore(deps: WorkerCoreDeps): WorkerCore {
   let detector: Detector | null = null;
   let capturing = false;
+  let loaded: { manifest: ModelManifest; backend: InferenceBackend } | null = null;
+  let autopsyCancelled = false;
+  let autopsyRunning = false;
   const timings: number[] = [];
   let runs = 0;
 
@@ -100,13 +106,43 @@ export function createWorkerCore(deps: WorkerCoreDeps): WorkerCore {
         clock: deps.clock,
       });
       detector.subscribe((update) => deps.post({ type: "update", update }));
-      const { id, version, role, hopSamples } = manifest;
-      deps.post({ type: "ready", model: { id, version, role, hopSamples } });
+      loaded = { manifest, backend };
+      const { id, version, role, hopSamples, thresholds } = manifest;
+      deps.post({ type: "ready", model: { id, version, role, hopSamples, thresholds } });
     } catch (error) {
       deps.post({
         type: "error",
         code: error instanceof IntegrityError ? "model-integrity" : "model-load",
       });
+    }
+  }
+
+  async function autopsy(samples: Float32Array): Promise<void> {
+    // One model session: no autopsy while live capture runs, and one autopsy at a time.
+    if (loaded === null || capturing || autopsyRunning || !(samples instanceof Float32Array)) {
+      deps.post({ type: "autopsy-cancelled" });
+      return;
+    }
+    autopsyRunning = true;
+    autopsyCancelled = false;
+    try {
+      const runner = createAutopsyRunner({
+        manifest: loaded.manifest,
+        backend: loaded.backend,
+        config: resolveConfig(loaded.manifest),
+        ...(deps.yieldNow === undefined ? {} : { yieldNow: deps.yieldNow }),
+      });
+      const outcome = await runner.run(samples, {
+        onProgress: (done, total) => deps.post({ type: "autopsy-progress", done, total }),
+        isCancelled: () => autopsyCancelled,
+      });
+      deps.post(
+        outcome.cancelled
+          ? { type: "autopsy-cancelled" }
+          : { type: "autopsy-report", report: outcome.report },
+      );
+    } finally {
+      autopsyRunning = false;
     }
   }
 
@@ -137,6 +173,12 @@ export function createWorkerCore(deps: WorkerCoreDeps): WorkerCore {
           return;
         case "protocol-completed":
           detector?.completeProtocol();
+          return;
+        case "autopsy":
+          await autopsy(message.samples);
+          return;
+        case "autopsy-cancel":
+          autopsyCancelled = true;
           return;
         case "stats":
           // Always answer, so a summary never waits: before the model loads, the session is empty.

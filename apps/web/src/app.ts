@@ -3,7 +3,8 @@
  * Architecture). Audio flows source → worklet → worker; this file sees only updates.
  */
 import type { DetectorUpdate, SessionStats, WorkerOutbound } from "@doppelganger/contracts";
-import { buildIncidentSummary } from "@doppelganger/detector";
+import { buildIncidentSummary, DEFAULT_CONFIG } from "@doppelganger/detector";
+import { createAutopsyView } from "./features/autopsy/autopsy-view.ts";
 import { createCaptureController } from "./features/capture/capture-controller.ts";
 import workletUrl from "./features/capture/capture-processor.ts?worker&url";
 import {
@@ -79,6 +80,7 @@ export function startApp(base: string, mode: string): AppEvents {
   let hopSamples = 16000;
   let ready = false;
   let model = { id: "unknown", version: "0.0.0" };
+  let thresholds: { unease: number; possession: number } = DEFAULT_CONFIG;
   let session: { kind: CaptureSource["kind"]; label?: "genuine" | "synthetic" } = { kind: "tab" };
   const statsWaiting: ((stats: SessionStats) => void)[] = [];
 
@@ -96,6 +98,8 @@ export function startApp(base: string, mode: string): AppEvents {
   });
 
   function setActive(source: CaptureSource | null, label = ""): void {
+    // Live capture and autopsy share one model session.
+    autopsy.setEnabled(source === null && ready);
     ui.indicator.hidden = source === null;
     ui.startPanel.hidden = source !== null;
     ui.sourceName.textContent = source ? SOURCE_NAMES[source.kind] : "";
@@ -103,6 +107,13 @@ export function startApp(base: string, mode: string): AppEvents {
     ui.sessionLabel.hidden = label === "";
   }
 
+  const autopsy = createAutopsyView({
+    analyze: (samples) => worker.postMessage({ type: "autopsy", samples }, [samples.buffer]),
+    cancel: () => worker.postMessage({ type: "autopsy-cancel" }),
+    model: () => model,
+    thresholds: () => thresholds,
+  });
+  autopsy.setEnabled(false);
   const stop = () => void controller.stop().then(() => setActive(null));
   // import.meta.env.MODE is replaced at build time, so production drops this branch entirely.
   const forced =
@@ -148,10 +159,13 @@ export function startApp(base: string, mode: string): AppEvents {
         ready = true;
         hopSamples = message.model.hopSamples;
         model = { id: message.model.id, version: message.model.version };
+        // The worker's verdicts use the manifest thresholds; draw the same ones.
+        thresholds = message.model.thresholds;
         ui.modelId.textContent = `${message.model.id} ${message.model.version}`;
         ui.testModel.hidden = message.model.role !== "test";
         ui.tab.disabled = !tabOk;
         ui.mic.disabled = false;
+        autopsy.setEnabled(true);
         return;
       case "update":
         view.update(message.update);
@@ -169,6 +183,15 @@ export function startApp(base: string, mode: string): AppEvents {
         return;
       case "stats":
         for (const resolve of statsWaiting.splice(0)) resolve(message.stats);
+        return;
+      case "autopsy-progress":
+        autopsy.progress(message.done, message.total);
+        return;
+      case "autopsy-report":
+        autopsy.report(message.report);
+        return;
+      case "autopsy-cancelled":
+        autopsy.cancelled();
         return;
     }
   });

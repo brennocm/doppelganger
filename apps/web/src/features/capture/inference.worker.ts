@@ -26,6 +26,7 @@ const core = createWorkerCore({
   now: () => performance.now(),
   wasmSupported: typeof WebAssembly === "object",
   origin: location.origin,
+  yieldNow: () => new Promise((resolve) => setTimeout(resolve, 0)),
 });
 
 scope.onmessage = (event) => {

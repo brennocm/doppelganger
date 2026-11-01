@@ -12,22 +12,22 @@
     - **Property 3: Report has no audio**
     - **Validates: Requirements 3.5**
 
-- [ ] 2. Intake and batch analysis
-  - [ ] 2.1 Implement drag-and-drop and the picker with size check before reading, then decoding, duration check and supported-format listing
+- [x] 2. Intake and batch analysis
+  - [x] 2.1 Implement drag-and-drop and the picker with size check before reading, then decoding, duration check and supported-format listing
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
-  - [ ]* 2.2 Write property test for limits enforced before decoding
+  - [x]* 2.2 Write property test for limits enforced before decoding
     - **Property 4: Limits enforced before decoding**
     - **Validates: Requirements 1.3**
-  - [ ] 2.3 Add batch mode with progress and cancellation to the worker
+  - [x] 2.3 Add batch mode with progress and cancellation to the worker
     - _Requirements: 2.1, 2.2, 2.3_
   - [x]* 2.4 Write property test for batch equals streaming
     - **Property 2: Batch equals streaming**
     - **Validates: Requirements 2.1**
 
-- [ ] 3. Report view
-  - [ ] 3.1 Implement the timeline canvas, thresholds, state segments, playhead and keyboard control
+- [x] 3. Report view
+  - [x] 3.1 Implement the timeline canvas, thresholds, state segments, playhead and keyboard control
     - _Requirements: 3.1, 3.2_
-  - [ ] 3.2 Implement the verdict block and JSON download
+  - [x] 3.2 Implement the verdict block and JSON download
     - _Requirements: 3.4, 3.5_
 
 - [ ] 4. Pro engine option (after local-runtime)

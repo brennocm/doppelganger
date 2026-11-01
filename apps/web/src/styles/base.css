@@ -509,3 +509,100 @@ ul {
     padding: var(--space-4);
   }
 }
+
+/* Autopsy (autopsy-mode). */
+.autopsy {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-surface-chip);
+  background: var(--color-surface-sidebar);
+}
+
+.drop-zone {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-line-strong);
+  transition: border-color var(--duration-ui) var(--ease-ui);
+}
+
+.drop-zone[data-over="true"] {
+  border-color: var(--color-purple);
+}
+
+.drop-zone label.button:has(+ input:focus-visible) {
+  outline: var(--focus-width) solid var(--color-purple);
+  outline-offset: var(--focus-offset);
+}
+
+.autopsy-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.autopsy-progress progress {
+  flex: 1 1 160px;
+  accent-color: var(--color-purple);
+}
+
+.autopsy-report {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.verdict-line {
+  font: var(--type-title);
+  color: var(--color-text);
+}
+
+.verdict[data-verdict="likely-synthetic"] {
+  color: var(--color-blood);
+}
+
+.verdict[data-verdict="inconclusive"] {
+  color: var(--color-ember);
+}
+
+.verdict[data-verdict="likely-human"] {
+  color: var(--color-purple);
+}
+
+.autopsy-timeline {
+  display: block;
+  width: 100%;
+  height: 160px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.autopsy-report audio {
+  width: 100%;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+
+.key {
+  display: inline-block;
+  width: 16px;
+  height: 0;
+  border-top: 2px solid var(--color-text-secondary);
+}
+
+.key-unease {
+  border-top: 2px dashed var(--color-ember);
+}
+
+.key-possession {
+  border-top: 2px dashed var(--color-blood);
+}

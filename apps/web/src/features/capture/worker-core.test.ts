@@ -67,7 +67,13 @@ describe("worker core", () => {
     await core.handle({ type: "init", manifestUrl: "https://app.example/models/m.json" });
     expect(posted[0]).toEqual({
       type: "ready",
-      model: { id: MANIFEST.id, version: MANIFEST.version, role: "test", hopSamples: 1600 },
+      model: {
+        id: MANIFEST.id,
+        version: MANIFEST.version,
+        role: "test",
+        hopSamples: 1600,
+        thresholds: MANIFEST.thresholds,
+      },
     });
     await core.handle({ type: "audio-port" }, [port]);
     await core.handle({ type: "start" });
@@ -142,6 +148,33 @@ describe("worker core", () => {
     port.onmessage?.(new MessageEvent("message", { data: bogus }));
     await flush();
     expect(posted.filter((m) => m.type === "update" && m.update.windowIndex !== null)).toEqual([]);
+  });
+
+  it("analyzes a file in batch mode, reports progress, and can be cancelled", async () => {
+    const { core, posted } = setup();
+    await core.handle({ type: "init", manifestUrl: "https://app.example/m.json" });
+    await core.handle({ type: "autopsy", samples: voiced(1600 * 12) });
+    expect(
+      posted
+        .filter((m) => m.type === "autopsy-progress")
+        .map((m) => m.type === "autopsy-progress" && m.done),
+    ).toEqual([10, 12]);
+    const report = posted.find((m) => m.type === "autopsy-report");
+    expect(report?.type === "autopsy-report" && report.report.windows).toHaveLength(12);
+    expect(holdsBinary(report)).toBe(false);
+    posted.length = 0;
+    const running = core.handle({ type: "autopsy", samples: voiced(1600 * 40) });
+    await core.handle({ type: "autopsy-cancel" });
+    await running;
+    expect(posted.at(-1)).toEqual({ type: "autopsy-cancelled" });
+  });
+
+  it("refuses an autopsy while live capture runs", async () => {
+    const { core, posted } = setup();
+    await core.handle({ type: "init", manifestUrl: "https://app.example/m.json" });
+    await core.handle({ type: "start" });
+    await core.handle({ type: "autopsy", samples: voiced(1600 * 4) });
+    expect(posted.at(-1)).toEqual({ type: "autopsy-cancelled" });
   });
 
   // Feature: audio-capture, Property 5: Main thread never receives audio

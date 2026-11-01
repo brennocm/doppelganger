@@ -152,6 +152,36 @@
         <label class="toggle"><input id="sound-cue" type="checkbox" /> Play a low tone when a doppelgänger is detected</label>
       </section>
 
+      <section id="autopsy" class="autopsy" aria-labelledby="autopsy-title">
+        <h2 id="autopsy-title" class="title">Autopsy</h2>
+        <p class="note">Check a recorded voice message. The file is read in this tab and never uploaded.</p>
+        <div id="drop-zone" class="drop-zone">
+          <label class="button button-secondary" for="autopsy-file">Choose a recording</label>
+          <input id="autopsy-file" class="visually-hidden" type="file" accept="audio/*" />
+          <p class="note">or drop it here. Up to 20 MB and 5 minutes.</p>
+          <p id="autopsy-formats" class="note"></p>
+        </div>
+        <div id="autopsy-progress" class="autopsy-progress" hidden>
+          <label for="autopsy-bar" class="note">Windows analyzed <span id="autopsy-percent" class="mono">0%</span></label>
+          <progress id="autopsy-bar" max="100" value="0"></progress>
+          <button id="autopsy-cancel" class="button button-secondary" type="button">Cancel</button>
+        </div>
+        <p id="autopsy-status" class="note" role="status"></p>
+        <div id="autopsy-report" class="autopsy-report" hidden>
+          <p class="verdict-line">Verdict: <strong id="autopsy-verdict" class="verdict"></strong></p>
+          <p id="autopsy-reason" class="supporting"></p>
+          <p class="note">The dissonance score is a probabilistic estimate that the voice was synthetic. It is not proof. Model: <span id="autopsy-model" class="mono"></span></p>
+          <canvas id="autopsy-timeline" class="autopsy-timeline" tabindex="0" role="slider" aria-label="Recording timeline: left and right arrows move one window, Enter plays or pauses" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"></canvas>
+          <p class="legend note"><span class="key key-score"></span>Smoothed score <span class="key key-unease"></span>Unease threshold <span class="key key-possession"></span>Possession threshold</p>
+          <!-- biome-ignore lint/a11y/useMediaCaption: this plays the user's own file; captions would need a transcription, which the security steering forbids. The verdict and timeline carry the result in text. -->
+          <audio id="autopsy-audio" controls preload="metadata"></audio>
+          <div class="actions">
+            <button id="autopsy-download" class="button button-secondary" type="button">Download report</button>
+            <button id="autopsy-close" class="button button-secondary" type="button">Close report</button>
+          </div>
+        </div>
+      </section>
+
       <footer class="facts">
         <dl class="facts-list">
           <div><dt>Model</dt><dd id="model-id" class="mono">Loading</dd></div>

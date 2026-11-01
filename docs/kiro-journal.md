@@ -265,3 +265,13 @@ Template:
   - L3: `note` is pinned with `const`.
   - L4: the copy status mentions clipboard history.
   - L5: Blob URL revocation waits 1 s.
+
+## 2026-11-01 — autopsy-mode (browser parts): report schema, batch analysis, timeline view (P28)
+- Kiro surface: CLI
+- Feature used: spec | PBT | hook
+- What happened: The design gaps were written first, as **P28** (a571470). `decodeAudioData` needs an `AudioContext`, which workers lack, so decode, downmix and resample run on the main thread, on a file the user already holds. The 16 kHz samples are *transferred* to the worker. The report is numbers only, so audio-capture Property 5 still holds. Other gaps: the batch runner, the verdict reasons as an enum, 20 MiB checked before reading, and the list of supported formats. Then:
+  - Detector and contracts: the `AutopsyReport` schema and validator. `deriveVerdict` replays `transition` and does not reimplement it (Property 1). `createAutopsyRunner` uses the same windower, VAD, scorer and smoother as live detection. Property 2 shows its per-window scores equal those of the streaming detector fed one hop at a time.
+  - Report: schema-valid JSON whose size grows only with windows and segments (Property 3). The worker has batch mode with progress every 10 windows, a macrotask yield so cancel can arrive, and a refusal while live capture runs. Intake rejects files over 20 MB before reading them (Property 4).
+  - View: a timeline canvas with thresholds, state segments and the playhead. It works as a keyboard slider, with the arrow keys moving one window and Enter for play/pause. Playback uses a Blob URL that is revoked on close. The view also shows the verdict with the "not proof" note and the model ID, and offers a JSON download.
+  - Playwright: three tests with in-memory synthetic WAVs (no file on disk): the full flow, the size and decode refusals with the design's wording, and cancel. Total E2E: 40 tests.
+- Effect: The timeline first drew the default thresholds, while the worker's verdict uses the manifest's. The `ready` message now carries the manifest thresholds, so drawing and verdict always agree. A hand-made verdict mutant (`reachedUnease && reachedPossession`) survived. On inspection it is equivalent: a Possession entry always passes through Unease while the confirmation counts up. Two non-equivalent mutants (an off-by-one in the speech minimum, and Unease swapped for Mask) were both caught. Not done: section 4 (the Pro engine option) needs local-runtime. Task 5.1 needs the developer's replay clips (detection-model 7.2), and the verdicts recorded today come from the synthetic model, which detects nothing.

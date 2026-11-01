@@ -3,6 +3,7 @@
  * (audio-capture design, P25). Hand-written TS: they carry MessagePorts and typed arrays,
  * which JSON Schema cannot describe, and only TS uses them.
  */
+import type { AutopsyReport } from "./generated/autopsy-report.ts";
 import type { DetectorUpdate } from "./generated/detector-update.ts";
 import type { ModelManifest } from "./generated/model-manifest.ts";
 import type { SessionStats } from "./generated/session-stats.ts";
@@ -14,18 +15,27 @@ export type WorkerInbound =
   | { type: "start" }
   | { type: "stop" }
   | { type: "protocol-completed" }
-  | { type: "stats" };
+  | { type: "stats" }
+  /** 16 kHz mono samples of a file to analyze; transferred, so the sender keeps no copy. */
+  | { type: "autopsy"; samples: Float32Array }
+  | { type: "autopsy-cancel" };
 
 export type WorkerErrorCode = "model-integrity" | "model-load" | "wasm-unsupported";
 
 /** Worker → main thread. Never carries audio (audio-capture Requirement 4.4). */
 export type WorkerOutbound =
-  | { type: "ready"; model: Pick<ModelManifest, "id" | "version" | "role" | "hopSamples"> }
+  | {
+      type: "ready";
+      model: Pick<ModelManifest, "id" | "version" | "role" | "hopSamples" | "thresholds">;
+    }
   | { type: "update"; update: DetectorUpdate }
   | { type: "perf"; p50: number; p95: number; windows: number }
   | { type: "stats"; stats: SessionStats }
   /** 64 band levels in [0, 1] per 100 ms chunk, as plain numbers (haunted-ui 3.1). */
   | { type: "levels"; bands: number[] }
+  | { type: "autopsy-progress"; done: number; total: number }
+  | { type: "autopsy-report"; report: AutopsyReport }
+  | { type: "autopsy-cancelled" }
   | { type: "error"; code: WorkerErrorCode };
 
 /** Worklet → worker, on the dedicated audio port only. */
