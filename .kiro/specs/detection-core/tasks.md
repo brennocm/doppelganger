@@ -20,20 +20,20 @@
     - **Validates: Requirements 1.3**
 
 - [ ] 3. Voice activity
-  - [ ] 3.1 Implement `isVoiced` with configurable thresholds and unit tests on silence, noise and speech fixtures
+  - [x] 3.1 Implement `isVoiced` with configurable thresholds and unit tests on silence, noise and speech fixtures
     - _Requirements: 2.1, 2.2_
   - [ ] 3.2 Add the optional neural VAD path through `InferenceBackend`
     - _Requirements: 2.3_
 
-- [ ] 4. Scorer and smoother
-  - [ ] 4.1 Implement `score` with manifest calibration; assert the golden vectors
+- [x] 4. Scorer and smoother
+  - [x] 4.1 Implement `score` with manifest calibration; assert the golden vectors
     - _Requirements: 3.1, 3.2, 3.3_
-  - [ ]* 4.2 Write property test for score bounds and rejection
+  - [x]* 4.2 Write property test for score bounds and rejection
     - **Property 4: Score bounds and rejection**
     - **Validates: Requirements 3.1, 3.2**
-  - [ ] 4.3 Implement `createSmoother`
+  - [x] 4.3 Implement `createSmoother`
     - _Requirements: 4.1, 4.2, 4.3_
-  - [ ]* 4.4 Write property test for smoother range
+  - [x]* 4.4 Write property test for smoother range
     - **Property 5: Smoother stays in range**
     - **Validates: Requirements 4.1**
 
