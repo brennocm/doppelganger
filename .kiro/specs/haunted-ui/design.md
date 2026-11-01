@@ -79,7 +79,7 @@ export function createSpectre(canvas: HTMLCanvasElement, motion: "full" | "reduc
 | 700 ms | Headline "Doppelgänger detected" replaces the previous one; assertive announcement |
 | 1000 ms | Protocol panel enters (200 ms) |
 
-At most 2 luminance changes in the sequence, all within the Spectre's area (well under 25% of the viewport).
+At most 2 luminance changes in the sequence. The tint covers the state card. It is a single one-way change of about 0.006 relative luminance, below the 0.1 threshold for a general flash, and it is never followed by an opposing change, so it is not a flash. The tear's displacement updates stay inside the Spectre's area, well under 25 % of the viewport, and the scheduler allows at most 3 per second, including across state and motion changes.
 
 ### Widget
 
