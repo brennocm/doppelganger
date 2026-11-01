@@ -1,0 +1,124 @@
+{
+  "description": "EMA smoothing and Haunting_Machine transitions (detection-core design). Smoothing restarts after capture-stopped.",
+  "cases": [
+    {
+      "name": "clone ramps up",
+      "config": {"alpha":0.4,"unease":0.4,"possession":0.7,"release":0.5,"confirmWindows":3,"releaseWindows":5,"silenceMs":2500,"maxPending":2,"vad":{"minRms":0.01,"maxZeroCrossingRate":0.35,"minVoicedFraction":0.3}},
+      "steps": [
+        {"event":{"type":"capture-started","at":0},"expect":{"state":"listening","smoothed":null}},
+        {"event":{"type":"window-scored","at":1000,"raw":0.1},"expect":{"state":"mask","smoothed":0.1}},
+        {"event":{"type":"window-scored","at":2000,"raw":0.2},"expect":{"state":"mask","smoothed":0.14}},
+        {"event":{"type":"window-scored","at":3000,"raw":0.3},"expect":{"state":"mask","smoothed":0.20400000000000001}},
+        {"event":{"type":"window-scored","at":4000,"raw":0.6},"expect":{"state":"mask","smoothed":0.3624}},
+        {"event":{"type":"window-scored","at":5000,"raw":0.9},"expect":{"state":"unease","smoothed":0.5774400000000001}},
+        {"event":{"type":"window-scored","at":6000,"raw":0.95},"expect":{"state":"unease","smoothed":0.726464}},
+        {"event":{"type":"window-scored","at":7000,"raw":0.95},"expect":{"state":"unease","smoothed":0.8158784}},
+        {"event":{"type":"window-scored","at":8000,"raw":0.95},"expect":{"state":"possession","smoothed":0.8695270399999999}},
+        {"event":{"type":"window-scored","at":9000,"raw":0.95},"expect":{"state":"possession","smoothed":0.901716224}},
+        {"event":{"type":"window-scored","at":10000,"raw":0.9},"expect":{"state":"possession","smoothed":0.9010297344}}
+      ]
+    },
+    {
+      "name": "genuine speech with isolated spikes",
+      "config": {"alpha":0.4,"unease":0.4,"possession":0.7,"release":0.5,"confirmWindows":3,"releaseWindows":5,"silenceMs":2500,"maxPending":2,"vad":{"minRms":0.01,"maxZeroCrossingRate":0.35,"minVoicedFraction":0.3}},
+      "steps": [
+        {"event":{"type":"capture-started","at":0},"expect":{"state":"listening","smoothed":null}},
+        {"event":{"type":"window-scored","at":1000,"raw":0.1},"expect":{"state":"mask","smoothed":0.1}},
+        {"event":{"type":"window-scored","at":2000,"raw":0.95},"expect":{"state":"unease","smoothed":0.44}},
+        {"event":{"type":"window-scored","at":3000,"raw":0.1},"expect":{"state":"mask","smoothed":0.30400000000000005}},
+        {"event":{"type":"window-scored","at":4000,"raw":0.1},"expect":{"state":"mask","smoothed":0.22240000000000004}},
+        {"event":{"type":"window-scored","at":5000,"raw":0.95},"expect":{"state":"unease","smoothed":0.51344}},
+        {"event":{"type":"window-scored","at":6000,"raw":0.2},"expect":{"state":"mask","smoothed":0.388064}},
+        {"event":{"type":"window-scored","at":7000,"raw":0.1},"expect":{"state":"mask","smoothed":0.27283840000000004}},
+        {"event":{"type":"window-scored","at":8000,"raw":0.15},"expect":{"state":"mask","smoothed":0.22370304000000002}},
+        {"event":{"type":"window-scored","at":9000,"raw":0.97},"expect":{"state":"unease","smoothed":0.5222218240000001}},
+        {"event":{"type":"window-scored","at":10000,"raw":0.05},"expect":{"state":"mask","smoothed":0.33333309440000003}}
+      ]
+    },
+    {
+      "name": "possession then slow release",
+      "config": {"alpha":0.4,"unease":0.4,"possession":0.7,"release":0.5,"confirmWindows":3,"releaseWindows":5,"silenceMs":2500,"maxPending":2,"vad":{"minRms":0.01,"maxZeroCrossingRate":0.35,"minVoicedFraction":0.3}},
+      "steps": [
+        {"event":{"type":"capture-started","at":0},"expect":{"state":"listening","smoothed":null}},
+        {"event":{"type":"window-scored","at":1000,"raw":0.95},"expect":{"state":"unease","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":2000,"raw":0.95},"expect":{"state":"unease","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":3000,"raw":0.95},"expect":{"state":"possession","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":4000,"raw":0.95},"expect":{"state":"possession","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":5000,"raw":0.95},"expect":{"state":"possession","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":6000,"raw":0.05},"expect":{"state":"possession","smoothed":0.59}},
+        {"event":{"type":"window-scored","at":7000,"raw":0.05},"expect":{"state":"possession","smoothed":0.374}},
+        {"event":{"type":"window-scored","at":8000,"raw":0.05},"expect":{"state":"possession","smoothed":0.2444}},
+        {"event":{"type":"window-scored","at":9000,"raw":0.05},"expect":{"state":"possession","smoothed":0.16664}},
+        {"event":{"type":"window-scored","at":10000,"raw":0.05},"expect":{"state":"possession","smoothed":0.11998400000000001}},
+        {"event":{"type":"window-scored","at":11000,"raw":0.05},"expect":{"state":"mask","smoothed":0.0919904}},
+        {"event":{"type":"window-scored","at":12000,"raw":0.05},"expect":{"state":"mask","smoothed":0.07519424}},
+        {"event":{"type":"window-scored","at":13000,"raw":0.05},"expect":{"state":"mask","smoothed":0.065116544}},
+        {"event":{"type":"window-scored","at":14000,"raw":0.05},"expect":{"state":"mask","smoothed":0.0590699264}}
+      ]
+    },
+    {
+      "name": "exorcised, then possessed again, then stopped",
+      "config": {"alpha":0.4,"unease":0.4,"possession":0.7,"release":0.5,"confirmWindows":3,"releaseWindows":5,"silenceMs":2500,"maxPending":2,"vad":{"minRms":0.01,"maxZeroCrossingRate":0.35,"minVoicedFraction":0.3}},
+      "steps": [
+        {"event":{"type":"capture-started","at":0},"expect":{"state":"listening","smoothed":null}},
+        {"event":{"type":"window-scored","at":1000,"raw":0.95},"expect":{"state":"unease","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":2000,"raw":0.95},"expect":{"state":"unease","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":3000,"raw":0.95},"expect":{"state":"possession","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":4000,"raw":0.95},"expect":{"state":"possession","smoothed":0.95}},
+        {"event":{"type":"protocol-completed","at":4500},"expect":{"state":"exorcised","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":5000,"raw":0.95},"expect":{"state":"exorcised","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":6000,"raw":0.95},"expect":{"state":"exorcised","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":7000,"raw":0.95},"expect":{"state":"possession","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":8000,"raw":0.95},"expect":{"state":"possession","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":9000,"raw":0.05},"expect":{"state":"possession","smoothed":0.59}},
+        {"event":{"type":"window-scored","at":10000,"raw":0.05},"expect":{"state":"possession","smoothed":0.374}},
+        {"event":{"type":"window-scored","at":11000,"raw":0.05},"expect":{"state":"possession","smoothed":0.2444}},
+        {"event":{"type":"window-scored","at":12000,"raw":0.05},"expect":{"state":"possession","smoothed":0.16664}},
+        {"event":{"type":"window-scored","at":13000,"raw":0.05},"expect":{"state":"possession","smoothed":0.11998400000000001}},
+        {"event":{"type":"window-scored","at":14000,"raw":0.05},"expect":{"state":"mask","smoothed":0.0919904}},
+        {"event":{"type":"capture-stopped","at":15000},"expect":{"state":"idle","smoothed":null}}
+      ]
+    },
+    {
+      "name": "silence shows Listening, but Possession persists",
+      "config": {"alpha":0.4,"unease":0.4,"possession":0.7,"release":0.5,"confirmWindows":3,"releaseWindows":5,"silenceMs":2500,"maxPending":2,"vad":{"minRms":0.01,"maxZeroCrossingRate":0.35,"minVoicedFraction":0.3}},
+      "steps": [
+        {"event":{"type":"capture-started","at":0},"expect":{"state":"listening","smoothed":null}},
+        {"event":{"type":"window-scored","at":1000,"raw":0.5},"expect":{"state":"unease","smoothed":0.5}},
+        {"event":{"type":"window-scored","at":2000,"raw":0.5},"expect":{"state":"unease","smoothed":0.5}},
+        {"event":{"type":"silence","at":3000},"expect":{"state":"unease","smoothed":0.5}},
+        {"event":{"type":"silence","at":4000},"expect":{"state":"unease","smoothed":0.5}},
+        {"event":{"type":"silence","at":5000},"expect":{"state":"listening","smoothed":0.5}},
+        {"event":{"type":"window-scored","at":6000,"raw":0.99},"expect":{"state":"unease","smoothed":0.696}},
+        {"event":{"type":"window-scored","at":7000,"raw":0.99},"expect":{"state":"unease","smoothed":0.8136}},
+        {"event":{"type":"window-scored","at":8000,"raw":0.99},"expect":{"state":"unease","smoothed":0.8841600000000001}},
+        {"event":{"type":"window-scored","at":9000,"raw":0.99},"expect":{"state":"possession","smoothed":0.926496}},
+        {"event":{"type":"window-scored","at":10000,"raw":0.99},"expect":{"state":"possession","smoothed":0.9518976}},
+        {"event":{"type":"window-scored","at":11000,"raw":0.99},"expect":{"state":"possession","smoothed":0.96713856}},
+        {"event":{"type":"silence","at":12000},"expect":{"state":"possession","smoothed":0.96713856}},
+        {"event":{"type":"silence","at":14000},"expect":{"state":"possession","smoothed":0.96713856}},
+        {"event":{"type":"silence","at":16000},"expect":{"state":"possession","smoothed":0.96713856}},
+        {"event":{"type":"silence","at":18000},"expect":{"state":"possession","smoothed":0.96713856}},
+        {"event":{"type":"silence","at":20000},"expect":{"state":"possession","smoothed":0.96713856}}
+      ]
+    },
+    {
+      "name": "alpha 1 with values exactly at the thresholds",
+      "config": {"alpha":1,"unease":0.4,"possession":0.7,"release":0.5,"confirmWindows":3,"releaseWindows":5,"silenceMs":2500,"maxPending":2,"vad":{"minRms":0.01,"maxZeroCrossingRate":0.35,"minVoicedFraction":0.3}},
+      "steps": [
+        {"event":{"type":"capture-started","at":0},"expect":{"state":"listening","smoothed":null}},
+        {"event":{"type":"window-scored","at":1000,"raw":0.4},"expect":{"state":"unease","smoothed":0.4}},
+        {"event":{"type":"window-scored","at":2000,"raw":0.7},"expect":{"state":"unease","smoothed":0.7}},
+        {"event":{"type":"window-scored","at":3000,"raw":0.7},"expect":{"state":"unease","smoothed":0.7}},
+        {"event":{"type":"window-scored","at":4000,"raw":0.7},"expect":{"state":"possession","smoothed":0.7}},
+        {"event":{"type":"window-scored","at":5000,"raw":0.5},"expect":{"state":"possession","smoothed":0.5}},
+        {"event":{"type":"window-scored","at":6000,"raw":0.49},"expect":{"state":"possession","smoothed":0.49}},
+        {"event":{"type":"window-scored","at":7000,"raw":0.49},"expect":{"state":"possession","smoothed":0.49}},
+        {"event":{"type":"window-scored","at":8000,"raw":0.49},"expect":{"state":"possession","smoothed":0.49}},
+        {"event":{"type":"window-scored","at":9000,"raw":0.49},"expect":{"state":"possession","smoothed":0.49}},
+        {"event":{"type":"window-scored","at":10000,"raw":0.49},"expect":{"state":"unease","smoothed":0.49}},
+        {"event":{"type":"window-scored","at":11000,"raw":0.4},"expect":{"state":"unease","smoothed":0.4}}
+      ]
+    }
+  ]
+}
