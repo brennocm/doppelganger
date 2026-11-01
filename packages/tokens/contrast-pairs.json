@@ -1,0 +1,44 @@
+{
+  "$description": "Foreground/background pairs the token build asserts (WCAG 2.x). Targets: 4.5 text, 3 large text, icons, controls and graphics.",
+  "pairs": [
+    { "fg": "text", "bg": "bg", "target": 4.5, "use": "headlines and body on the page" },
+    { "fg": "text-secondary", "bg": "bg", "target": 4.5, "use": "secondary text" },
+    { "fg": "text-body", "bg": "bg", "target": 4.5, "use": "supporting lines" },
+    { "fg": "text-muted", "bg": "bg", "target": 4.5, "use": "Idle accent, footer facts" },
+    { "fg": "text-body", "bg": "surface-input", "target": 4.5, "use": "text in inputs" },
+    {
+      "fg": "text-placeholder",
+      "bg": "surface-input",
+      "target": 4.5,
+      "use": "placeholders (contrast fix)"
+    },
+    {
+      "fg": "line-strong",
+      "bg": "surface-button",
+      "target": 3,
+      "use": "control borders (contrast fix)"
+    },
+    {
+      "fg": "purple-line",
+      "bg": "surface-input",
+      "target": 3,
+      "use": "focused input border (contrast fix)"
+    },
+    { "fg": "text-subtle", "bg": "bg", "target": 3, "use": "icons only" },
+    { "fg": "on-purple", "bg": "purple", "target": 4.5, "use": "primary button label" },
+    { "fg": "purple", "bg": "bg", "target": 4.5, "use": "Mask accent text and the focus ring" },
+    { "fg": "purple", "bg": "surface-control", "target": 3, "use": "focus ring on controls" },
+    { "fg": "text", "bg": "surface-control", "target": 4.5, "use": "secondary button label" },
+    { "fg": "info-chip-text", "bg": "bg", "target": 4.5, "use": "Listening accent" },
+    { "fg": "info-chip-text", "bg": "info-chip", "target": 4.5, "use": "info chips" },
+    { "fg": "info-line", "bg": "info-surface", "target": 3, "use": "Exorcised accent graphic" },
+    { "fg": "text", "bg": "info-surface", "target": 4.5, "use": "Exorcised text" },
+    { "fg": "ember", "bg": "ember-deep", "target": 4.5, "use": "Unease accent text on its tint" },
+    { "fg": "text", "bg": "ember-deep", "target": 4.5, "use": "Unease text" },
+    { "fg": "ember", "bg": "bg", "target": 4.5, "use": "Unease accent on the page" },
+    { "fg": "blood", "bg": "blood-deep", "target": 4.5, "use": "Possession alert text" },
+    { "fg": "text", "bg": "blood-deep", "target": 4.5, "use": "Possession text" },
+    { "fg": "ecto", "bg": "blood-deep", "target": 3, "use": "Possession waveform" },
+    { "fg": "on-ecto", "bg": "ecto", "target": 4.5, "use": "text on ecto" }
+  ]
+}

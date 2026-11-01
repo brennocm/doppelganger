@@ -1,11 +1,11 @@
 # Implementation Plan
 
-- [ ] 1. Tokens
-  - [ ] 1.1 Create `packages/tokens/tokens.json` from the design-system steering (base, contrast fixes, Halloween layer, type, spacing, radius, motion)
+- [x] 1. Tokens
+  - [x] 1.1 Create `packages/tokens/tokens.json` from the design-system steering (base, contrast fixes, Halloween layer, type, spacing, radius, motion)
     - _Requirements: 7.1_
-  - [ ] 1.2 Write the token build script (CSS, TS, contrast report) and `contrast-pairs.json`
+  - [x] 1.2 Write the token build script (CSS, TS, contrast report) and `contrast-pairs.json`
     - _Requirements: 7.2_
-  - [ ]* 1.3 Write the contrast test over every pair
+  - [x]* 1.3 Write the contrast test over every pair
     - **Property 4: Token contrast**
     - **Validates: Requirements 7.2**
 
