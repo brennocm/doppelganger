@@ -55,6 +55,27 @@ A `<section aria-labelledby>` with an `<ol>`; each step is a `<li>` with a nativ
 
 `IncidentSummary` JSON Schema in `packages/contracts/schemas/incident-summary.json`, with `additionalProperties: false`.
 
+## Implementation details (P27)
+
+- **Fields.** `IncidentSummary` (schema file `incident-summary.schema.json`):
+  - `schemaVersion: 1`
+  - `replay: { label } | null`
+  - `startedAt` and `endedAt`: ISO 8601 with offset; `startedAt` is null if capture never started
+  - `source`
+  - `voicedSeconds`
+  - `dissonance: { peak, mean }`: integers 0–100, or null
+  - `secondsInState`: one entry per state
+  - `transitions: [{ from, to, at }]`, with `at` in ISO 8601
+  - `model: { id, version }`, `appVersion`, `stepsDone`
+  - `note`: the probabilistic-estimate sentence
+
+  TS validates untrusted JSON with `parseIncidentSummary`, which a test keeps equal to the schema (as for the manifest). The mean comes from `SessionStats.meanSmoothed`, the mean smoothed score over scored windows (added to the detection-core schema).
+- **Free text.** The only strings taken from the input are the model ID (manifest ID pattern) and the model and app versions (`x.y.z`). `buildIncidentSummary` throws on anything else, so nothing user-supplied can reach the summary. `appVersion` is `apps/web/package.json`'s version, injected at build time.
+- **Times.** Text times use the input's `timeZoneOffsetMinutes`, so the output does not depend on the machine's time zone (Property 2). Durations are shown as "X min Y s".
+- **Panel lifetime.** The panel is shown in Possession, collapsed in Exorcised, and reset and hidden when the session ends (Idle). The Widget's "Show the protocol" button is visible in Possession and Exorcised.
+- **Test_State_Mode.** With `?test-state=possession`, completing all steps moves the forced state to Exorcised in the page, because no detector session runs. Playwright uses this for the journey.
+- **Reminder storage.** The key is `doppelganger.codeWordReminder` in `localStorage`. It holds only the hint, never audio or scores.
+
 ## Correctness Properties
 
 ### Property 1: Summary excludes forbidden data
