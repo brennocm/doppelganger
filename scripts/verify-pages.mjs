@@ -92,10 +92,34 @@ export function checkHtml(path, html) {
   return problems;
 }
 
+/**
+ * Hosts that may appear in emitted scripts, only as text inside error messages (they are
+ * never fetched). Anything else that looks like an absolute URL in a .js or .mjs file fails
+ * the check, because a dedicated worker on Pages runs without the page's CSP.
+ */
+export const SCRIPT_TEXT_HOSTS = ["web.dev", "rolldown.rs"];
+const SCRIPT_URL_RE = /\bhttps?:\/\/([a-z0-9.-]+\.[a-z]{2,})/gi;
+
+/** Check one emitted script; return a list of problems. */
+export function checkScript(path, source) {
+  const problems = [];
+  for (const match of source.matchAll(SCRIPT_URL_RE)) {
+    const host = match[1].toLowerCase();
+    if (!SCRIPT_TEXT_HOSTS.includes(host)) {
+      problems.push(`${path}: script contains an absolute URL to ${host}`);
+    }
+  }
+  return problems;
+}
+
 async function htmlFiles(dir) {
+  return filesEndingWith(dir, [".html"]);
+}
+
+async function filesEndingWith(dir, suffixes) {
   const entries = await readdir(dir, { recursive: true, withFileTypes: true });
   return entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".html"))
+    .filter((entry) => entry.isFile() && suffixes.some((s) => entry.name.endsWith(s)))
     .map((entry) => join(entry.parentPath, entry.name));
 }
 
@@ -111,9 +135,14 @@ async function main() {
     const path = relative(root, file).split(sep).join("/");
     problems.push(...checkHtml(path, await readFile(file, "utf8")));
   }
+  const scripts = await filesEndingWith(root, [".js", ".mjs"]);
+  for (const file of scripts.sort()) {
+    const path = relative(root, file).split(sep).join("/");
+    problems.push(...checkScript(path, await readFile(file, "utf8")));
+  }
   for (const problem of problems) stderr.write(`verify-pages: ${problem}\n`);
   stdout.write(
-    `verify-pages: ${problems.length === 0 ? "ok" : "FAILED"}, ${files.length} HTML file(s), ${problems.length} problem(s)\n`,
+    `verify-pages: ${problems.length === 0 ? "ok" : "FAILED"}, ${files.length} HTML file(s), ${scripts.length} script(s), ${problems.length} problem(s)\n`,
   );
   return problems.length === 0 ? 0 : 1;
 }

@@ -28,6 +28,8 @@ export interface WorkerCoreDeps {
   clock(): number;
   now(): number;
   wasmSupported: boolean;
+  /** The worker's own origin; manifests from anywhere else are refused. */
+  origin: string;
 }
 
 export interface PortLike {
@@ -82,6 +84,9 @@ export function createWorkerCore(deps: WorkerCoreDeps): WorkerCore {
       return;
     }
     try {
+      // A dedicated worker on Pages has no CSP of its own, so the origin is checked here.
+      if (new URL(manifestUrl).origin !== deps.origin)
+        throw new Error("manifest is not same-origin");
       const manifest = await deps.loadManifest(manifestUrl);
       const backend = timed(deps.createBackend(manifestUrl));
       await backend.load(manifest);

@@ -43,19 +43,21 @@ self.addEventListener("fetch", (event) => {
   if (!url.href.startsWith(self.registration.scope)) return;
   if (isPage(url)) {
     // Network first for the page, so a new build is picked up; the cache when offline.
+    // One cache entry per path: the query string never creates a new entry.
+    const key = new URL(url.pathname, url.origin);
     event.respondWith(
       fetch(request)
         .then((response) => {
-          if (response.ok) {
+          if (response.ok && response.type === "basic") {
             const copy = response.clone();
-            caches.open(CACHE).then((cache) => cache.put(request, copy));
+            caches.open(CACHE).then((cache) => cache.put(key, copy));
           }
           return response;
         })
         .catch(() =>
           caches
-            .match(request)
-            .then((hit) => hit ?? caches.match(new URL("./", self.registration.scope))),
+            .match(key, MATCH)
+            .then((hit) => hit ?? caches.match(new URL("./", self.registration.scope), MATCH)),
         ),
     );
     return;

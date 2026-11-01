@@ -32,6 +32,7 @@ function setup(overrides: { load?: () => Promise<ModelManifest>; wasm?: boolean 
     clock: () => 1_000_000,
     now: () => (t += 4),
     wasmSupported: overrides.wasm ?? true,
+    origin: "https://app.example",
   });
   const port: PortLike = { onmessage: null };
   const send = (samples: Float32Array) =>
@@ -63,7 +64,7 @@ function holdsBinary(value: unknown, seen = new Set<unknown>()): boolean {
 describe("worker core", () => {
   it("loads the model, then scores audio from the port and posts updates", async () => {
     const { core, posted, port, send } = setup();
-    await core.handle({ type: "init", manifestUrl: "/models/m.json" });
+    await core.handle({ type: "init", manifestUrl: "https://app.example/models/m.json" });
     expect(posted[0]).toEqual({
       type: "ready",
       model: { id: MANIFEST.id, version: MANIFEST.version, role: "test", hopSamples: 1600 },
@@ -78,7 +79,7 @@ describe("worker core", () => {
 
   it("posts perf every PERF_EVERY scored windows", async () => {
     const { core, posted, port, send } = setup();
-    await core.handle({ type: "init", manifestUrl: "/m.json" });
+    await core.handle({ type: "init", manifestUrl: "https://app.example/m.json" });
     await core.handle({ type: "audio-port" }, [port]);
     await core.handle({ type: "start" });
     for (let i = 0; i < PERF_EVERY; i++) {
@@ -95,19 +96,32 @@ describe("worker core", () => {
     ["model-load", async () => Promise.reject(new Error("404"))],
   ] as const)("reports %s", async (code, load) => {
     const { core, posted } = setup({ load });
-    await core.handle({ type: "init", manifestUrl: "/m.json" });
+    await core.handle({ type: "init", manifestUrl: "https://app.example/m.json" });
     expect(posted).toEqual([{ type: "error", code }]);
   });
 
   it("reports wasm-unsupported without loading", async () => {
     const { core, posted } = setup({ wasm: false });
-    await core.handle({ type: "init", manifestUrl: "/m.json" });
+    await core.handle({ type: "init", manifestUrl: "https://app.example/m.json" });
     expect(posted).toEqual([{ type: "error", code: "wasm-unsupported" }]);
+  });
+
+  it("refuses a manifest from another origin without fetching it", async () => {
+    let fetched = false;
+    const { core, posted } = setup({
+      load: async () => {
+        fetched = true;
+        return MANIFEST;
+      },
+    });
+    await core.handle({ type: "init", manifestUrl: "https://evil.example/m.json" });
+    expect(posted).toEqual([{ type: "error", code: "model-load" }]);
+    expect(fetched).toBe(false);
   });
 
   it("ignores audio messages that are not chunks of float samples", async () => {
     const { core, posted, port } = setup();
-    await core.handle({ type: "init", manifestUrl: "/m.json" });
+    await core.handle({ type: "init", manifestUrl: "https://app.example/m.json" });
     await core.handle({ type: "audio-port" }, [port]);
     await core.handle({ type: "start" });
     // An untrusted message whose samples are not a Float32Array.
@@ -135,7 +149,7 @@ describe("worker core", () => {
     await fc.assert(
       fc.asyncProperty(fc.array(step, { maxLength: 40 }), async (steps) => {
         const { core, posted, port, send } = setup();
-        await core.handle({ type: "init", manifestUrl: "/m.json" });
+        await core.handle({ type: "init", manifestUrl: "https://app.example/m.json" });
         await core.handle({ type: "audio-port" }, [port]);
         for (const s of steps) {
           if (s.kind === "audio") send(voiced(s.n));

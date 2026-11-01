@@ -13,7 +13,7 @@ const scope = self as unknown as {
 };
 
 const fetchSameOrigin = (url: string) =>
-  fetch(url, { credentials: "same-origin", cache: "no-cache" });
+  fetch(url, { credentials: "same-origin", cache: "no-cache", redirect: "error" });
 
 configureOrt(ort, import.meta.env.BASE_URL, scope.crossOriginIsolated);
 
@@ -25,6 +25,7 @@ const core = createWorkerCore({
   clock: () => Date.now(),
   now: () => performance.now(),
   wasmSupported: typeof WebAssembly === "object",
+  origin: location.origin,
 });
 
 scope.onmessage = (event) => {

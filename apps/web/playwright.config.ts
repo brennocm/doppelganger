@@ -1,7 +1,8 @@
 import { defineConfig } from "@playwright/test";
-import { FAKE_AUDIO_FILE } from "./e2e/fake-audio.ts";
+import { fakeAudioFile } from "./e2e/fake-audio.ts";
 
 const PORT = 4317;
+const FAKE_AUDIO_FILE = fakeAudioFile();
 
 export default defineConfig({
   testDir: "e2e",

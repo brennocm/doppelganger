@@ -104,7 +104,8 @@ export function tabSource(devices: MediaDevicesLike): CaptureSource {
       video: true,
       preferCurrentTab: false,
       selfBrowserSurface: "exclude",
-      systemAudio: "include",
+      systemAudio: "exclude",
+      monitorTypeSurfaces: "exclude",
     } as DisplayMediaStreamOptions;
     return devices.getDisplayMedia(options);
   });

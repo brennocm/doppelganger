@@ -1,13 +1,22 @@
 /**
- * Synthetic audio for Chromium's fake capture device (testing steering): a seeded,
- * voiced-speech stand-in written to a git-ignored temp folder and removed after the run.
+ * Synthetic audio for Chromium's fake capture device (testing steering): a deterministic,
+ * voiced-speech stand-in written to a fresh private temp folder and removed after the run.
+ * playwright.config.ts creates the folder (it needs the path for the launch flags) and
+ * this global setup writes the file and removes the folder at teardown.
  */
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-export const FAKE_AUDIO_DIR = join(tmpdir(), "doppelganger-e2e");
-export const FAKE_AUDIO_FILE = join(FAKE_AUDIO_DIR, "voice.wav");
+const ENV = "DOPPELGANGER_FAKE_AUDIO_DIR";
+
+/** A unique folder per run (mkdtemp: mode 0700, no predictable name to pre-create). */
+export function fakeAudioFile(): string {
+  const existing = process.env[ENV];
+  const dir = existing ?? mkdtempSync(join(tmpdir(), "doppelganger-e2e-"));
+  process.env[ENV] = dir;
+  return join(dir, "voice.wav");
+}
 
 /** 16-bit PCM mono WAV: a 120 Hz harmonic series with a 4 Hz syllable envelope. */
 export function voicedWav(seconds = 12, rate = 48000): Buffer {
@@ -38,7 +47,8 @@ export function voicedWav(seconds = 12, rate = 48000): Buffer {
 }
 
 export default function globalSetup(): () => void {
-  mkdirSync(FAKE_AUDIO_DIR, { recursive: true });
-  writeFileSync(FAKE_AUDIO_FILE, voicedWav());
-  return () => rmSync(FAKE_AUDIO_DIR, { recursive: true, force: true });
+  const file = fakeAudioFile();
+  // "wx": fail rather than follow anything already at that path.
+  writeFileSync(file, voicedWav(), { flag: "wx" });
+  return () => rmSync(join(file, ".."), { recursive: true, force: true });
 }

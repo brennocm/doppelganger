@@ -2,7 +2,8 @@ import { expect, type Page, test } from "@playwright/test";
 
 function trackExternal(page: Page, origin: string): string[] {
   const external: string[] = [];
-  page.on("request", (request) => {
+  // The context sees page, worker and service-worker requests alike.
+  page.context().on("request", (request) => {
     if (!request.url().startsWith(origin) && !request.url().startsWith("data:"))
       external.push(request.url());
   });
