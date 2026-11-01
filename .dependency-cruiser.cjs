@@ -4,6 +4,8 @@
  * @type {import('dependency-cruiser').IConfiguration}
  */
 const TEST_FILE = "\\.(test|spec|prop)\\.ts$";
+/** Browser page served by packages/model-lab/bench-web/tests/server.ts, not bundled. */
+const BENCH_PAGE = "^packages/model-lab/bench-web/page/";
 
 module.exports = {
   forbidden: [
@@ -47,8 +49,16 @@ module.exports = {
       name: "not-to-unresolvable",
       comment: "Every import must resolve.",
       severity: "error",
-      from: {},
+      from: { pathNot: BENCH_PAGE },
       to: { couldNotResolve: true },
+    },
+    {
+      name: "not-to-unresolvable-bench-page",
+      comment:
+        "The bench-web page imports ONNX Runtime Web by URL (/ort/…), which its test server maps to node_modules/onnxruntime-web/dist. Only that URL prefix is exempt; every other import must resolve.",
+      severity: "error",
+      from: { path: BENCH_PAGE },
+      to: { couldNotResolve: true, pathNot: "^/ort/[^/]+\\.mjs$" },
     },
   ],
   options: {

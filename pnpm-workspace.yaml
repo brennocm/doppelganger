@@ -5,6 +5,7 @@ packages:
   - packages/detector
   - packages/contracts
   - packages/tokens
+  - packages/model-lab/bench-web
 
 # Supply chain (see .kiro/steering/security.md).
 # Explicitly set, so pnpm enforces it strictly: no version younger than 24 h is installed.
@@ -15,7 +16,9 @@ trustPolicy: no-downgrade
 blockExoticSubdeps: true
 # Dependency build scripts need explicit approval in allowBuilds.
 strictDepBuilds: true
-allowBuilds: {}
+allowBuilds:
+  # Its postinstall only prints a version hint; nothing to build.
+  protobufjs: false
 # Fail when the running Node or pnpm does not match "engines".
 engineStrict: true
 # Exact versions only.

@@ -63,7 +63,8 @@ run = [
   { task = "secrets:history" },
   "scripts/audit.sh",
   { task = "build:pages" },
-  "echo 'check:all: no E2E suites yet (added by haunted-ui)'",
+  # E2E and browser suites: every workspace package with an "e2e" script (Playwright).
+  "pnpm -r --if-present run e2e",
 ]
 
 [tasks.fix]

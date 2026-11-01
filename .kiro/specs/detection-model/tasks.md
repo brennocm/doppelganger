@@ -24,7 +24,7 @@
     - _Requirements: 3.1_
   - [x] 3.3 Implement report writing (`results.json`, `summary.md`) without raw paths
     - _Requirements: 2.4_
-  - [ ] 3.4 Build `bench-web/` and the Playwright latency benchmark for ORT Web; add ORT CPU latency
+  - [x] 3.4 Build `bench-web/` and the Playwright latency benchmark for ORT Web; add ORT CPU latency
     - _Requirements: 2.3_
 
 - [ ] 4. Go/no-go gate

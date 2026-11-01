@@ -45,6 +45,12 @@ jobs:
       - name: Install ffmpeg
         run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg
 
+      # Headless Chromium for the Playwright suites, at the version @playwright/test pins.
+      - name: Install Chromium for Playwright
+        run: |
+          mise x -- pnpm install --frozen-lockfile --silent
+          mise x -- pnpm --filter @doppelganger/bench-web exec playwright install --with-deps chromium
+
       # Installs from pnpm-lock.yaml and uv.lock only (--frozen-lockfile, --locked),
       # then runs every gate in check:all.
       - name: mise run check:all

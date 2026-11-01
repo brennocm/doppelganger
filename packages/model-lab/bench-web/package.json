@@ -1,0 +1,20 @@
+{
+  "name": "@doppelganger/bench-web",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "description": "ONNX Runtime Web latency benchmark for the model lab (detection-model 3.4).",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "onnxruntime-web": "1.31.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@types/node": "26.6.6",
+    "typescript": "6.0.3"
+  }
+}
