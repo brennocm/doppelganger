@@ -8,9 +8,11 @@ import pytest
 
 from model_lab import codecs, datasets, evaluate, haunt_set, metrics, report, synthetic
 from model_lab.codecs import CodecCondition
+from model_lab.haunting import HauntingConfig
 
 WINDOW, HOP = 1600, 800
 CONDITIONS = (CodecCondition.CLEAN, CodecCondition.NOISE_10DB)
+DEFAULTS = HauntingConfig()
 
 
 @dataclass(frozen=True)
@@ -23,6 +25,7 @@ class MeanCandidate:
     hop_samples: int = HOP
     possession: float = 0.7
     temperature: float = 1.0
+    haunting: HauntingConfig = DEFAULTS
 
     def margin(self, window: codecs.Audio) -> float:
         return float(np.mean(window)) * 40.0
@@ -67,6 +70,9 @@ def test_separable_data_gives_perfect_metrics_per_condition() -> None:
         assert row["eer"] == 0.0
         assert row["falseAlarmRate"] == 0.0
         assert row["detectionRate"] == 1.0
+        # Three windows per item; Possession needs three confirmations, so only the third.
+        assert row["falseAlarmRateSmoothed"] == 0.0
+        assert row["detectionRateSmoothed"] == pytest.approx(1 / 3, abs=1e-6)
         assert row["genuine"] == row["synthetic"] > 0
     assert candidate["latencyMs"]["p50"] == pytest.approx(1.0)
 

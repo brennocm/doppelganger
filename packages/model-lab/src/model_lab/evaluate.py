@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Final, Protocol
 
 import numpy as np
 
-from model_lab import calibration, codecs, datasets, haunt_set, metrics, report
+from model_lab import calibration, codecs, datasets, haunt_set, haunting, metrics, report
 from model_lab.inference import OnnxModel
 from model_lab.windows import frame
 
@@ -57,6 +57,10 @@ class Candidate(Protocol):
     def temperature(self) -> float:
         """Temperature stored in the manifest (used when there is no dev split)."""
 
+    @property
+    def haunting(self) -> haunting.HauntingConfig:
+        """Detector defaults with the manifest's thresholds, for the smoothed rates."""
+
     def margin(self, window: codecs.Audio) -> float:
         """Spoof margin of one window."""
 
@@ -90,6 +94,11 @@ class OnnxCandidate:
     @property
     def temperature(self) -> float:  # noqa: D102
         return self.model.manifest.calibration.temperature
+
+    @property
+    def haunting(self) -> haunting.HauntingConfig:  # noqa: D102
+        t = self.model.manifest.thresholds
+        return haunting.HauntingConfig(unease=t.unease, possession=t.possession, release=t.release)
 
     def margin(self, window: codecs.Audio) -> float:  # noqa: D102
         return self.model.margin(window)
@@ -152,6 +161,21 @@ def _optional(value: float | None) -> float | None:
     return None if value is None else round(value, 6)
 
 
+def smoothed_rates(
+    group: Sequence[ScoredItem], temperature: float, cfg: haunting.HauntingConfig
+) -> tuple[float | None, float | None]:
+    """Share of genuine and of synthetic windows spent in Possession after replay."""
+    possessed = {0: 0, 1: 0}
+    total = {0: 0, 1: 0}
+    for s in group:
+        margins = calibration.calibrate_margins(s.margins, temperature).tolist()
+        states = haunting.replay(margins, cfg)
+        total[s.item.label] += len(states)
+        possessed[s.item.label] += sum(1 for state in states if state == "possession")
+    rate = {k: possessed[k] / total[k] if total[k] else None for k in total}
+    return rate[0], rate[1]
+
+
 def evaluate_candidate(
     candidate: Candidate,
     items: Sequence[datasets.Item],
@@ -172,6 +196,7 @@ def evaluate_candidate(
         raw = calibration.calibrate_margins(margins, 1.0)
         calibrated = calibration.calibrate_margins(margins, temperature)
         m = metrics.compute(labels, calibrated, candidate.possession)
+        fa_smoothed, detected_smoothed = smoothed_rates(group, temperature, candidate.haunting)
         rows.append(
             {
                 "dataset": dataset,
@@ -183,6 +208,8 @@ def evaluate_candidate(
                 "eer": _optional(m.eer),
                 "falseAlarmRate": _optional(m.false_alarm_rate),
                 "detectionRate": _optional(m.detection_rate),
+                "falseAlarmRateSmoothed": _optional(fa_smoothed),
+                "detectionRateSmoothed": _optional(detected_smoothed),
                 "eceBefore": _optional(calibration.expected_calibration_error(raw, labels)),
                 "eceAfter": _optional(calibration.expected_calibration_error(calibrated, labels)),
             }

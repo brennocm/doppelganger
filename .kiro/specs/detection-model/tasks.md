@@ -17,10 +17,10 @@
   - [x] 2.4 Implement session-based dev/eval splitting
     - _Requirements: 2.1, 4.1_
 
-- [ ] 3. Evaluation harness
+- [x] 3. Evaluation harness
   - [x] 3.1 Implement the ONNX candidate loader and `evaluate.py` with EER, AUC, false-alarm and detection rates per condition
     - _Requirements: 2.1, 2.2, 2.5_
-  - [ ] 3.2 Port the EMA and hysteresis logic for "after smoothing" metrics and assert parity with the golden vectors
+  - [x] 3.2 Port the EMA and hysteresis logic for "after smoothing" metrics and assert parity with the golden vectors
     - _Requirements: 3.1_
   - [x] 3.3 Implement report writing (`results.json`, `summary.md`) without raw paths
     - _Requirements: 2.4_
