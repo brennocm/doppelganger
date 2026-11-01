@@ -8,8 +8,9 @@ Rules:
 - Redaction runs before anything is written. The redacted text is scanned again; if any
   step fails or anything is still found, nothing is written and a warning is printed.
   The raw prompt is never written anywhere.
-- The surface (CLI or IDE) is not identified reliably by the hook event or environment,
-  so it is written as "set by hand", like the spec field.
+- The surface is "CLI" when KIRO_CUSTOM_USER_AGENT starts with "KiroCLI/", which Kiro CLI
+  sets in every hook's environment. Otherwise (the IDE has no observed marker yet) it is
+  "set by hand". The spec field is always "set by hand".
 - An entry identical to the last one is not written twice.
 - Warnings go to stdout with exit code 0: in the IDE a non-zero exit would block the
   user's prompt, and a logging problem must never do that.
@@ -25,7 +26,7 @@ import re
 import shutil
 import subprocess
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
 
 # pii_scan and token_shapes live one folder up, in scripts/.
@@ -100,16 +101,27 @@ def _last_entry_body(history: str) -> str | None:
     return body.group(2) if body else None
 
 
-def format_entry(number: int, today: dt.date, prompt: str) -> str:
+def detect_surface(env: Mapping[str, str]) -> str:
+    """Return "CLI" when the environment proves a Kiro CLI session, else UNKNOWN."""
+    return "CLI" if env.get("KIRO_CUSTOM_USER_AGENT", "").startswith("KiroCLI/") else UNKNOWN
+
+
+def format_entry(number: int, today: dt.date, prompt: str, surface: str = UNKNOWN) -> str:
     """Render one entry in the format at the top of the prompt history."""
     fence = _fence(prompt)
     return (
-        f"\n## {number:03d} — {today.isoformat()} — {UNKNOWN} — {UNKNOWN}\n\n"
+        f"\n## {number:03d} — {today.isoformat()} — {surface} — {UNKNOWN}\n\n"
         f"{fence}text\n{prompt}\n{fence}\n\nOutcome: _pending_\n"
     )
 
 
-def log_prompt(history_path: Path, prompt: str, today: dt.date, scan_secrets: SecretScanner) -> str:
+def log_prompt(
+    history_path: Path,
+    prompt: str,
+    today: dt.date,
+    scan_secrets: SecretScanner,
+    surface: str = UNKNOWN,
+) -> str:
     """Append the redacted prompt; return a status line. Never writes on failure."""
     if not prompt.strip():
         return "prompt-logger: empty prompt, nothing written"
@@ -125,7 +137,7 @@ def log_prompt(history_path: Path, prompt: str, today: dt.date, scan_secrets: Se
         numbers = [int(n) for n in _ENTRY.findall(history)]
         number = max(numbers, default=0) + 1
         handle.seek(0, os.SEEK_END)
-        handle.write(format_entry(number, today, safe))
+        handle.write(format_entry(number, today, safe, surface))
     changed = " (redacted)" if safe != prompt else ""
     return f"prompt-logger: logged entry {number:03d}{changed}"
 
@@ -151,7 +163,7 @@ def main() -> int:
         ).stdout.strip()
         status = log_prompt(
             Path(root) / HISTORY, _prompt_from_event(), dt.datetime.now().astimezone().date(),
-            gitleaks_secrets,
+            gitleaks_secrets, detect_surface(os.environ),
         )  # fmt: skip
     except Exception as error:  # noqa: BLE001  (a logging failure must never block the prompt)
         status = f"prompt-logger: WARNING {type(error).__name__}; nothing written"
