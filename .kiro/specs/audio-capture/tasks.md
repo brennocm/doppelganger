@@ -29,24 +29,24 @@
     - **Property 5: Main thread never receives audio**
     - **Validates: Requirements 4.4**
 
-- [ ] 3. Capture sources
-  - [ ] 3.1 Implement `TabSource` with feature detection, video-track stop and end handling
+- [x] 3. Capture sources
+  - [x] 3.1 Implement `TabSource` with feature detection, video-track stop and end handling
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
-  - [ ] 3.2 Implement `MicSource` with processing disabled
+  - [x] 3.2 Implement `MicSource` with processing disabled
     - _Requirements: 2.1_
-  - [ ] 3.3 Implement `ReplaySource` reading `clips.json`, with visible replay labelling
+  - [x] 3.3 Implement `ReplaySource` reading `clips.json`, with visible replay labelling
     - _Requirements: 2.2, 2.3_
-  - [ ] 3.4 Implement `CaptureController` connecting the worklet and the worker through a `MessageChannel`
+  - [x] 3.4 Implement `CaptureController` connecting the worklet and the worker through a `MessageChannel`
     - _Requirements: 3.2, 4.4_
 
-- [ ] 4. Permissions and messaging
-  - [ ] 4.1 Implement the pre-permission privacy notice, denial guidance and the persistent listening indicator
+- [x] 4. Permissions and messaging
+  - [x] 4.1 Implement the pre-permission privacy notice, denial guidance and the persistent listening indicator
     - _Requirements: 5.1, 5.2, 5.3_
-  - [ ] 4.2 Implement the error messages from the design
+  - [x] 4.2 Implement the error messages from the design
     - _Requirements: 1.2, 4.2_
 
 - [ ] 5. Offline
-  - [ ] 5.1 Add the service worker with a build-time precache list and the same-origin GET-only fetch handler
+  - [x] 5.1 Add the service worker with a build-time precache list and the same-origin GET-only fetch handler
     - _Requirements: 6.1, 6.3_
   - [ ] 5.2 Playwright test: load once, go offline, reload, run replay detection
     - _Requirements: 6.2_

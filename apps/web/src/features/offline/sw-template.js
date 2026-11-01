@@ -4,6 +4,9 @@
 // because audio is never fetched (Requirement 6.3).
 const PRECACHE = __PRECACHE__;
 const CACHE = `doppelganger-${__VERSION__}`;
+// Precache requests carry no Origin header, module and worker requests do; servers that
+// send "Vary: Origin" would otherwise never match.
+const MATCH = { ignoreVary: true };
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -58,5 +61,5 @@ self.addEventListener("fetch", (event) => {
     return;
   }
   // Cache first for hashed assets, ONNX Runtime files and models; precached only.
-  event.respondWith(caches.match(request).then((hit) => hit ?? fetch(request)));
+  event.respondWith(caches.match(request, MATCH).then((hit) => hit ?? fetch(request)));
 });

@@ -11,10 +11,54 @@
     <script type="module" src="./src/main.ts"></script>
   </head>
   <body>
-    <main>
-      <h1>Not listening</h1>
-      <p>The detector is not built yet.</p>
-      <p><a href="../">Back to the landing page</a></p>
+    <main id="app" data-state="idle">
+      <header class="app-header">
+        <p class="brand">Doppelgänger</p>
+        <p id="session-label" class="session-label" hidden></p>
+        <div id="indicator" class="indicator" hidden>
+          <p>Listening to <span id="source-name"></span></p>
+          <button id="stop" type="button">Stop listening</button>
+        </div>
+      </header>
+
+      <section class="state" aria-labelledby="state-headline">
+        <p id="state-icon" class="state-icon">Idle</p>
+        <h1 id="state-headline">Not listening</h1>
+        <p id="state-line">Choose a call tab to start.</p>
+        <p class="score">Dissonance <output id="score" for="state-headline">–</output></p>
+      </section>
+
+      <div id="alert" class="alert" role="alert" hidden>
+        <p></p>
+        <button id="alert-replay" type="button" hidden>Try a replay</button>
+      </div>
+      <p id="notice-slow" class="notice" role="status" hidden></p>
+
+      <section id="start-panel" class="start-panel" aria-labelledby="start-title">
+        <h2 id="start-title">Start listening</h2>
+        <p id="privacy-notice" class="privacy-notice"></p>
+        <button id="start-tab" type="button" disabled>Listen to a call tab</button>
+        <p id="tab-unsupported" hidden></p>
+        <button id="start-mic" type="button" disabled>Use microphone</button>
+        <section class="replay" aria-labelledby="replay-title">
+          <h3 id="replay-title">Replay</h3>
+          <p id="no-clips" hidden></p>
+          <ul id="clips"></ul>
+        </section>
+      </section>
+
+      <footer class="facts">
+        <dl>
+          <dt>Model</dt>
+          <dd id="model-id">Loading</dd>
+          <dt>Runs on</dt>
+          <dd>This device</dd>
+          <dt>Recording</dt>
+          <dd>None</dd>
+        </dl>
+        <p id="test-model" hidden></p>
+        <p><a href="../">Back to the landing page</a></p>
+      </footer>
     </main>
   </body>
 </html>

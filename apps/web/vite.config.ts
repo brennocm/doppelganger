@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 /**
  * Vite build for the detector app (served at <base>app/). The `self-hosted-assets` plugin
  * copies ONNX Runtime Web's WASM files into `ort/` (never a CDN; tech steering) and emits
@@ -7,7 +8,7 @@ import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { defineConfig, type Plugin } from "vite";
+import { defaultClientConditions, defineConfig, type Plugin } from "vite";
 
 const ORT_DIST = fileURLToPath(new URL("./node_modules/onnxruntime-web/dist/", import.meta.url));
 export const ORT_FILES = ["ort-wasm-simd-threaded.wasm", "ort-wasm-simd-threaded.mjs"] as const;
@@ -65,6 +66,11 @@ function selfHostedAssets(): Plugin {
 
 export default defineConfig({
   plugins: [selfHostedAssets()],
+  // ORT's "extern wasm" build loads its .mjs/.wasm from wasmPaths (our ort/ copy) instead
+  // of bundling a second 15 MB copy through import.meta.url.
+  resolve: { conditions: ["onnxruntime-web-use-extern-wasm", ...defaultClientConditions] },
   worker: { format: "es" },
   build: { target: "es2022", sourcemap: false, assetsInlineLimit: 0 },
+  // Playwright owns e2e/; Vitest runs only the unit and property tests.
+  test: { include: ["src/**/*.test.ts"] },
 });
