@@ -68,14 +68,46 @@ def allowed(path: str, roots: Sequence[Path]) -> Path:
     return real
 
 
+def _read_no_follow(real: Path) -> bytes:
+    """Read a checked path without following a symlink swapped in after the check (L1).
+
+    O_NONBLOCK keeps a FIFO from hanging the server; fstat re-checks the open descriptor,
+    and the read stops at the limit, so /dev/zero or a growing file cannot exhaust memory.
+    """
+    fd = os.open(real, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | getattr(os, "O_CLOEXEC", 0))
+    try:
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode):
+            raise SandboxError(REFUSED)
+        if info.st_size > MAX_BYTES:
+            msg = f"file is larger than {MAX_BYTES // (1024 * 1024)} MB"
+            raise TooLargeError(msg)
+        chunks, total = [], 0
+        while total <= MAX_BYTES:
+            chunk = os.read(fd, min(1 << 20, MAX_BYTES + 1 - total))
+            if not chunk:
+                break
+            chunks.append(chunk)
+            total += len(chunk)
+        return b"".join(chunks)
+    finally:
+        os.close(fd)
+
+
 def read_allowed(
     path: str,
     roots: Sequence[Path],
-    reader: Callable[[Path], bytes] = Path.read_bytes,
+    reader: Callable[[Path], bytes] = _read_no_follow,
 ) -> bytes:
     """Read an allowed file into memory; the reader is never called for a refused path."""
     real = allowed(path, roots)
-    data = reader(real)
+    try:
+        data = reader(real)
+    except SandboxError:
+        raise
+    except OSError:
+        # Same answer as any refusal: OS messages carry local paths (L2).
+        raise SandboxError(REFUSED) from None
     if len(data) > MAX_BYTES:  # the file grew after the check
         msg = f"file is larger than {MAX_BYTES // (1024 * 1024)} MB"
         raise TooLargeError(msg)

@@ -130,3 +130,48 @@ def test_roots_come_from_the_environment_or_default_to_the_replay_folder() -> No
     assert sandbox.roots_from_env({}) == sandbox.DEFAULT_ROOTS
     assert sandbox.roots_from_env({sandbox.ROOTS_ENV: "/a:/b:"}) == (Path("/a"), Path("/b"))
     assert sandbox.DEFAULT_ROOTS[0].parts[-3:] == ("web", "public", "replay")
+
+
+def test_a_symlink_swapped_in_after_the_check_is_not_followed(tmp_path: Path) -> None:
+    clip = tmp_path / "clip.wav"
+    clip.write_bytes(b"RIFF")
+
+    def swap_then_read(path: Path) -> bytes:
+        clip.unlink()
+        clip.symlink_to("/dev/zero")  # the race the check cannot see
+        return sandbox._read_no_follow(path)  # noqa: SLF001
+
+    with pytest.raises(sandbox.SandboxError, match="outside the allowed folders"):
+        sandbox.read_allowed(str(clip), [tmp_path], swap_then_read)
+
+
+def test_a_fifo_swapped_in_after_the_check_does_not_hang(tmp_path: Path) -> None:
+    clip = tmp_path / "clip.wav"
+    clip.write_bytes(b"RIFF")
+
+    def swap_then_read(path: Path) -> bytes:
+        clip.unlink()
+        os.mkfifo(clip)
+        return sandbox._read_no_follow(path)  # noqa: SLF001
+
+    with pytest.raises(sandbox.SandboxError, match="outside the allowed folders"):
+        sandbox.read_allowed(str(clip), [tmp_path], swap_then_read)
+
+
+def test_read_errors_do_not_leak_the_path(tmp_path: Path) -> None:
+    clip = tmp_path / "clip.wav"
+    clip.write_bytes(b"RIFF")
+
+    def denied(path: Path) -> bytes:
+        raise PermissionError(13, "Permission denied", str(path))
+
+    with pytest.raises(sandbox.SandboxError) as caught:
+        sandbox.read_allowed(str(clip), [tmp_path], denied)
+    assert str(tmp_path) not in str(caught.value)
+    assert str(caught.value) == sandbox.REFUSED
+
+
+def test_the_default_reader_returns_the_file(tmp_path: Path) -> None:
+    clip = tmp_path / "clip.wav"
+    clip.write_bytes(b"RIFF" * 1000)
+    assert sandbox.read_allowed(str(clip), [tmp_path]) == b"RIFF" * 1000
