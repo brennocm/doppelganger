@@ -34,7 +34,7 @@
   - [x]* 3.5 Write property test for bounded per-connection memory
     - **Property 6: Bounded per-connection memory**
     - **Validates: Requirements 3.4**
-  - [ ] 3.6 Implement `EngineBackend` (`InferenceBackend` over WebSocket) in the web app, offered only when served by the engine
+  - [ ] 3.6 (Deferred, first in the cut order) Implement the engine score source in the web app: stream PCM16 to `WS /v1/stream` and feed its `score` messages into the Haunting_Machine, offered only when served by the engine
     - _Requirements: 3.5_
 
 - [x] 4. Autopsy endpoint

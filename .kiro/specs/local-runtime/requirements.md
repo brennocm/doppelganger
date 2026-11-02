@@ -49,7 +49,7 @@ This spec delivers tiers 2 and 3: the self-hosted static app and the optional Pr
 2. THE Engine SHALL apply the same windowing, voice activity, scoring and smoothing as `packages/detector`, verified with the shared golden vectors.
 3. THE Engine SHALL send `score` messages (`windowIndex`, `raw`, `smoothed`, `modelId`) and `error` messages defined in `packages/contracts`.
 4. THE Engine SHALL hold at most one window plus one hop of audio per connection and SHALL drop it when the connection closes.
-5. THE web app SHALL offer "Local engine (pro model)" as the inference backend only when served by the Engine, implemented as an `InferenceBackend`.
+5. WHERE the web app is served by the Engine, THE web app SHALL be able to use the Engine as a score source for live detection: the Engine's `score` messages feed the Haunting_Machine directly, instead of a browser `InferenceBackend`. (Deferred: first in the cut order, decided 2026-11-01.)
 
 ### Requirement 4: Autopsy endpoint
 
