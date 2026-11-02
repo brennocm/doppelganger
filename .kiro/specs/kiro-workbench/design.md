@@ -89,6 +89,16 @@ Tools:
 
 `analyze_audio_file` resolves the path, rejects anything outside the allowlisted roots or above the engine's size/duration limits, decodes in memory and reuses the same windowing and calibration as the engine.
 
+#### Implementation details (P36)
+
+- **Shared Autopsy code.** The engine's WAV decoder (`audio_file.py`), its detector pipeline ports (`pipeline.py`: windower, voice activity check, `StreamSession`) and its report builder (`autopsy.py`) move unchanged into `packages/model-lab/src/model_lab/`. `score_logits` and `InferenceError` move to `model_lab.scoring`. `model_lab.inference` re-exports all of them, so the engine and the MCP server both import model-lab only through the published inference module. The engine keeps thin modules with the old names that re-export from `model_lab.inference`, so its code and tests do not change. Import-linter forbids both the engine and the MCP server from importing any other model_lab module. The reason for the move is that Property 2 needs the same code path, and Python packages must not import from `apps/engine`.
+- **Formats and limits.** Like the engine (local-runtime P29), the server decodes WAV only, in memory. It refuses files over 20 MB before reading them (from `stat`) and recordings over 5 minutes from the WAV header.
+- **Sandbox.** `DOPPELGANGER_MCP_ROOTS` is a `:`-separated list of folders. The default is `apps/web/public/replay` in the repository. A path is resolved with `Path.resolve(strict=True)`, which follows every symlink. It is read only if the result is a regular file inside a resolved root. Any other path is refused with the same message, and the file is never opened.
+- **Models.** `DOPPELGANGER_MCP_MODELS` is a `:`-separated list of folders with manifests (default `apps/web/public/models`). `list_models` reads the manifests only. `analyze_audio_file` loads the chosen model through `OnnxModel.from_manifest_file`, which verifies the SHA-256 first. Without `model_id`, the first manifest in sorted order is used.
+- **Output.** Window `score` is the raw calibrated Dissonance_Score, or null for an unvoiced window. `summary` has `peak` and `mean` over the scored windows (null if there are none), `state_timeline` (the report's `states`), `verdict` and `verdict_reason`. A fixed `note` says that the score is probabilistic, is not proof and does not identify a person, and points to `docs/model-card.md`. `explain_thresholds` returns the `HauntingConfig` defaults that the engine's Autopsy uses.
+- **SDK.** `mcp==2.3.0` (MIT), with `MCPServer` and `run()` on stdio. Problems the model can fix (outside the sandbox, too large, not WAV, unknown model) are raised as `ToolError`. The server makes no network requests and writes nothing.
+- **Command.** `uv run --locked --package doppelganger-mcp python -m doppelganger_mcp`, from the repository root.
+
 ### Power
 
 A folder `powers/doppelganger/` containing the power definition in Kiro's current format, the MCP server reference, a steering file ("use for suspicious audio files; the score is probabilistic; never treat it as proof; see the model card") and activation keywords.
