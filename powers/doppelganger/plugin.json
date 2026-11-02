@@ -1,0 +1,22 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "doppelganger",
+  "version": "0.1.0",
+  "description": "Check suspicious audio files for signs of a synthetic or cloned voice with the local Doppelgänger detector. Probabilistic: a score is never proof.",
+  "author": {
+    "name": "Doppelgänger project",
+    "url": "https://github.com/brennocm/doppelganger"
+  },
+  "homepage": "https://github.com/brennocm/doppelganger",
+  "repository": "https://github.com/brennocm/doppelganger",
+  "license": "MIT",
+  "keywords": [
+    "deepfake",
+    "voice clone",
+    "cloned voice",
+    "synthetic voice",
+    "suspicious audio",
+    "audio deepfake",
+    "doppelganger"
+  ]
+}

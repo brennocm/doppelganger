@@ -1,0 +1,18 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "doppelganger": {
+      "type": "stdio",
+      "command": "sh",
+      "args": [
+        "-c",
+        "exec uv run --locked --directory \"$DOPPELGANGER_REPO\" --package doppelganger-mcp python -m doppelganger_mcp"
+      ],
+      "env": {
+        "DOPPELGANGER_REPO": "${DOPPELGANGER_REPO}",
+        "DOPPELGANGER_MCP_ROOTS": "${DOPPELGANGER_MCP_ROOTS}",
+        "DOPPELGANGER_MCP_MODELS": "${DOPPELGANGER_MCP_MODELS}"
+      }
+    }
+  }
+}

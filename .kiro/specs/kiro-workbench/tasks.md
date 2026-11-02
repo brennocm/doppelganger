@@ -64,7 +64,7 @@
     - _Requirements: 7.6, 9.2_
 
 - [ ] 6. Kiro power
-  - [ ] 6.1 Check the current Kiro power format in the documentation and create `powers/doppelganger/` with the MCP reference, steering and keywords
+  - [x] 6.1 Check the current Kiro power format in the documentation and create `powers/doppelganger/` with the MCP reference, steering and keywords
     - _Requirements: 8.1, 8.2_
   - [ ] 6.2 Install the power in a clean workspace, test it on a fixture and record the result
     - _Requirements: 8.3_
