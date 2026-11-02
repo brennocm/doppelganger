@@ -103,6 +103,14 @@ Tools:
 
 A folder `powers/doppelganger/` containing the power definition in Kiro's current format, the MCP server reference, a steering file ("use for suspicious audio files; the score is probabilistic; never treat it as proof; see the model card") and activation keywords.
 
+#### Format and details (P37, checked 2026-11-02)
+
+- **Format.** kiro.dev (`/docs/powers/create`, `/docs/powers/installation`) now documents the Agent Plugins format. It has a `plugin.json` manifest (schema `https://agent-plugins.org/schemas/1.0.0/plugin.schema.json`; only `$schema` and `name` are required, with no extra properties), an optional `mcp.json`, and `skills/<name>/SKILL.md`. `POWER.md` with `steering/` is the legacy format and its front-matter is no longer documented. The power therefore ships the "steering file" of Requirement 8.1 as the skill `skills/doppelganger-safe-use/SKILL.md`. Kiro loads that skill when the power activates.
+- **Files.** `plugin.json` holds `name: doppelganger`, a version, a description, an `author` object (the project, not a person), the repository URL, MIT, and keywords including "deepfake", "voice clone" and "suspicious audio". `mcp.json` declares one stdio server, `doppelganger`, which Kiro namespaces at install time. `README.md` covers setup, the probabilistic nature of the score and the model card link (Requirement 8.2).
+- **Server command.** The docs do not say which working directory a power's server starts in. The command is therefore `sh -c 'exec uv run --locked --directory "$DOPPELGANGER_REPO" --package doppelganger-mcp python -m doppelganger_mcp'`. `DOPPELGANGER_REPO` (a clone of this repository) and the optional `DOPPELGANGER_MCP_ROOTS` and `DOPPELGANGER_MCP_MODELS` are passed as `${VAR}` references in `env`, the documented form. The server makes no network requests, and the shell string is constant, with only the quoted variable expanded.
+- **Limits stated in the skill.** The score is a probabilistic Dissonance_Score, not proof, and it does not identify a person. The only model shipped today is the synthetic CI model, whose scores mean nothing. Real use waits for detection-model 6.4, and the skill and README say so. Only WAV files are read.
+- **Tests.** A pytest checks the manifest against the published schema's fields, the keywords, the skill's front-matter (name equal to its folder, description ≤ 1024 characters), that `mcp.json` holds only `${VAR}` references and no literal values, and that the docs mention the model card. It then starts the exact command from `mcp.json` with `DOPPELGANGER_REPO` set and lists the tools over stdio. Installing it in a clean workspace (task 6.2) is a manual step for the developer, because `kiro-cli powers install` changes user-level Kiro state.
+
 ## Data Models
 
 The MCP tool outputs reuse the `AutopsyReport` and `ModelManifest` schemas from `packages/contracts`.
