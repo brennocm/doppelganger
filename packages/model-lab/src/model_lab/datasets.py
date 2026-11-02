@@ -18,15 +18,19 @@ if TYPE_CHECKING:
 
 HAUNT_SET: Final = "haunt-set"
 ASVSPOOF_2019_LA: Final = "asvspoof2019-la"
+#: The LA train partition: fine-tuning data only, never evaluated (design P34).
+ASVSPOOF_2019_LA_TRAIN: Final = "asvspoof2019-la-train"
 #: Seeded signals for the dry run (design P31, P33). Not a measurement.
 SYNTHETIC: Final = "synthetic"
 SYNTHETIC_SECONDS: Final = 6
 _SYNTHETIC_SESSIONS: Final = 4
 BENCHMARK_ENV: Final = "BENCHMARK_DIR"
 _PROTOCOL: Final = "ASVspoof2019_LA_cm_protocols/ASVspoof2019.LA.cm.eval.trl.txt"
+_TRAIN_PROTOCOL: Final = "ASVspoof2019_LA_cm_protocols/ASVspoof2019.LA.cm.train.trn.txt"
 _PROTOCOL_FIELDS: Final = 5
 
-Split = Literal["dev", "eval"]
+#: "train" items are never scored by the harness, which reads only dev and eval.
+Split = Literal["dev", "eval", "train"]
 
 
 @dataclass(frozen=True)
@@ -62,8 +66,14 @@ def haunt_set_items(rows: list[haunt_set.IndexRow], seed: int = 0) -> list[Item]
     ]
 
 
-def parse_asvspoof_protocol(lines: list[str]) -> list[Item]:
-    """Parse the LA eval protocol: ``speaker utterance - system key``."""
+def parse_asvspoof_protocol(
+    lines: list[str], partition: Literal["eval", "train"] = "eval"
+) -> list[Item]:
+    """Parse an LA protocol: ``speaker utterance - system key``.
+
+    Eval items belong to the benchmark; train items exist only for fine-tuning (P34).
+    """
+    dataset = ASVSPOOF_2019_LA if partition == "eval" else ASVSPOOF_2019_LA_TRAIN
     items: list[Item] = []
     for number, line in enumerate(lines, start=1):
         fields = line.split()
@@ -75,12 +85,12 @@ def parse_asvspoof_protocol(lines: list[str]) -> list[Item]:
         speaker, utterance, _, system, key = fields
         items.append(
             Item(
-                dataset=ASVSPOOF_2019_LA,
-                path=f"ASVspoof2019_LA_eval/flac/{utterance}.flac",
+                dataset=dataset,
+                path=f"ASVspoof2019_LA_{partition}/flac/{utterance}.flac",
                 label=1 if key == "spoof" else 0,
                 group=speaker,
                 system="genuine" if system == "-" else system,
-                split="eval",
+                split=partition,
             )
         )
     return items
@@ -98,6 +108,20 @@ def load_asvspoof(root: Path) -> list[Item]:
         msg = f"{BENCHMARK_ENV} does not contain the ASVspoof 2019 LA eval protocol"
         raise haunt_set.DatasetError(msg)
     return parse_asvspoof_protocol(protocol.read_text(encoding="utf-8").splitlines())
+
+
+def asvspoof_train_root(root: Path) -> Path:
+    """Accept either the LA folder or its parent, for the train partition."""
+    return root / "LA" if (root / "LA" / _TRAIN_PROTOCOL).is_file() else root
+
+
+def load_asvspoof_train(root: Path) -> list[Item]:
+    """Read the LA train protocol under $BENCHMARK_DIR (fine-tuning only, P34)."""
+    protocol = asvspoof_train_root(root) / _TRAIN_PROTOCOL
+    if not protocol.is_file():
+        msg = f"{BENCHMARK_ENV} does not contain the ASVspoof 2019 LA train protocol"
+        raise haunt_set.DatasetError(msg)
+    return parse_asvspoof_protocol(protocol.read_text(encoding="utf-8").splitlines(), "train")
 
 
 def subsample(items: list[Item], limit: int | None, seed: int = 0) -> list[Item]:

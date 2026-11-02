@@ -1,0 +1,15 @@
+{
+  "candidate": "aasist-l",
+  "init": "pretrained",
+  "dataset": "asvspoof2019-la-train",
+  "seed": 1234,
+  "epochs": 5,
+  "batchSize": 24,
+  "learningRate": 0.00001,
+  "weightDecay": 0.0001,
+  "classWeights": [0.1, 0.9],
+  "conditions": ["clean", "opus-16k", "opus-32k", "band-8k", "noise-10db"],
+  "maxItemsPerEpoch": null,
+  "exportOnnx": true,
+  "modelId": "aasist-l-codec-v1"
+}
