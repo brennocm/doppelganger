@@ -71,6 +71,7 @@ Python: `import-linter` contracts for `packages/model-lab` must not import `apps
 - A package that reports only a license category or free text (for example the classifier "BSD License") must have an entry in the policy's override list, keyed by `name==version`, with the SPDX ID and a comment citing the project's license file URL. A version bump therefore forces the override to be checked again.
 - Runtime dependencies (`pnpm licenses list --prod`, and `uv export --no-dev`) must use the base allowlist. Development-only dependencies may also use MPL-2.0.
 - A package whose license is unknown, or outside the allowlist that applies to it, fails the check with its name, version and license.
+- **P40 (2026-11-02):** MIT-0 (MIT No Attribution) joins the allowlist. It is MIT without the attribution condition, so it grants strictly more than MIT. It arrived with `cffi` 2.1.1, through `cryptography` ← `pyjwt[crypto]` ← `mcp` (the MCP server).
 
 ### Pages build
 
