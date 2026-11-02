@@ -11,13 +11,17 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Final, Literal
 
-from model_lab import codecs, haunt_set
+from model_lab import codecs, haunt_set, synthetic
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
 HAUNT_SET: Final = "haunt-set"
 ASVSPOOF_2019_LA: Final = "asvspoof2019-la"
+#: Seeded signals for the dry run (design P31, P33). Not a measurement.
+SYNTHETIC: Final = "synthetic"
+SYNTHETIC_SECONDS: Final = 6
+_SYNTHETIC_SESSIONS: Final = 4
 BENCHMARK_ENV: Final = "BENCHMARK_DIR"
 _PROTOCOL: Final = "ASVspoof2019_LA_cm_protocols/ASVspoof2019.LA.cm.eval.trl.txt"
 _PROTOCOL_FIELDS: Final = 5
@@ -118,3 +122,37 @@ def file_source(roots: dict[str, Path]) -> Callable[[Item], codecs.Audio]:
         return codecs.decode((roots[item.dataset] / relative).read_bytes())
 
     return load
+
+
+def synthetic_items() -> list[Item]:
+    """Dry-run items: 4 sessions, one genuine and one synthetic item each (design P33).
+
+    Sessions 1-2 are dev and 3-4 eval. The path names the signal kind; labels are arbitrary.
+    """
+    items: list[Item] = []
+    for number in range(_SYNTHETIC_SESSIONS):
+        session = f"s{number + 1}"
+        for label in (0, 1):
+            kind = synthetic.KINDS[(2 * number + label) % len(synthetic.KINDS)]
+            items.append(
+                Item(
+                    dataset=SYNTHETIC,
+                    path=f"{session}/{kind}-{label}",
+                    label=label,
+                    group=session,
+                    system="genuine" if label == 0 else f"synthetic-{kind}",
+                    split="dev" if number < _SYNTHETIC_SESSIONS // 2 else "eval",
+                )
+            )
+    return items
+
+
+def synthetic_source(item: Item) -> codecs.Audio:
+    """A seeded 6 s signal of the kind named in the item path; nothing is read from disk."""
+    name = item.path.rsplit("/", 1)[-1].split("-", 1)[0]
+    kinds = {k: k for k in synthetic.KINDS}
+    if item.dataset != SYNTHETIC or name not in kinds:
+        msg = f"not a synthetic item: {item.path}"
+        raise haunt_set.DatasetError(msg)
+    samples = SYNTHETIC_SECONDS * codecs.SAMPLE_RATE
+    return synthetic.signal(kinds[name], samples, seed=item_seed(item))

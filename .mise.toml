@@ -104,8 +104,9 @@ run = "uv run --locked python -m model_lab.evaluate"
 [tasks."model:export"]
 description = "Export, quantize and verify ONNX models; update the manifest"
 depends = ["deps"]
-# Until the gate picks the Light_Model (detection-model 6.4), only the synthetic CI model.
-run = "uv run --locked python -m model_lab.export synthetic --out apps/web/public/models"
+# No argument: the synthetic CI model into apps/web/public/models. `-- aasist-l` or
+# `-- aasist`: fp32 ONNX of a pinned candidate into $DOPPELGANGER_CACHE/onnx (design P31).
+run = "uv run --locked python -m model_lab.export"
 
 [tasks."build:pages"]
 description = "Build landing (/) and app (/app/) into one Pages artifact"

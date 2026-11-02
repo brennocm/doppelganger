@@ -1,0 +1,53 @@
+{
+  "description": "Pinned AASIST checkpoints (detection-model task 4.1). Files are fetched into $DOPPELGANGER_CACHE/checkpoints and refused unless size and SHA-256 match. The GitHub files equal the Hugging Face mirrors listed in CANDIDATES.md (same SHA-256).",
+  "upstream": {
+    "repository": "https://github.com/clovaai/aasist",
+    "commit": "a04c9863f63d44471dde8a6abcb3b082b07cd1d1",
+    "modelCodeSha256": "9e0d3e80937dd0577beea7883098465a479da23a198ebc0d712abcc59b0bec50",
+    "licenseSha256": "da2e79b8592d166ef505224300968b80ebe1e4c217c43b94a5ec627d81cd4142"
+  },
+  "candidates": {
+    "aasist-l": {
+      "url": "https://raw.githubusercontent.com/clovaai/aasist/a04c9863f63d44471dde8a6abcb3b082b07cd1d1/models/weights/AASIST-L.pth",
+      "mirror": "https://hf.co/SpeechAntiSpoofingBenchmarks/AASIST-L @ 357e022c",
+      "sha256": "814331d088032bb4c3fa61cc014789eadeed464209dd094ab3a2dd6ffbdce27a",
+      "bytes": 426428,
+      "parameters": 85306,
+      "modelConfig": {
+        "architecture": "AASIST",
+        "nb_samp": 64600,
+        "first_conv": 128,
+        "filts": [70, [1, 32], [32, 32], [32, 24], [24, 24]],
+        "gat_dims": [24, 32],
+        "pool_ratios": [0.4, 0.5, 0.7, 0.5],
+        "temperatures": [2.0, 2.0, 100.0, 100.0]
+      },
+      "license": {
+        "code": "MIT",
+        "weights": "MIT",
+        "trainingData": "ODC-By (ASVspoof 2019 LA, attribution required)"
+      }
+    },
+    "aasist": {
+      "url": "https://raw.githubusercontent.com/clovaai/aasist/a04c9863f63d44471dde8a6abcb3b082b07cd1d1/models/weights/AASIST.pth",
+      "mirror": "https://hf.co/SpeechAntiSpoofingBenchmarks/AASIST @ 16774d45",
+      "sha256": "51d2d9cf0738172f61e2a384ec50a54a55363240f67c971ed55a92435bc1a1c0",
+      "bytes": 1281532,
+      "parameters": 297866,
+      "modelConfig": {
+        "architecture": "AASIST",
+        "nb_samp": 64600,
+        "first_conv": 128,
+        "filts": [70, [1, 32], [32, 32], [32, 64], [64, 64]],
+        "gat_dims": [64, 32],
+        "pool_ratios": [0.5, 0.7, 0.5, 0.5],
+        "temperatures": [2.0, 2.0, 100.0, 100.0]
+      },
+      "license": {
+        "code": "MIT",
+        "weights": "MIT",
+        "trainingData": "ODC-By (ASVspoof 2019 LA, attribution required)"
+      }
+    }
+  }
+}

@@ -57,7 +57,8 @@ src = [
     "packages/model-lab/src",
     "packages/doppelganger-mcp/src",
 ]
-extend-exclude = ["**/generated/**"]
+# Generated code and unmodified third-party code (model_lab/candidates/upstream).
+extend-exclude = ["**/generated/**", "**/candidates/upstream/**"]
 # Also skip excluded files when they are passed explicitly (pre-commit passes staged files).
 force-exclude = true
 
@@ -103,6 +104,12 @@ explicit_package_bases = true
 [[tool.mypy.overrides]]
 module = ["onnxruntime.*", "sklearn.*"]
 ignore_missing_imports = true
+
+# Unmodified third-party model code (clovaai/aasist, MIT), checked by SHA-256 instead.
+[[tool.mypy.overrides]]
+module = ["model_lab.candidates.upstream.*"]
+ignore_errors = true
+follow_imports = "skip"
 
 # --- import-linter: Python boundary rules from .kiro/steering/structure.md ---
 [tool.importlinter]

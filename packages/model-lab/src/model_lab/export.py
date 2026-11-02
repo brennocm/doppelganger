@@ -113,9 +113,14 @@ def onnx_logits(model_bytes: bytes, windows: Windows) -> npt.NDArray[np.float32]
 
 
 def parity(module: torch.nn.Module, model_bytes: bytes, windows: Windows) -> float:
-    """Max |PyTorch - ONNX Runtime| over the fixture windows."""
+    """Max |PyTorch - ONNX Runtime| over the fixture windows.
+
+    PyTorch also runs one window at a time: a batch of 200 AASIST windows needs several
+    GB of activations and swaps on a 16 GB laptop (P32).
+    """
     with torch.no_grad():
-        expected = module(torch.from_numpy(windows)).numpy()
+        rows = [module(torch.from_numpy(w.reshape(1, -1))).numpy().reshape(-1) for w in windows]
+    expected = np.asarray(rows, dtype=np.float32)
     return float(np.max(np.abs(expected - onnx_logits(model_bytes, windows))))
 
 
@@ -240,13 +245,30 @@ def export_synthetic(out_dir: Path, today: dt.date) -> ExportResult:
     return export_model(synthetic_model(), spec, out_dir, check, today)
 
 
+#: Where the committed synthetic CI model lives (detection-model design, Data Models).
+SYNTHETIC_OUT: Final = Path("apps/web/public/models")
+
+
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point used by ``mise run model:export``."""
     parser = argparse.ArgumentParser(prog="model_lab.export", description=__doc__)
-    parser.add_argument("model", choices=["synthetic"], help="model to export")
-    parser.add_argument("--out", type=Path, required=True, help="output folder")
+    parser.add_argument(
+        "model", nargs="?", default="synthetic", choices=["synthetic", "aasist-l", "aasist"]
+    )
+    parser.add_argument("--out", type=Path, default=None, help="output folder")
     args = parser.parse_args(argv)
-    result = export_synthetic(args.out, dt.datetime.now(dt.UTC).date())
+    if args.model != "synthetic":
+        # Real candidates: fp32 ONNX into the cache unless --out is given (design P31).
+        from model_lab import candidates  # noqa: PLC0415
+
+        out = args.out or candidates.cache_dir() / "onnx"
+        done = candidates.export_candidate(args.model, out)
+        print(  # noqa: T201  (CLI output)
+            f"exported {args.model} to {done.manifest_path} ({done.bytes} bytes, fp32), "
+            f"parity max |diff| {done.max_abs_diff:.2e}"
+        )
+        return 0
+    result = export_synthetic(args.out or SYNTHETIC_OUT, dt.datetime.now(dt.UTC).date())
     aucs = "skipped"
     if result.int8_auc is not None:
         aucs = "fp32 {:.4f} / int8 {:.4f}".format(*result.int8_auc)

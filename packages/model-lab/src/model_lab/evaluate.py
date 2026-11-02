@@ -249,7 +249,39 @@ def evaluate(
     }
 
 
-def _load_items(names: list[str], limit: int | None) -> tuple[list[datasets.Item], dict[str, Path]]:
+#: Every report of the synthetic dataset carries this label (design P31).
+DRY_RUN_LABEL: Final = "synthetic dry run, not a measurement"
+#: packages/model-lab/reports, found from this file so the check does not depend on the cwd.
+_COMMITTED_REPORTS: Final = Path(__file__).resolve().parents[2] / "reports"
+
+
+class DryRunError(ValueError):
+    """A synthetic dry run was asked to do something that could pass for a measurement."""
+
+
+def dry_run_reports(names: list[str], reports: Path | None, label: str) -> tuple[Path, str]:
+    """The reports folder and label of a run; strict for the synthetic dataset (P31, P33)."""
+    if datasets.SYNTHETIC not in names:
+        return reports or DEFAULT_REPORTS_DIR, label
+    if names != [datasets.SYNTHETIC]:
+        msg = "the synthetic dataset cannot be combined with other datasets"
+        raise DryRunError(msg)
+    if reports is None:
+        msg = "--reports is required with the synthetic dataset, outside packages/model-lab/reports"
+        raise DryRunError(msg)
+    target = reports.resolve()
+    for committed in {_COMMITTED_REPORTS, DEFAULT_REPORTS_DIR.resolve()}:
+        if target.is_relative_to(committed):
+            msg = "a synthetic dry run must not write into packages/model-lab/reports"
+            raise DryRunError(msg)
+    return reports, DRY_RUN_LABEL + (f"; {label}" if label else "")
+
+
+def _load_items(
+    names: list[str], limit: int | None
+) -> tuple[list[datasets.Item], Callable[[datasets.Item], codecs.Audio], list[Path]]:
+    if names == [datasets.SYNTHETIC]:
+        return datasets.synthetic_items(), datasets.synthetic_source, []
     items: list[datasets.Item] = []
     roots: dict[str, Path] = {}
     if datasets.HAUNT_SET in names:
@@ -260,7 +292,7 @@ def _load_items(names: list[str], limit: int | None) -> tuple[list[datasets.Item
         root = datasets.asvspoof_root(haunt_set.dataset_dir(datasets.BENCHMARK_ENV))
         roots[datasets.ASVSPOOF_2019_LA] = root
         items += datasets.subsample(datasets.load_asvspoof(root), limit)
-    return items, roots
+    return items, datasets.file_source(roots), list(roots.values())
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -270,22 +302,24 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--manifest-dir", type=Path, default=DEFAULT_MANIFEST_DIR)
     parser.add_argument("--datasets", default=f"{datasets.HAUNT_SET},{datasets.ASVSPOOF_2019_LA}")
     parser.add_argument("--benchmark-limit", type=int, default=None)
-    parser.add_argument("--reports", type=Path, default=DEFAULT_REPORTS_DIR)
+    parser.add_argument("--reports", type=Path, default=None, help=f"default {DEFAULT_REPORTS_DIR}")
     parser.add_argument("--web-latency", type=Path, default=None)
     parser.add_argument("--label", default="")
     args = parser.parse_args(argv)
     manifests = args.manifest or sorted(args.manifest_dir.glob("*.json"))
+    names = args.datasets.split(",")
     try:
-        items, roots = _load_items(args.datasets.split(","), args.benchmark_limit)
-    except haunt_set.DatasetError as error:
+        reports_dir, label = dry_run_reports(names, args.reports, args.label)
+        items, source, forbidden = _load_items(names, args.benchmark_limit)
+    except (haunt_set.DatasetError, DryRunError) as error:
         sys.stderr.write(f"model:eval: {error}\n")
         return 2
     candidates = [OnnxCandidate(OnnxModel.from_manifest_file(p)) for p in manifests]
-    results = evaluate(candidates, items, datasets.file_source(roots))
+    results = evaluate(candidates, items, source)
     if args.web_latency is not None:
         results["webLatency"] = report.read_web_latency(args.web_latency)
     today = dt.datetime.now(dt.UTC).date()
-    folder = report.write(results, args.reports, today, args.label, forbidden=list(roots.values()))
+    folder = report.write(results, reports_dir, today, label, forbidden=forbidden)
     sys.stdout.write(f"model:eval: wrote {folder}/results.json and summary.md\n")
     return 0
 
