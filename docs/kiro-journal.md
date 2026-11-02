@@ -316,3 +316,9 @@ Template:
   - **haunter**: the first Possession frame could tear twice within 33 ms, which breaks the ≤ 3 flashes per second rule.
 
   Each of these now has a regression test. Not run in this environment: the Docker image (no Docker in this WSL distro), `/haunt-snapshots` (the shell tool refuses to start a preview server), and anything that needs the developer's recordings or a real call.
+
+## 2026-11-01 — Developer decisions from prompt 016: sticky Exorcised, deferred engine score source
+- Kiro surface: CLI
+- Feature used: spec | PBT
+- What happened: P20 was ratified; P21–P30 and the WAV-only engine were accepted. On the developer's decision, Exorcised is now sticky: it lasts until re-possession or capture stop. Detection-core Requirements 5.2 and 5.3 now read "unless it is in Possession or Exorcised". Property 9 now also says Exorcised is left only for Possession, after confirmation, or for Idle, and it validates 5.6 and 5.7 (3ff7e0c). Then the TS `transition`, the Python port in `model_lab.haunting`, the example test and Property 9 were changed (e5105b9), with one new golden case, "Exorcised is sticky through low scores and silence". Local-runtime 3.6 is deferred. The developer's note said Requirement 5.5, but the requirement about the engine backend is **3.5**, so 3.5 was rewritten: the engine would be a *score source* whose `score` messages feed the Haunting_Machine, not an `InferenceBackend`. The design says how it would work (b9a5982). Detection-model section 5's parent checkbox is now ticked (2b5ae81).
+- Effect: The first golden regeneration left `haunting.json` unchanged, because no existing case put low scores after Exorcised. The parity test would therefore not have caught a Python port still on the old rule. With the new case, restoring the old rule in Python fails the model-lab parity test, and restoring it in TS fails 3 TS tests: the example, Property 9 and the golden snapshot.
