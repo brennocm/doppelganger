@@ -189,3 +189,5 @@ testpaths = [
 ]
 addopts = ["--strict-markers", "--strict-config", "--import-mode=importlib"]
 xfail_strict = true
+# Synthetic test audio written to tmp_path must not outlive the test (testing steering).
+tmp_path_retention_policy = "none"

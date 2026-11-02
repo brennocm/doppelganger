@@ -48,16 +48,16 @@
 ## Phase B (after detection-model provides an ONNX model)
 
 - [ ] 5. Doppelganger MCP server
-  - [ ] 5.1 Scaffold `packages/doppelganger-mcp` with the MCP SDK and stdio transport
+  - [x] 5.1 Scaffold `packages/doppelganger-mcp` with the MCP SDK and stdio transport
     - _Requirements: 7.6_
-  - [ ] 5.2 Implement `sandbox.py` with the path allowlist
+  - [x] 5.2 Implement `sandbox.py` with the path allowlist
     - _Requirements: 7.4_
-  - [ ]* 5.3 Write property test for path sandbox
+  - [x]* 5.3 Write property test for path sandbox
     - **Property 1: Path sandbox**
     - **Validates: Requirements 7.4**
-  - [ ] 5.4 Implement `analyze_audio_file`, `list_models` and `explain_thresholds` on top of `model_lab.inference`
+  - [x] 5.4 Implement `analyze_audio_file`, `list_models` and `explain_thresholds` on top of `model_lab.inference`
     - _Requirements: 7.1, 7.2, 7.3, 7.5_
-  - [ ]* 5.5 Write integration test for output consistency with the engine
+  - [x]* 5.5 Write integration test for output consistency with the engine
     - **Property 2: Output consistency with the engine**
     - **Validates: Requirements 7.1**
   - [ ] 5.6 Register the server in `.kiro/settings/mcp.json` and use it from Kiro to analyze the replay fixtures; record it in the journal

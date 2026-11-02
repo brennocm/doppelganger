@@ -4,7 +4,11 @@ version = "0.0.0"
 description = "Doppelgänger MCP server exposing the detector to Kiro."
 requires-python = "==3.12.*"
 license = "MIT"
-dependencies = []
+# MCP SDK (MIT) for the stdio server; model-lab for the shared inference module (P36).
+dependencies = [
+    "doppelganger-model-lab",
+    "mcp==2.3.0",
+]
 
 [build-system]
 requires = ["uv_build==0.13.6"]
@@ -12,3 +16,6 @@ build-backend = "uv_build"
 
 [tool.uv.build-backend]
 module-name = "doppelganger_mcp"
+
+[tool.uv.sources]
+doppelganger-model-lab = { workspace = true }
