@@ -74,14 +74,12 @@ for port in "$PORT" "$STATIC_PORT" "$HEALTH_TIMEOUT"; do
   fi
 done
 
-RELEASE_URL="${DOPPELGANGER_RELEASE_URL:-$REPO_URL/releases/download/v$VERSION}"
-case "$RELEASE_URL" in
-  https://*) ;;
-  *) die 1 "DOPPELGANGER_RELEASE_URL must start with https://" ;;
-esac
+# Not overridable: SHA256SUMS comes from the same place as the files it checks (exorcist M1).
+RELEASE_URL="$REPO_URL/releases/download/v$VERSION"
 RELEASE_DIR="$DATA_DIR/$VERSION"
 PARTIAL_DIR="$DATA_DIR/$VERSION.partial"
 PID_FILE="$DATA_DIR/static.pid"
+MARKER="$DATA_DIR/.doppelganger-installer"
 
 # --- platform and prerequisites -----------------------------------------------------------
 
@@ -123,6 +121,7 @@ check_port() {
 
 check_disk() {
   mkdir -p "$DATA_DIR"
+  : >>"$MARKER"
   avail="$(df -Pk "$DATA_DIR" | awk 'NR == 2 { print $4 }')"
   case "$avail" in
     '' | *[!0-9]*) missing "free disk space (could not read df output)" ;;
@@ -273,7 +272,10 @@ static_running() {
   [ -f "$PID_FILE" ] || return 1
   pid="$(cat "$PID_FILE")"
   case "$pid" in '' | *[!0-9]*) return 1 ;; esac
-  kill -0 "$pid" 2>/dev/null && ps -o args= -p "$pid" 2>/dev/null | grep -q 'http.server'
+  # The full command line, so a reused PID never matches another user's http.server (L8).
+  kill -0 "$pid" 2>/dev/null &&
+    ps -o args= -p "$pid" 2>/dev/null |
+    grep -qF -- "http.server $STATIC_PORT --bind 127.0.0.1 --directory $DATA_DIR/"
 }
 
 start_static() {
@@ -283,6 +285,12 @@ start_static() {
   fi
   tarball=""
   for name in $(wanted_files "$RELEASE_DIR/SHA256SUMS"); do tarball="$name"; done
+  # Only regular files and directories: http.server follows symlinks (exorcist M2).
+  listing="$(tar -tvzf "$RELEASE_DIR/$tarball" 2>/dev/null)" ||
+    die 2 "integrity error: could not read $tarball"
+  if printf '%s\n' "$listing" | cut -c1 | grep -qv '^[-d]$'; then
+    die 2 "integrity error: $tarball contains links or special files"
+  fi
   web="$RELEASE_DIR/web"
   rm -rf -- "$web"
   mkdir -p "$web/app"
@@ -322,6 +330,15 @@ do_status() {
 }
 
 do_uninstall() {
+  # Absolute, named doppelganger, and created by this installer (exorcist L7). Checked
+  # before anything is removed.
+  case "$DATA_DIR" in
+    /*/doppelganger) ;;
+    *) die 1 "refusing to delete $DATA_DIR (not an absolute path ending in /doppelganger)" ;;
+  esac
+  if [ -d "$DATA_DIR" ] && [ ! -f "$MARKER" ]; then
+    die 1 "refusing to delete $DATA_DIR: the installer did not create it"
+  fi
   say "This removes the $PROJECT containers, the $IMAGE image and $DATA_DIR."
   printf 'Type yes to continue: '
   answer=""
@@ -332,10 +349,7 @@ do_uninstall() {
     docker image rm "$IMAGE" >/dev/null 2>&1 || true
   fi
   stop_static
-  case "$DATA_DIR" in
-    */doppelganger) rm -rf -- "$DATA_DIR" ;;
-    *) die 1 "refusing to delete $DATA_DIR (it does not end in /doppelganger)" ;;
-  esac
+  rm -rf -- "$DATA_DIR"
   say "Uninstalled."
 }
 

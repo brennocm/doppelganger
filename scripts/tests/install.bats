@@ -13,7 +13,7 @@ setup() {
   : >"$CALLS"
   echo "Linux version 6.8.0-generic" >"$DOPPELGANGER_PROC_VERSION"
 
-  for tool in sh awk sed grep cat mkdir rm mv dirname basename head tail touch tar gzip ps nohup sha256sum env; do
+  for tool in sh awk sed grep cat cut mkdir rm mv ln dirname basename head tail touch tar gzip ps nohup sha256sum env; do
     ln -s "$(command -v "$tool")" "$T/real/$tool"
   done
   stub docker <<'EOF'
@@ -40,6 +40,7 @@ case "$url" in
   http://127.0.0.1:*/healthz) [ -f "$STATE/running" ] && [ -z "${HEALTH_FAIL:-}" ] ;;
   https://*)
     echo "curl $(basename "$url")" >>"$CALLS"
+    echo "url $url" >>"$CALLS"
     [ -f "$RELEASE/$(basename "$url")" ] && cat "$RELEASE/$(basename "$url")" >"$target" ;;
   *) exit 22 ;;
 esac
@@ -237,7 +238,46 @@ hide() { rm -f "$T/real/$1" "$T/bin/$1"; }
   [ "$status" -eq 1 ]
   run "$INSTALL" --bogus
   [ "$status" -eq 1 ]
-  DOPPELGANGER_RELEASE_URL=http://example.com run "$INSTALL"
+}
+
+@test "the release URL cannot be redirected through the environment" {
+  DOPPELGANGER_RELEASE_URL=https://evil.example run "$INSTALL"
+  [ "$status" -eq 0 ]
+  grep -q '^url https://github.com/brennocm/doppelganger/releases/download/v0.1.0/SHA256SUMS$' "$CALLS"
+  ! grep -q 'evil.example' "$CALLS"
+}
+
+@test "a web tarball with a symlink is refused before unpacking" {
+  ln -s /etc/passwd "$T/web/k"
+  tar -czf "$RELEASE/doppelganger-web-0.1.0.tar.gz" -C "$T/web" index.html k
+  (cd "$RELEASE" && sha256sum pro-test.fp32.onnx pro-test.json doppelganger-web-0.1.0.tar.gz >SHA256SUMS)
+  run "$INSTALL" --static
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"contains links or special files"* ]]
+  [ ! -e "$XDG_DATA_HOME/doppelganger/0.1.0/web" ]
+  [ ! -f "$XDG_DATA_HOME/doppelganger/static.pid" ]
+}
+
+@test "--uninstall refuses a data folder the installer did not create" {
+  mkdir -p "$XDG_DATA_HOME/doppelganger"
+  echo keep >"$XDG_DATA_HOME/doppelganger/precious"
+  run "$INSTALL" --uninstall <<<"yes"
   [ "$status" -eq 1 ]
-  [[ "$output" == *"must start with https://"* ]]
+  [[ "$output" == *"the installer did not create it"* ]]
+  [ -f "$XDG_DATA_HOME/doppelganger/precious" ]
+  ! grep -q ' down ' "$CALLS"
+  XDG_DATA_HOME=relative/dir run "$INSTALL" --uninstall <<<"yes"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"not an absolute path"* ]]
+}
+
+@test "--stop never kills a process that only looks like a static server" {
+  mkdir -p "$XDG_DATA_HOME/doppelganger"
+  "$T/bin/python3" -m http.server 9999 &
+  other=$!
+  echo "$other" >"$XDG_DATA_HOME/doppelganger/static.pid"
+  run "$INSTALL" --stop
+  [ "$status" -eq 0 ]
+  kill -0 "$other"
+  kill "$other"
 }
