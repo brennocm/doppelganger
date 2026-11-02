@@ -127,18 +127,52 @@ name = "The engine imports model_lab only through its published inference module
 type = "forbidden"
 source_modules = ["doppelganger_engine"]
 forbidden_modules = [
+    "model_lab.audio_file",
+    "model_lab.autopsy",
     "model_lab.calibration",
+    "model_lab.candidates",
     "model_lab.codecs",
     "model_lab.datasets",
     "model_lab.evaluate",
     "model_lab.export",
+    "model_lab.finetune",
     "model_lab.golden",
     "model_lab.haunt_scripts",
     "model_lab.haunt_set",
     "model_lab.haunting",
     "model_lab.manifest",
     "model_lab.metrics",
+    "model_lab.pipeline",
     "model_lab.report",
+    "model_lab.scoring",
+    "model_lab.synthetic",
+    "model_lab.windows",
+]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "The MCP server imports model_lab only through its published inference module (P36)"
+type = "forbidden"
+source_modules = ["doppelganger_mcp"]
+forbidden_modules = [
+    "model_lab.audio_file",
+    "model_lab.autopsy",
+    "model_lab.calibration",
+    "model_lab.candidates",
+    "model_lab.codecs",
+    "model_lab.datasets",
+    "model_lab.evaluate",
+    "model_lab.export",
+    "model_lab.finetune",
+    "model_lab.golden",
+    "model_lab.haunt_scripts",
+    "model_lab.haunt_set",
+    "model_lab.haunting",
+    "model_lab.manifest",
+    "model_lab.metrics",
+    "model_lab.pipeline",
+    "model_lab.report",
+    "model_lab.scoring",
     "model_lab.synthetic",
     "model_lab.windows",
 ]

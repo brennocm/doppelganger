@@ -1,14 +1,17 @@
-"""Engine Autopsy: the same report as the browser (autopsy-mode, local-runtime Req. 4.3)."""
+"""Autopsy report: the same report as the browser (autopsy-mode, local-runtime Req. 4.3).
+
+Shared by the Pro engine and the MCP server through `model_lab.inference` (P36).
+"""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final
 
 from doppelganger_contracts.generated.autopsy_report_schema import AutopsyReport
-from model_lab.inference import INITIAL, Event, HauntingConfig, transition
+from model_lab.haunting import INITIAL, Event, HauntingConfig, transition
 
 if TYPE_CHECKING:
-    from doppelganger_engine.pipeline import Audio, StreamSession
+    from model_lab.pipeline import Audio, StreamSession
 
 MIN_SCORED_WINDOWS: Final = 3
 SAMPLE_RATE: Final = 16_000

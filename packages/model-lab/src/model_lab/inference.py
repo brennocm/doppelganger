@@ -14,7 +14,28 @@ import numpy.typing as npt
 import onnxruntime as ort
 
 from model_lab import calibration, manifest
+from model_lab.audio_file import (
+    MAX_SECONDS,
+    SUPPORTED_FORMATS,
+    TooLongError,
+    UnsupportedAudioError,
+    decode_wav,
+    resample,
+    to_16k_mono,
+)
+from model_lab.autopsy import analyze, derive_verdict
 from model_lab.haunting import INITIAL, Event, HauntingConfig, MachineState, Smoother, transition
+from model_lab.manifest import load as load_manifest
+from model_lab.pipeline import (
+    BadFrameError,
+    StreamSession,
+    VadConfig,
+    Windower,
+    decode_pcm16,
+    encode_pcm16,
+    is_voiced,
+)
+from model_lab.scoring import InferenceError, score_logits
 from model_lab.windows import frame
 
 if TYPE_CHECKING:
@@ -22,39 +43,41 @@ if TYPE_CHECKING:
 
     from doppelganger_contracts.generated.model_manifest_schema import ModelManifest
 
-# The detector primitives the engine needs, re-exported so that it imports model_lab only
-# through this published module (structure steering, local-runtime P29).
+# The detector primitives, WAV decoder, pipeline and Autopsy builder that the engine and the
+# MCP server need, re-exported so that both import model_lab only through this published
+# module (structure steering, local-runtime P29, kiro-workbench P36).
 __all__ = [
     "INITIAL",
+    "MAX_SECONDS",
+    "SUPPORTED_FORMATS",
+    "Audio",
+    "BadFrameError",
     "Event",
     "HauntingConfig",
     "InferenceError",
     "MachineState",
     "OnnxModel",
     "Smoother",
+    "StreamSession",
+    "TooLongError",
+    "UnsupportedAudioError",
+    "VadConfig",
+    "Windower",
+    "analyze",
+    "decode_pcm16",
+    "decode_wav",
+    "derive_verdict",
+    "encode_pcm16",
+    "is_voiced",
+    "load_manifest",
+    "resample",
     "score_logits",
+    "to_16k_mono",
     "transition",
 ]
 
 Audio = npt.NDArray[np.float32]
 SAMPLE_RATE: Final = 16_000
-
-
-class InferenceError(RuntimeError):
-    """The model produced unusable output or got unusable input."""
-
-
-def score_logits(logits: list[float], model_manifest: ModelManifest) -> float:
-    """Calibrated Dissonance_Score of one raw model output (same rules as the TS scorer)."""
-    try:
-        return calibration.calibrate(
-            logits,
-            model_manifest.outputKind.value,
-            model_manifest.spoofIndex,
-            model_manifest.calibration.temperature,
-        )
-    except calibration.CalibrationError as error:
-        raise InferenceError(str(error)) from error
 
 
 class OnnxModel:

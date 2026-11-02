@@ -1,5 +1,7 @@
 """Stream pipeline: ports of the detector's windowing and voice activity check.
 
+Shared by the Pro engine and the MCP server through `model_lab.inference` (P36).
+
 Parity with `packages/detector` is asserted against the TS-written golden vectors in
 `packages/contracts/fixtures/golden/` (local-runtime Requirement 3.2, Property 5).
 """
@@ -14,7 +16,8 @@ from typing import TYPE_CHECKING, Final
 import numpy as np
 import numpy.typing as npt
 
-from model_lab.inference import HauntingConfig, InferenceError, Smoother, score_logits
+from model_lab.haunting import HauntingConfig, Smoother
+from model_lab.scoring import InferenceError, score_logits
 
 if TYPE_CHECKING:
     from doppelganger_contracts.generated.model_manifest_schema import ModelManifest

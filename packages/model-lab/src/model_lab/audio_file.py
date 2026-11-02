@@ -1,6 +1,7 @@
 """In-memory WAV decoding and resampling for Autopsy (local-runtime Requirement 4, P29).
 
-A small RIFF parser instead of `wave`, which cannot read 32-bit float WAV. The bytes are
+A small RIFF parser instead of `wave`, which cannot read 32-bit float WAV. Shared by the
+Pro engine and the MCP server through `model_lab.inference` (P36). The bytes are
 never written anywhere; the result is a 16 kHz mono float32 array.
 """
 
