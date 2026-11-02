@@ -115,7 +115,7 @@ hide() { rm -f "$T/real/$1" "$T/bin/$1"; }
 }
 
 @test "WSL2 is detected, macOS is untested, other systems are refused" {
-  echo "Linux version 5.15.153.1-microsoft-standard-WSL2" >"$DOPPELGANGER_PROC_VERSION"
+  echo "Linux version 6.6.87-microsoft-standard-WSL2" >"$DOPPELGANGER_PROC_VERSION"
   hide docker
   run "$INSTALL"
   [[ "$output" == *"Platform: WSL2"* ]]
