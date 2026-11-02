@@ -366,3 +366,28 @@ End with the same six-part final report. Also confirm that the logger wrote this
 ```
 
 Outcome: The developer's decisions went in: sticky Exorcised in the detector and the model lab, local-runtime 3.6 deferred as an engine score source, and the detection-model section 5 checkbox (3ff7e0c, e5105b9, 2b5ae81, b9a5982, 25c52f0). The P31 candidate-loader design followed (8cd0a58). The session stopped in step 1 before committing the loaders. Prompt 017 finished step 1 (8a6a459, d4d8b10) and continued with steps 2–6.
+
+## 017 — 2026-11-02 — CLI — set by hand
+
+```text
+Prompt 017. Resume prompt 016; do not redo committed work. The reviewer checked the repository at 8cd0a58: the 016 decisions (sticky Exorcised, deferred 3.6 with Requirement 3.5 rewritten, section 5 parent checkbox) and the P31 design commit are in. Same autonomy rules as prompt 013 (decide reversible things and record them as P32+, skip big deviations and blocked tasks, spec before code, one commit per step, never push, never commit red). One journal entry per finished spec section.
+
+Your session stopped in the middle of 016 step 1. Uncommitted work in the tree: packages/model-lab/src/model_lab/candidates/ (loader, checkpoints.json, vendored upstream), the aasist-l/aasist CLI in export.py, the Ruff/mypy excludes in pyproject.toml, and the logger's 016 entry in docs/prompt-history.md. The reviewer verified that both cached .pth files and the vendored upstream files match their recorded SHA-256, and that load() works with strict=True (85,306 and 297,866 parameters).
+
+Finish step 1 first:
+a. Tests for candidates: verify() rejects wrong size and wrong hash; fetch() refuses a mismatched download through the injected `get` and keeps nothing on disk, and refuses non-HTTPS URLs; upstream_code_ok() is true; LogitsOnly returns shape (batch, 2). Mark any test that needs the real checkpoints so it skips cleanly when the cache is empty (CI has no checkpoints, so never download in CI).
+b. Small fix: in pyproject.toml the new mypy override was put between the comment "Third-party packages without type information" and the block it describes; move it so the comment sits above its own block again.
+c. Run `mise run model:export -- aasist-l` and `-- aasist`. Report the parity max |diff| and the ONNX sizes.
+d. Implement the `synthetic` dataset in evaluate.py exactly as the P31 design says (seeded signals, every codec condition, the "synthetic dry run, not a measurement" label, --reports required and refused under packages/model-lab/reports/). Run it on both manifests and report whether it completes and how long it takes.
+e. Commit (code + tests), and commit the 016 prompt-history entry with its outcome, as separate commits.
+Leave 4.1 unchecked. State exactly what the gate run still needs.
+
+Then continue with 016 steps 2–6 in order: the 4.2 fine-tuning script (config, seed, CPU smoke test on synthetic data, no real training), local-runtime 6.1–6.4 (installer + Bats with stubbed commands; 6.5 only if testable without publishing), kiro-workbench 5 (MCP server; put the exact .kiro/settings/mcp.json block in your report), kiro-workbench 6 (power; check the current format in the docs first), and landing-page from task 1 to a clean boundary.
+
+If a CI log is pasted below, fix CI first, as described in prompt 016 (deterministic screenshot baselines proposed as P32, no looser thresholds).
+
+Run `mise run check:all` before your final report, and say which steps it covered. End with the same six-part final report as prompt 013. Also confirm that the logger wrote this entry's surface as CLI.
+```
+
+Outcome: Step 1 finished, then steps 2–6, in 26 commits (8a6a459 to d86e752) with P32–P40. Left open: the 4.1 gate run, local-runtime 6.5, kiro-workbench 5.6 and 6.2, and the landing-page 1.2 write-up link. `mise run check:all` is green; see the journal entry of 2026-11-02.
+e
