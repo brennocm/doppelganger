@@ -5,8 +5,9 @@
 // Fails when any HTML file:
 //   - lacks the Content-Security-Policy meta tag from .kiro/steering/security.md, or
 //   - references a URL on another origin (src, href, srcset, poster, action, formaction).
-// The landing page's YouTube facade is the only exception: www.youtube-nocookie.com,
-// allowed only in the root index.html, and only together with the matching frame-src.
+// Exceptions: the landing page's YouTube facade (www.youtube-nocookie.com, only in the root
+// index.html and only with the matching frame-src), and https:// links on <a> elements,
+// which load nothing until clicked (project-foundation P39).
 import { readdir, readFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 import { argv, exit, stderr, stdout } from "node:process";
@@ -23,6 +24,7 @@ const ATTRIBUTE_RE = new RegExp(
   `\\s(${URL_ATTRIBUTES.join("|")})\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`,
   "gi",
 );
+const TAG_RE = /<([a-z][a-z0-9-]*)\b[^>]*>/gi;
 const META_RE = /<meta\b[^>]*>/gi;
 
 /** Decode the few HTML entities that can appear in attribute values. */
@@ -46,19 +48,26 @@ export function cspValues(html) {
     .map((tag) => attribute(tag, "content") ?? "");
 }
 
-/** Return every URL referenced by a URL-bearing attribute. */
+/**
+ * Return every URL that would load a resource: URL-bearing attributes on every element,
+ * except an https:// href on <a>, which only navigates when clicked (project-foundation P39).
+ */
 export function referencedUrls(html) {
   const urls = [];
-  for (const match of html.matchAll(ATTRIBUTE_RE)) {
-    const name = match[1].toLowerCase();
-    const value = decode(match[2] ?? match[3] ?? match[4] ?? "").trim();
-    if (name === "srcset") {
-      for (const candidate of value.split(",")) {
-        const url = candidate.trim().split(/\s+/)[0];
-        if (url) urls.push(url);
+  for (const tag of html.matchAll(TAG_RE)) {
+    const element = tag[1].toLowerCase();
+    for (const match of tag[0].matchAll(ATTRIBUTE_RE)) {
+      const name = match[1].toLowerCase();
+      const value = decode(match[2] ?? match[3] ?? match[4] ?? "").trim();
+      if (element === "a" && name === "href" && /^https:\/\//i.test(value)) continue;
+      if (name === "srcset") {
+        for (const candidate of value.split(",")) {
+          const url = candidate.trim().split(/\s+/)[0];
+          if (url) urls.push(url);
+        }
+      } else {
+        urls.push(value);
       }
-    } else {
-      urls.push(value);
     }
   }
   return urls;
