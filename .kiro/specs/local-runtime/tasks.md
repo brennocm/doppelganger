@@ -53,13 +53,13 @@
     - _Requirements: 5.1, 5.2_
 
 - [ ] 6. Installer
-  - [ ] 6.1 Write `scripts/install.sh` with platform detection and prerequisite checks
+  - [x] 6.1 Write `scripts/install.sh` with platform detection and prerequisite checks
     - _Requirements: 6.1, 6.2, 6.3_
-  - [ ] 6.2 Add download, checksum verification and engine startup with the health wait
+  - [x] 6.2 Add download, checksum verification and engine startup with the health wait
     - _Requirements: 6.4, 6.7, 6.8_
-  - [ ] 6.3 Add `--static`, `--stop`, `--status` and `--uninstall`
+  - [x] 6.3 Add `--static`, `--stop`, `--status` and `--uninstall`
     - _Requirements: 6.5, 6.6_
-  - [ ] 6.4 Write Bats tests with stubbed commands
+  - [x] 6.4 Write Bats tests with stubbed commands
     - _Requirements: 6.3, 6.7, 6.8_
   - [ ] 6.5 Add the release workflow that builds the web tarball and publishes the models and `SHA256SUMS`
     - _Requirements: 6.4_
