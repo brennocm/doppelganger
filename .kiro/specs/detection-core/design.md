@@ -92,7 +92,7 @@ Thresholds can be overridden by the manifest (tuned per model on the dev split).
 - **Voice activity.** A window is split into 20 ms frames (320 samples at 16 kHz; a shorter last frame counts if it has at least 160 samples). A frame is voiced when its RMS is ≥ `minRms` and its zero-crossing rate (sign changes per sample pair) is ≤ `maxZeroCrossingRate`; a frame with a non-finite sample is unvoiced. The window is voiced when the voiced fraction of its frames is ≥ `minVoicedFraction`. Defaults: `minRms` 0.01 (−40 dBFS), `maxZeroCrossingRate` 0.35 (white noise is near 0.5), `minVoicedFraction` 0.3.
 - **Neural voice activity (Requirement 2.3).** `createDetector` accepts an optional `voiceActivity: (window) => Promise<boolean>`. `neuralVoiceActivity(backend, threshold)` builds one from an already loaded `InferenceBackend` whose first output value is a speech probability. Without it, the energy check is used.
 - **Scorer input.** `score` takes `ArrayLike<number>`, so a `Float32Array` from ONNX Runtime and the float64 golden logits use the same code. The output length must match `outputKind` (1 or 2), otherwise `invalid-output`.
-- **Exorcised, as Requirement 5 is written.** In Exorcised, a scored window below `unease` moves to Mask and one in `[unease, possession)` to Unease (criteria 5.2 and 5.3 exempt only Possession). One at or above `possession` keeps Exorcised until `confirmWindows` consecutive ones re-enter Possession (criterion 5.7). `protocol-completed` resets both counters, so re-possession needs fresh evidence.
+- **Exorcised is sticky** (developer decision, prompt 016). Exorcised lasts until re-possession or `capture-stopped`. Scored windows update the counters but never move it to Mask or Unease (criteria 5.2 and 5.3), and silence keeps it (criterion 5.8). It re-enters Possession only after `confirmWindows` consecutive windows at or above `possession` (criteria 5.4 and 5.7). `protocol-completed` resets both counters, so re-possession needs fresh evidence.
 - **Counters.** `aboveCount` counts consecutive scored windows with `smoothed ≥ possession`, `belowCount` those with `smoothed < release`. Unvoiced windows (`silence` events) neither count nor reset them. A smoothed value at or above `possession` that is not yet confirmed shows Unease (outside Possession and Exorcised).
 - **Queue.** Every window (voiced or not) enters one FIFO, so updates keep window order. When more than `maxPending` windows wait, the oldest waiting window is dropped and counted in `droppedWindows`; the window being processed is not counted as waiting. A rejected `run` and an `invalid-output` both count in `failedWindows`; three in a row emit an update with `error: "inference-failed"`. `stop()` clears the queue, and a result that arrives after `stop()` is ignored.
 - **Statistics.** `voicedMs` adds one hop (`hopSamples / sampleRate`) per voiced window. `msInState` and transition times use the injected clock; `stats()` includes the time spent so far in the current state. `scoredWindows` counts windows that produced a score, and `meanSmoothed` is the mean smoothed score over them (null before the first). The exorcism-protocol summary reports it as the mean dissonance (P27).
@@ -152,11 +152,11 @@ Thresholds can be overridden by the manifest (tuned per model on the dev split).
 
 **Validates: Requirements 5.4, 5.5**
 
-### Property 9: Exorcised requires Possession
+### Property 9: Exorcised requires Possession and is sticky
 
-*For any* event sequence, the machine enters Exorcised only from Possession, through `protocol-completed`.
+*For any* event sequence, the machine enters Exorcised only from Possession, through `protocol-completed`, and leaves Exorcised only for Possession (after `confirmWindows` windows at or above `possession`) or for Idle (`capture-stopped`).
 
-**Validates: Requirements 5.6**
+**Validates: Requirements 5.6, 5.7**
 
 ### Property 10: Stop resets
 

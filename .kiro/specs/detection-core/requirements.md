@@ -64,8 +64,8 @@
 #### Acceptance Criteria
 
 1. WHEN capture starts, THE Haunting_Machine SHALL move from Idle to Listening.
-2. WHEN a Voiced_Window is scored and the smoothed score is below the `unease` threshold, THE Haunting_Machine SHALL be in Mask, unless it is in Possession.
-3. WHEN the smoothed score is at or above `unease` and below `possession`, THE Haunting_Machine SHALL be in Unease, unless it is in Possession.
+2. WHEN a Voiced_Window is scored and the smoothed score is below the `unease` threshold, THE Haunting_Machine SHALL be in Mask, unless it is in Possession or Exorcised.
+3. WHEN the smoothed score is at or above `unease` and below `possession`, THE Haunting_Machine SHALL be in Unease, unless it is in Possession or Exorcised.
 4. WHEN the smoothed score has been at or above `possession` for `confirmWindows` consecutive Voiced_Windows, THE Haunting_Machine SHALL enter Possession.
 5. WHILE in Possession, THE Haunting_Machine SHALL stay in Possession until the smoothed score has been below `release` for `releaseWindows` consecutive Voiced_Windows.
 6. WHEN the user completes the exorcism protocol while in Possession, THE Haunting_Machine SHALL enter Exorcised.

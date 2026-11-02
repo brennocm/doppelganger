@@ -50,8 +50,8 @@
     - **Property 8: No flicker inside the hysteresis band**
     - **Validates: Requirements 5.4, 5.5**
   - [x]* 5.5 Write property test for exorcised requiring possession
-    - **Property 9: Exorcised requires Possession**
-    - **Validates: Requirements 5.6**
+    - **Property 9: Exorcised requires Possession and is sticky**
+    - **Validates: Requirements 5.6, 5.7**
   - [x]* 5.6 Write property test for stop resets
     - **Property 10: Stop resets**
     - **Validates: Requirements 5.9**
