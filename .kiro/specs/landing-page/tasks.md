@@ -1,13 +1,14 @@
 # Implementation Plan
 
 - [ ] 1. Structure and content
-  - [ ] 1.1 Build the page outline with semantic sections and the design tokens
+  - [x] 1.1 Build the page outline with semantic sections and the design tokens
     - _Requirements: 1.1, 1.3_
   - [ ] 1.2 Write the scenario, proof panel, tier table, install commands and build story copy; review it with the `haunter` agent
+    - Copy written and reviewed by `haunter` (2026-11-02). Open: the write-up link (Requirement 6.1) waits for the `submission` spec; see design P38.
     - _Requirements: 2.1, 2.2, 3.1, 3.2, 3.3, 4.1, 4.2, 6.1_
-  - [ ] 1.3 Import the evaluation summary at build time and render the Limits section
+  - [x] 1.3 Import the evaluation summary at build time and render the Limits section
     - _Requirements: 5.1, 5.2_
-  - [ ]* 1.4 Write the build test that numbers come from the report
+  - [x]* 1.4 Write the build test that numbers come from the report
     - **Property 2: Numbers come from the report**
     - **Validates: Requirements 5.2**
 

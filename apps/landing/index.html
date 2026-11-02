@@ -7,13 +7,164 @@
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#131116" />
     <meta name="referrer" content="no-referrer" />
-    <title>Doppelgänger</title>
+    <meta name="description" content="Doppelgänger listens to the other side of a browser call and warns you when the voice sounds synthetic. It runs in your browser; no audio leaves your device." />
+    <!-- An empty icon: no favicon request, no 404. -->
+    <link rel="icon" href="data:," />
+    <title>Doppelgänger · hear a cloned voice before it costs you</title>
+    <script type="module" src="./src/index.ts"></script>
   </head>
   <body>
-    <main>
-      <h1>Doppelgänger</h1>
-      <p>A real-time voice-clone detector that runs on your own device. The landing page is not built yet.</p>
-      <p><a href="./app/">Open the app</a></p>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+      <span class="wordmark">Doppelgänger</span>
+      <nav aria-label="Project links">
+        <a href="https://github.com/brennocm/doppelganger">GitHub</a>
+        <a href="#video">Video</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <h1 id="hero-title">Hear a cloned voice before it costs you.</h1>
+        <p class="lede">
+          Doppelgänger listens to the other side of a browser call and warns you when the voice
+          sounds synthetic. It runs in your browser, and no audio leaves your device.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="./app/">Try the live demo</a>
+          <a class="button secondary" href="#video">Watch the 3-minute video</a>
+        </div>
+      </section>
+
+      <section aria-labelledby="scenario-title">
+        <h2 id="scenario-title">One call, three moments</h2>
+        <ol class="steps">
+          <li>
+            <h3>The call</h3>
+            <p>
+              Your finance director calls on a video meeting. It sounds exactly like her, and she
+              needs an urgent transfer before the bank closes.
+            </p>
+          </li>
+          <li>
+            <h3>The alert</h3>
+            <p>
+              The calm interface starts to rot. After several seconds of sustained evidence it
+              reads: <strong>Doppelgänger detected.</strong> Do not approve anything on this call.
+            </p>
+          </li>
+          <li>
+            <h3>The protocol</h3>
+            <p>
+              Ask the code word you agreed on. Hang up and call her back on a number you already
+              know. Report the call.
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <section aria-labelledby="proof-title">
+        <h2 id="proof-title">Check it yourself: nothing leaves your device</h2>
+        <p>
+          The model and the audio both stay in your browser. The page downloads the app, the model
+          file and its runtime from this site, and then sends nothing to any server.
+        </p>
+        <ol class="proof">
+          <li>Open the live demo and press <kbd>F12</kbd> to open your browser's developer tools on the Network tab.</li>
+          <li>Start a replay or a capture and watch the requests while it listens.</li>
+          <li>Confirm that every request goes to this site and only downloads files. Nothing is sent back while it listens; a replay clip is downloaded, never uploaded.</li>
+        </ol>
+        <p>
+          The rules behind this are in the
+          <a href="https://github.com/brennocm/doppelganger/blob/main/.kiro/steering/security.md">security steering</a>
+          and the
+          <a href="https://github.com/brennocm/doppelganger/blob/main/docs/model-card.md">model card</a>.
+        </p>
+      </section>
+
+      <section aria-labelledby="tiers-title">
+        <h2 id="tiers-title">Run it your way</h2>
+        <div class="table-wrap">
+          <table class="tiers">
+            <thead>
+              <tr>
+                <th scope="col">Tier</th>
+                <th scope="col">What you need</th>
+                <th scope="col">What runs where</th>
+                <th scope="col">Which model</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Demo</th>
+                <td data-label="What you need">A Chromium browser</td>
+                <td data-label="What runs where">Everything in your browser, served from this site</td>
+                <td data-label="Which model">Light model in the browser</td>
+              </tr>
+              <tr>
+                <th scope="row">Self-hosted</th>
+                <td data-label="What you need">Python 3 and the installer</td>
+                <td data-label="What runs where">The same app, served from your own machine on 127.0.0.1</td>
+                <td data-label="Which model">Light model in the browser</td>
+              </tr>
+              <tr>
+                <th scope="row">Pro engine</th>
+                <td data-label="What you need">Docker with Compose v2 and the installer</td>
+                <td data-label="What runs where">A local container, reachable only from your machine</td>
+                <td data-label="Which model">Heavier model in the engine, plus file Autopsy</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>On Linux or WSL2, from a clone of the repository:</p>
+        <div class="command">
+          <pre><code id="cmd-static">git clone https://github.com/brennocm/doppelganger.git
+cd doppelganger
+scripts/install.sh --static</code></pre>
+          <button class="copy" type="button" data-copy="cmd-static" data-name="Self-hosted commands" aria-label="Copy the self-hosted commands">Copy</button>
+        </div>
+        <div class="command">
+          <pre><code id="cmd-engine">scripts/install.sh</code></pre>
+          <button class="copy" type="button" data-copy="cmd-engine" data-name="Pro engine command" aria-label="Copy the Pro engine command">Copy</button>
+        </div>
+        <p class="note">The first command serves the app on your machine. The second starts the Pro engine. macOS is untested.</p>
+        <p class="note" aria-live="polite" id="copy-status"></p>
+      </section>
+
+      <section aria-labelledby="limits-title">
+        <h2 id="limits-title">Limits</h2>
+        <ul class="limits">
+          <li>The dissonance score is a probabilistic estimate that a voice is synthetic. It is not proof.</li>
+          <li>It does not identify people. It cannot tell you who is speaking.</li>
+          <li>Call codecs, background noise, accents, short replies and voice generators the model has never heard all cause mistakes, in both directions.</li>
+          <li>Alerts wait for sustained evidence, so a short clip may never reach one.</li>
+        </ul>
+        <!-- evaluation -->
+        <p>The <a href="https://github.com/brennocm/doppelganger/blob/main/docs/model-card.md">model card</a> has the details.</p>
+      </section>
+
+      <section aria-labelledby="built-title">
+        <h2 id="built-title">How it was built with Kiro</h2>
+        <p>
+          Every feature started as a spec, with requirements, a design and tasks. Hooks checked
+          every save, custom agents reviewed security and accessibility, and the project's own MCP
+          server lets Kiro run the detector.
+        </p>
+        <ul class="links">
+          <li><a href="https://github.com/brennocm/doppelganger/tree/main/.kiro">The <code>.kiro/</code> folder</a>: specs, steering, hooks and agents</li>
+          <li><a href="https://github.com/brennocm/doppelganger/blob/main/docs/kiro-journal.md">The Kiro journal</a>: what was tried, what failed, what changed</li>
+          <li><a href="https://github.com/brennocm/doppelganger/blob/main/docs/prompt-history.md">The prompt history</a>: every prompt, in order</li>
+        </ul>
+      </section>
+
+      <section id="video" aria-labelledby="video-title">
+        <h2 id="video-title">Video</h2>
+        <p>The 3-minute video is not published yet.</p>
+      </section>
     </main>
+
+    <footer class="site-footer">
+      <p>MIT license · <a href="https://github.com/brennocm/doppelganger">Repository</a> · Built with Kiro for Kiroween</p>
+    </footer>
   </body>
 </html>
