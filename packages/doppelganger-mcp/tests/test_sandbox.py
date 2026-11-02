@@ -57,11 +57,15 @@ PREFIXES = st.sampled_from(["base", "root", "outside", "relative", "absolute-sys
 
 def _expected(candidate: str, root: Path) -> bool:
     """Oracle: a regular file whose real path is inside the real root."""
-    # os.path on purpose: an oracle independent of the pathlib code under test. isfile() on
-    # the candidate itself asks the kernel, which refuses "file/x/.." (ENOTDIR) even though
-    # realpath() collapses it lexically.
-    real = os.path.realpath(candidate)
-    return os.path.isfile(candidate) and Path(real).is_relative_to(root.resolve())  # noqa: PTH113
+    # os.path on purpose: an oracle independent of the pathlib code under test. isfile() asks
+    # the kernel, which refuses "file/x/.." (ENOTDIR) although realpath() collapses it.
+    # pathlib drops "." and empty segments, so "inside.wav/." and "inside.wav/" mean
+    # inside.wav to the sandbox. That is still the same file inside the root, so the oracle
+    # drops them too.
+    head, *rest = candidate.split("/")
+    as_pathlib = "/".join([head, *(part for part in rest if part not in ("", "."))])
+    real = os.path.realpath(as_pathlib)
+    return os.path.isfile(as_pathlib) and Path(real).is_relative_to(root.resolve())  # noqa: PTH113
 
 
 def _build(tree: Path, prefix: str, parts: list[str]) -> str:
@@ -124,6 +128,13 @@ def test_a_path_through_a_file_is_refused(tree: Path) -> None:
     candidate = str(tree / "root" / "sub" / "deep.wav" / "root" / "..")
     with pytest.raises(sandbox.SandboxError, match="outside the allowed folders"):
         sandbox.read_allowed(candidate, [tree / "root"])
+
+
+def test_a_trailing_dot_after_a_file_reads_that_file(tree: Path) -> None:
+    # Shrunk Hypothesis counterexample (seed 8, 2026-11-02): pathlib drops ".", so this is
+    # inside.wav, a regular file inside the root.
+    candidate = f"{tree / 'root' / 'inside.wav'}/."
+    assert sandbox.read_allowed(candidate, [tree / "root"]) == b"RIFF-in"
 
 
 def test_files_over_the_limit_are_refused_before_reading(tmp_path: Path) -> None:
