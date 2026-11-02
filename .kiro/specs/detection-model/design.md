@@ -58,6 +58,8 @@ Window length equals the model's native input (for AASIST, 64,600 samples). Hop 
 - **Checkpoints.** `candidates/checkpoints.json` records, per candidate, the URL of the checkpoint at the same commit, its SHA-256 and size, the model config from the upstream `config/*.conf`, and the licenses. The GitHub files' hashes match the Hugging Face mirrors in CANDIDATES.md. `model_lab.candidates.fetch` downloads over HTTPS only into `$DOPPELGANGER_CACHE/checkpoints` (default `~/.cache/doppelganger`, outside the repository) and refuses a file whose size or SHA-256 differs. The state dict is loaded with `torch.load(weights_only=True)`.
 - **Export.** The loader wraps `Model` so that it returns only the logits, and exports with `export.export_model` to fp32 ONNX: no int8 until the gate measures the AUC drop on the Haunt_Set (Requirement 5.2). The manifest has `outputKind: two-class-logits` and `spoofIndex: 0` (upstream index 1 is bona fide), temperature 1.0 until calibration, and `role: light`. The command is `mise run model:export -- aasist-l` (or `aasist`), writing to `$DOPPELGANGER_CACHE/onnx/` by default.
 - **Dry run.** `mise run model:eval -- --datasets synthetic --manifest …` runs the full harness (every codec condition, the dev/eval split, calibration, smoothed rates, latency) on seeded synthetic signals. Its report is labelled "synthetic dry run, not a measurement" and must be written outside `packages/model-lab/reports/` (`--reports` is required with this dataset). It proves the pipeline runs; its numbers mean nothing.
+  - Shape (P33): 8 items of 6 s (two AASIST windows each) in 4 sessions, each session with one item labelled genuine and one labelled synthetic. The signals cycle through sine, noise, silence and chirp from `model_lab.synthetic`, seeded per item. Sessions 1–2 are dev and 3–4 are eval, so calibration and the eval rows both run. The labels are arbitrary.
+  - `synthetic` cannot be combined with another dataset in one run, so a dry-run label never covers real numbers. `--reports` must not resolve to a folder inside `packages/model-lab/reports/`. A `--label` is appended after the dry-run label and does not replace it.
 - **What the gate run still needs:** the Haunt_Set in `$HAUNT_SET_DIR`, then `mise run model:eval -- --manifest <onnx dir>/aasist-l.json --manifest <onnx dir>/aasist.json`, the gate decision and the ADR.
 
 ### Calibration
@@ -68,7 +70,7 @@ Temperature scaling on the spoof logit: `p = sigmoid(z / T)` for single-logit mo
 
 - `torch.onnx.export`, opset 17, static shape `[1, window_samples]`, input name `waveform`, output name `logits`.
 - `onnxruntime.quantization.quantize_dynamic` with int8 weights.
-- Parity: 200 random fixture windows; fp32 max |Δ| ≤ 1e-3; int8 kept only if the eval AUC drop is ≤ 0.01.
+- Parity: 200 random fixture windows; fp32 max |Δ| ≤ 1e-3; int8 kept only if the eval AUC drop is ≤ 0.01. Both PyTorch and ONNX Runtime run the windows one at a time: a single batch of 200 AASIST windows needs several GB of activations and swaps on a 16 GB laptop. (P32)
 
 ## Data Models
 
