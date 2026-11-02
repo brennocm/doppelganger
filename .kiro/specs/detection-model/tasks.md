@@ -33,7 +33,7 @@
   - [ ] 4.2 If the gate fails, run the fallbacks in order (codec-augmented fine-tuning first) and update the ADR
     - _Requirements: 3.2_
 
-- [ ] 5. Calibration
+- [x] 5. Calibration
   - [x] 5.1 Implement temperature scaling, ECE reporting and the golden calibration vectors
     - _Requirements: 4.1, 4.2, 4.3_
   - [x]* 5.2 Write property test for probability bounds
