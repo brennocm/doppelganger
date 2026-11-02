@@ -56,16 +56,17 @@ PREFIXES = st.sampled_from(["base", "root", "outside", "relative", "absolute-sys
 
 
 def _expected(candidate: str, root: Path) -> bool:
-    """Oracle: a regular file whose real path is inside the real root."""
-    # os.path on purpose: an oracle independent of the pathlib code under test. isfile() asks
-    # the kernel, which refuses "file/x/.." (ENOTDIR) although realpath() collapses it.
-    # pathlib drops "." and empty segments, so "inside.wav/." and "inside.wav/" mean
-    # inside.wav to the sandbox. That is still the same file inside the root, so the oracle
-    # drops them too.
-    head, *rest = candidate.split("/")
-    as_pathlib = "/".join([head, *(part for part in rest if part not in ("", "."))])
-    real = os.path.realpath(as_pathlib)
-    return os.path.isfile(as_pathlib) and Path(real).is_relative_to(root.resolve())  # noqa: PTH113
+    """Oracle for Property 1: the strict real path is a regular file inside the real root.
+
+    Strict realpath follows every symlink and fails on missing components or a walk through
+    a file ("file/x"), and it collapses ".." and "." after resolving; that is the property's
+    "resolved real path". os.path keeps it separate from the pathlib code under test.
+    """
+    try:
+        real = os.path.realpath(candidate, strict=True)
+    except (OSError, ValueError):
+        return False
+    return os.path.isfile(real) and Path(real).is_relative_to(root.resolve())  # noqa: PTH113
 
 
 def _build(tree: Path, prefix: str, parts: list[str]) -> str:
@@ -134,6 +135,13 @@ def test_a_trailing_dot_after_a_file_reads_that_file(tree: Path) -> None:
     # Shrunk Hypothesis counterexample (seed 8, 2026-11-02): pathlib drops ".", so this is
     # inside.wav, a regular file inside the root.
     candidate = f"{tree / 'root' / 'inside.wav'}/."
+    assert sandbox.read_allowed(candidate, [tree / "root"]) == b"RIFF-in"
+
+
+def test_dot_dot_after_a_file_resolves_to_its_folder(tree: Path) -> None:
+    # Shrunk Hypothesis counterexample (2026-11-02): the real path is root/inside.wav, a
+    # regular file inside the root, so it may be read.
+    candidate = f"{tree / 'root' / 'inside.wav'}/../inside.wav"
     assert sandbox.read_allowed(candidate, [tree / "root"]) == b"RIFF-in"
 
 

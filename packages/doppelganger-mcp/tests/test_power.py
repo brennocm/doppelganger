@@ -4,6 +4,7 @@ import json
 import os
 import re
 import subprocess
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -67,34 +68,56 @@ def test_the_declared_command_starts_the_server(tmp_path: Path) -> None:
     server = _json("mcp.json")["mcpServers"]["doppelganger"]
     env = {k: v for k, v in os.environ.items() if not k.startswith("DOPPELGANGER_")}
     env["DOPPELGANGER_REPO"] = str(REPO)
-    messages = [
-        {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "initialize",
-            "params": {
-                "protocolVersion": "2025-06-18",
-                "capabilities": {},
-                "clientInfo": {"name": "power-test", "version": "0"},
-            },
+    initialize = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
+        "params": {
+            "protocolVersion": "2025-06-18",
+            "capabilities": {},
+            "clientInfo": {"name": "power-test", "version": "0"},
         },
-        {"jsonrpc": "2.0", "method": "notifications/initialized"},
-        {"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
-    ]
-    stdin = "".join(json.dumps(m) + "\n" for m in messages)
+    }
     try:
-        done = subprocess.run(  # noqa: S603  (fixed command from the committed mcp.json)
+        proc = subprocess.Popen(  # noqa: S603  (fixed command from the committed mcp.json)
             [server["command"], *server["args"]],
-            input=stdin,
-            capture_output=True,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
             text=True,
             env=env,
             cwd=tmp_path,  # any working directory: the command must not depend on it
-            timeout=120,
-            check=False,
         )
     except FileNotFoundError:
         pytest.skip("sh or uv not on PATH")
-    replies = [json.loads(line) for line in done.stdout.splitlines() if line.strip()]
-    tools = next(r for r in replies if r.get("id") == 2)["result"]["tools"]  # noqa: PLR2004
+    stdin, stdout = proc.stdin, proc.stdout
+    assert stdin is not None
+    assert stdout is not None
+    timer = threading.Timer(120, proc.kill)  # never hang the suite
+    timer.start()
+
+    def send(message: dict[str, Any]) -> None:
+        stdin.write(json.dumps(message) + "\n")
+        stdin.flush()
+
+    def reply(wanted: int) -> dict[str, Any]:
+        # Keep stdin open until the answer arrives, like a real client: closing it early
+        # lets the server exit before it answers.
+        for line in stdout:
+            message: dict[str, Any] = json.loads(line)
+            if message.get("id") == wanted:
+                return message
+        msg = f"server exited before answering request {wanted}"
+        raise AssertionError(msg)
+
+    try:
+        send(initialize)
+        reply(1)
+        send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        send({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
+        tools = reply(2)["result"]["tools"]
+    finally:
+        timer.cancel()
+        stdin.close()
+        proc.wait(timeout=30)
     assert {t["name"] for t in tools} == {"analyze_audio_file", "list_models", "explain_thresholds"}
