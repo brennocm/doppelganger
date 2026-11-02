@@ -91,6 +91,7 @@ None beyond configuration.
 This spec is configuration; it has no runtime properties. Its verifiable guarantees are checked by scripts:
 
 - `verify-pages.mjs`: every HTML file in the artifact has the CSP meta tag; no `src` or `href` points to an origin other than self (the landing page's YouTube facade is the only allowlisted exception, and only `www.youtube-nocookie.com`).
+  - **P39:** the exception is navigation links. The landing page must link to the repository (landing-page Requirements 3.3 and 6.1), and a link the visitor clicks loads nothing by itself, so Requirement 5.4 still holds. An `href` on an `<a>` element may point to an `https://` URL. Every resource-loading attribute is still limited to self: `src`, `srcset` and `poster`, `href` on `<link>` or any other element, `action` and `formaction`. Plain `http://` links are refused.
 
 ## Error Handling
 
