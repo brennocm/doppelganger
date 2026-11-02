@@ -338,3 +338,31 @@ End with the same six-part final report as prompt 013.
 ```
 
 Outcome: Reviewer findings 1–5 fixed (a18c590, 848be9f, c08406c, 762e3c8, 66a31b7), then detection-core (all), detection-model 3.2, audio-capture, haunted-ui (+ haunter review, kiro-workbench task 4), exorcism-protocol, autopsy-mode browser and engine parts, and local-runtime 1–4 with the container files: 39 commits from a18c590 to 3f4d468, P23–P30, and `mise run check:all` green. See the journal entries dated 2026-11-01.
+
+## 016 — 2026-11-01 — CLI — set by hand
+
+```text
+Prompt 016. The reviewer validated your last report against the repository: authorship, gitleaks (full history), PII scan, task checkboxes and `mise run check` all hold. Same autonomy rules as prompt 013 (decide reversible things and record them as P31+, skip big deviations and blocked tasks, spec before code, one commit per step, never push, never commit red). One journal entry per finished spec section.
+
+Decisions from the developer:
+- P20 ratified. P21–P30 accepted.
+- P29 accepted: the engine stays WAV-only.
+- Exorcised is sticky: it lasts until re-possession (criterion 4) or capture stop. Change detection-core Requirement 5.2 and 5.3 to "unless it is in Possession or Exorcised", update the design, then the TS machine (`haunting-machine.ts`), the Python port in model-lab, the haunting golden vectors and the property tests. Parity tests must stay green.
+- local-runtime 3.6 (EngineBackend) is deferred: it is first in the cut order. Record in the local-runtime design that, if built, it will be a score source fed by the engine's `score` messages into the Haunting_Machine rather than an `InferenceBackend`, and update Requirement 5.5 accordingly. Do not implement it now.
+
+Housekeeping: mark detection-model section 5's parent checkbox `[x]` (all its subtasks are done).
+
+If a CI log is pasted below, fix CI first. If screenshot baselines differ because of runner fonts, make them deterministic (for example, generate and compare them inside the pinned Playwright container image, or bundle the fonts) instead of loosening thresholds. Propose this as P31 before you change it.
+
+Then, in order:
+1. detection-model 4.1 without the Haunt_Set: write the AASIST-L and AASIST checkpoint loaders in `candidates/`, fetch the checkpoints (verify the licenses and record SHA-256 hashes), export them to fp32 ONNX, and run them through the existing harness on the synthetic data and the codecs. The goal is that on recording day only the evaluation has to run. Leave 4.1 unchecked if the gate run itself is still missing, and say exactly what is missing.
+2. Prepare the 4.2 fallback: a codec-augmented fine-tuning script, with a config, a seed and a tiny smoke test on synthetic data on CPU. Do not run a real training.
+3. local-runtime 6.1–6.4: the installer and Bats tests with stubbed commands (no Docker needed). Add 6.5 (the release workflow) only if it can be tested without publishing anything.
+4. kiro-workbench 5: the Doppelganger MCP server (sandbox, tools, property test, integration test). You cannot edit `.kiro/settings/mcp.json`; write the exact JSON block to register it in your report and I will add it.
+5. kiro-workbench 6: the Kiro power. Check the current power format in the documentation first.
+6. landing-page: start from task 1 and stop at a clean boundary.
+
+End with the same six-part final report. Also confirm that the logger wrote this entry's surface as CLI.
+```
+
+Outcome: The developer's decisions went in: sticky Exorcised in the detector and the model lab, local-runtime 3.6 deferred as an engine score source, and the detection-model section 5 checkbox (3ff7e0c, e5105b9, 2b5ae81, b9a5982, 25c52f0). The P31 candidate-loader design followed (8cd0a58). The session stopped in step 1 before committing the loaders. Prompt 017 finished step 1 (8a6a459, d4d8b10) and continued with steps 2–6.
