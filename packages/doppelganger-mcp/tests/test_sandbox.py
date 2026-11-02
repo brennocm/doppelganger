@@ -57,9 +57,11 @@ PREFIXES = st.sampled_from(["base", "root", "outside", "relative", "absolute-sys
 
 def _expected(candidate: str, root: Path) -> bool:
     """Oracle: a regular file whose real path is inside the real root."""
+    # os.path on purpose: an oracle independent of the pathlib code under test. isfile() on
+    # the candidate itself asks the kernel, which refuses "file/x/.." (ENOTDIR) even though
+    # realpath() collapses it lexically.
     real = os.path.realpath(candidate)
-    # os.path on purpose: an oracle independent of the pathlib code under test.
-    return os.path.isfile(real) and Path(real).is_relative_to(root.resolve())  # noqa: PTH113
+    return os.path.isfile(candidate) and Path(real).is_relative_to(root.resolve())  # noqa: PTH113
 
 
 def _build(tree: Path, prefix: str, parts: list[str]) -> str:
@@ -114,6 +116,14 @@ def test_examples(tree: Path) -> None:
         sandbox.read_allowed("", [root])
     with pytest.raises(sandbox.SandboxError):
         sandbox.read_allowed(str(root / "inside.wav"), [tree / "does-not-exist"])
+
+
+def test_a_path_through_a_file_is_refused(tree: Path) -> None:
+    # Shrunk Hypothesis counterexample (2026-11-02): realpath() collapses this to deep.wav,
+    # but the kernel refuses to walk through a regular file.
+    candidate = str(tree / "root" / "sub" / "deep.wav" / "root" / "..")
+    with pytest.raises(sandbox.SandboxError, match="outside the allowed folders"):
+        sandbox.read_allowed(candidate, [tree / "root"])
 
 
 def test_files_over_the_limit_are_refused_before_reading(tmp_path: Path) -> None:
