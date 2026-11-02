@@ -37,10 +37,18 @@ class CheckpointError(RuntimeError):
     """A checkpoint is missing, unpinned or does not match its recorded hash."""
 
 
+#: packages/model-lab/src/model_lab/candidates/__init__.py -> the repository root.
+REPO_ROOT: Final = HERE.parents[4]
+
+
 def cache_dir() -> Path:
-    """`$DOPPELGANGER_CACHE`, or `~/.cache/doppelganger`: never inside the repository."""
+    """`$DOPPELGANGER_CACHE`, or `~/.cache/doppelganger`: never inside the repository (L5)."""
     root = os.environ.get("DOPPELGANGER_CACHE")
-    return Path(root) if root else Path.home() / ".cache" / "doppelganger"
+    path = Path(root) if root else Path.home() / ".cache" / "doppelganger"
+    if path.resolve().is_relative_to(REPO_ROOT):
+        msg = "DOPPELGANGER_CACHE must be outside the repository: checkpoints are never committed"
+        raise CheckpointError(msg)
+    return path
 
 
 def sha256_file(path: Path) -> str:
@@ -67,16 +75,38 @@ def verify(path: Path, name: str) -> None:
         raise CheckpointError(msg)
 
 
-def _https_get(url: str) -> bytes:
+class _HttpsOnlyRedirects(urllib.request.HTTPRedirectHandler):
+    """Refuse a redirect that leaves HTTPS (L4)."""
+
+    def redirect_request(  # noqa: PLR0913, PLR0917  (urllib signature)
+        self,
+        req: urllib.request.Request,
+        fp: Any,  # noqa: ANN401  (urllib passes a file-like response)
+        code: int,
+        msg: str,
+        headers: Any,  # noqa: ANN401  (urllib's HTTPMessage)
+        newurl: str,
+    ) -> urllib.request.Request | None:
+        if not newurl.startswith("https://"):
+            message = "checkpoint download redirected away from HTTPS"
+            raise CheckpointError(message)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def _https_get(url: str, limit: int) -> bytes:
     if not url.startswith("https://"):
         msg = "checkpoints are fetched over HTTPS only"
         raise CheckpointError(msg)
-    with urllib.request.urlopen(url, timeout=60) as response:  # noqa: S310  (https checked above)
-        data: bytes = response.read()
+    opener = urllib.request.build_opener(_HttpsOnlyRedirects)
+    with opener.open(url, timeout=60) as response:
+        # One byte past the pinned size is enough to know it is wrong (L4).
+        data: bytes = response.read(limit + 1)
     return data
 
 
-def fetch(name: str, root: Path | None = None, get: Callable[[str], bytes] = _https_get) -> Path:
+def fetch(
+    name: str, root: Path | None = None, get: Callable[[str, int], bytes] = _https_get
+) -> Path:
     """The verified checkpoint, downloading it first if it is not cached."""
     entry = _entry(name)
     folder = (root or cache_dir()) / "checkpoints"
@@ -84,7 +114,7 @@ def fetch(name: str, root: Path | None = None, get: Callable[[str], bytes] = _ht
     if path.is_file():
         verify(path, name)
         return path
-    data = get(entry["url"])
+    data = get(entry["url"], entry["bytes"])
     if len(data) != entry["bytes"] or hashlib.sha256(data).hexdigest() != entry["sha256"]:
         msg = f"{name}: downloaded checkpoint does not match checkpoints.json; nothing kept"
         raise CheckpointError(msg)

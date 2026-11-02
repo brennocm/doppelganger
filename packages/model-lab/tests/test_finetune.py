@@ -170,3 +170,22 @@ def test_train_protocol_items_are_never_dev_or_eval() -> None:
     assert items[0].dataset == datasets.ASVSPOOF_2019_LA_TRAIN
     assert items[0].split == "train"
     assert items[0].path == "ASVspoof2019_LA_train/flac/LA_T_1138215.flac"
+
+
+def test_the_output_is_checked_again_after_training(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    out = tmp_path / "out"
+    real_train = finetune.train
+
+    def train_then_redirect(*args: Any, **kwargs: Any) -> list[float]:  # noqa: ANN401
+        losses = real_train(*args, **kwargs)
+        out.symlink_to(finetune.REPO_ROOT / "packages", target_is_directory=True)
+        return losses
+
+    monkeypatch.setattr(finetune, "train", train_then_redirect)
+    cfg = finetune.parse_config(_smoke(maxItemsPerEpoch=2))
+    items, source = finetune.training_data(cfg)
+    with pytest.raises(finetune.FinetuneError, match="outside the repository"):
+        finetune.run(cfg, out, items, source, TODAY)
+    assert not (finetune.REPO_ROOT / "packages" / "model.pth").exists()

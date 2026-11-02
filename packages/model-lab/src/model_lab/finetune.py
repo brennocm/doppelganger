@@ -246,7 +246,10 @@ def run(
     torch.manual_seed(cfg.seed)  # before building: random init must be seeded too
     model, start_sha = initial_model(cfg)
     losses = train(cfg, model, items, source)
+    # Again after training: a symlink can appear during a long run (exorcist L6).
+    folder = check_out_dir(out)
     folder.mkdir(parents=True, exist_ok=True)
+    check_out_dir(folder)
     weights = folder / "model.pth"
     torch.save(model.model.state_dict(), weights)
     record: dict[str, object] = {

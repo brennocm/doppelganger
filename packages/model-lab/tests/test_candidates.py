@@ -5,6 +5,7 @@ checkpoints skip when they are not in the cache (CI has none).
 """
 
 import hashlib
+import urllib.request
 from pathlib import Path
 
 import pytest
@@ -27,7 +28,7 @@ needs_checkpoints = pytest.mark.skipif(
 )
 
 
-def _no_network(url: str) -> bytes:
+def _no_network(url: str, _limit: int) -> bytes:
     msg = f"test tried to download {url}"
     raise AssertionError(msg)
 
@@ -68,15 +69,16 @@ def test_unknown_candidates_are_refused(tmp_path: Path) -> None:
 def test_fetch_refuses_a_mismatched_download_and_keeps_nothing(
     tmp_path: Path, payload: bytes
 ) -> None:
-    calls: list[str] = []
+    calls: list[tuple[str, int]] = []
 
-    def get(url: str) -> bytes:
-        calls.append(url)
+    def get(url: str, limit: int) -> bytes:
+        calls.append((url, limit))
         return payload
 
     with pytest.raises(candidates.CheckpointError, match="nothing kept"):
         candidates.fetch("aasist-l", root=tmp_path, get=get)
-    assert calls == [candidates.CATALOG["candidates"]["aasist-l"]["url"]]
+    entry = candidates.CATALOG["candidates"]["aasist-l"]
+    assert calls == [(entry["url"], entry["bytes"])]
     assert [p for p in tmp_path.rglob("*") if p.is_file()] == []
 
 
@@ -85,7 +87,21 @@ def test_fetch_refuses_a_mismatched_download_and_keeps_nothing(
 )
 def test_downloads_are_https_only(url: str) -> None:
     with pytest.raises(candidates.CheckpointError, match="HTTPS only"):
-        candidates._https_get(url)  # noqa: SLF001
+        candidates._https_get(url, 10)  # noqa: SLF001
+
+
+@pytest.mark.parametrize("target", ["http://example.com/x.pth", "file:///etc/passwd"])
+def test_redirects_away_from_https_are_refused(target: str) -> None:
+    handler = candidates._HttpsOnlyRedirects()  # noqa: SLF001
+    request = urllib.request.Request("https://example.com/x.pth")
+    with pytest.raises(candidates.CheckpointError, match="away from HTTPS"):
+        handler.redirect_request(request, None, 302, "Found", {}, target)
+
+
+def test_a_cache_inside_the_repository_is_refused(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DOPPELGANGER_CACHE", str(candidates.REPO_ROOT / "packages" / "cache"))
+    with pytest.raises(candidates.CheckpointError, match="outside the repository"):
+        candidates.cache_dir()
 
 
 def test_cache_dir_follows_the_environment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -131,7 +147,7 @@ def test_fetch_keeps_a_matching_download(name: str, tmp_path: Path) -> None:
     cached = _cached(name)
     assert cached is not None
     data = cached.read_bytes()
-    path = candidates.fetch(name, root=tmp_path, get=lambda _url: data)
+    path = candidates.fetch(name, root=tmp_path, get=lambda _url, _limit: data)
     assert hashlib.sha256(path.read_bytes()).hexdigest() == candidates.sha256_file(cached)
     assert [p.name for p in path.parent.iterdir()] == [path.name]
 
