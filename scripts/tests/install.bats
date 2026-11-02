@@ -231,7 +231,7 @@ hide() { rm -f "$T/real/$1" "$T/bin/$1"; }
   [ -d "$XDG_DATA_HOME" ]
 }
 
-@test "bad versions, options and non-HTTPS release URLs are refused" {
+@test "bad versions and options are refused" {
   run "$INSTALL" --version 1.0
   [ "$status" -eq 1 ]
   run "$INSTALL" --version '1.0.0;rm'
