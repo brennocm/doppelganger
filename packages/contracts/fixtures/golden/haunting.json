@@ -80,6 +80,35 @@
       ]
     },
     {
+      "name": "Exorcised is sticky through low scores and silence",
+      "config": {"alpha":0.4,"unease":0.4,"possession":0.7,"release":0.5,"confirmWindows":3,"releaseWindows":5,"silenceMs":2500,"maxPending":2,"vad":{"minRms":0.01,"maxZeroCrossingRate":0.35,"minVoicedFraction":0.3}},
+      "steps": [
+        {"event":{"type":"capture-started","at":0},"expect":{"state":"listening","smoothed":null}},
+        {"event":{"type":"window-scored","at":1000,"raw":0.95},"expect":{"state":"unease","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":2000,"raw":0.95},"expect":{"state":"unease","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":3000,"raw":0.95},"expect":{"state":"possession","smoothed":0.95}},
+        {"event":{"type":"protocol-completed","at":3500},"expect":{"state":"exorcised","smoothed":0.95}},
+        {"event":{"type":"window-scored","at":4000,"raw":0.05},"expect":{"state":"exorcised","smoothed":0.59}},
+        {"event":{"type":"window-scored","at":5000,"raw":0.05},"expect":{"state":"exorcised","smoothed":0.374}},
+        {"event":{"type":"window-scored","at":6000,"raw":0.05},"expect":{"state":"exorcised","smoothed":0.2444}},
+        {"event":{"type":"window-scored","at":7000,"raw":0.05},"expect":{"state":"exorcised","smoothed":0.16664}},
+        {"event":{"type":"window-scored","at":8000,"raw":0.05},"expect":{"state":"exorcised","smoothed":0.11998400000000001}},
+        {"event":{"type":"window-scored","at":9000,"raw":0.05},"expect":{"state":"exorcised","smoothed":0.0919904}},
+        {"event":{"type":"window-scored","at":10000,"raw":0.5},"expect":{"state":"exorcised","smoothed":0.25519424}},
+        {"event":{"type":"window-scored","at":11000,"raw":0.5},"expect":{"state":"exorcised","smoothed":0.35311654400000003}},
+        {"event":{"type":"silence","at":12000},"expect":{"state":"exorcised","smoothed":0.35311654400000003}},
+        {"event":{"type":"silence","at":14000},"expect":{"state":"exorcised","smoothed":0.35311654400000003}},
+        {"event":{"type":"silence","at":16000},"expect":{"state":"exorcised","smoothed":0.35311654400000003}},
+        {"event":{"type":"silence","at":18000},"expect":{"state":"exorcised","smoothed":0.35311654400000003}},
+        {"event":{"type":"window-scored","at":20000,"raw":0.99},"expect":{"state":"exorcised","smoothed":0.6078699264}},
+        {"event":{"type":"window-scored","at":21000,"raw":0.99},"expect":{"state":"exorcised","smoothed":0.76072195584}},
+        {"event":{"type":"window-scored","at":22000,"raw":0.99},"expect":{"state":"exorcised","smoothed":0.852433173504}},
+        {"event":{"type":"window-scored","at":23000,"raw":0.99},"expect":{"state":"possession","smoothed":0.9074599041024001}},
+        {"event":{"type":"window-scored","at":24000,"raw":0.99},"expect":{"state":"possession","smoothed":0.9404759424614401}},
+        {"event":{"type":"window-scored","at":25000,"raw":0.99},"expect":{"state":"possession","smoothed":0.9602855654768641}}
+      ]
+    },
+    {
       "name": "silence shows Listening, but Possession persists",
       "config": {"alpha":0.4,"unease":0.4,"possession":0.7,"release":0.5,"confirmWindows":3,"releaseWindows":5,"silenceMs":2500,"maxPending":2,"vad":{"minRms":0.01,"maxZeroCrossingRate":0.35,"minVoicedFraction":0.3}},
       "steps": [

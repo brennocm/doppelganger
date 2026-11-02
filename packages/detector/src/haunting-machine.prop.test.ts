@@ -173,8 +173,8 @@ describe("Haunting_Machine properties", () => {
     );
   });
 
-  // Feature: detection-core, Property 9: Exorcised requires Possession
-  it("enters Exorcised only from Possession through protocol-completed", () => {
+  // Feature: detection-core, Property 9: Exorcised requires Possession and is sticky
+  it("enters Exorcised only from Possession and leaves it only for Possession or Idle", () => {
     fc.assert(
       fc.property(withSteps(), ([cfg, steps]) => {
         const events = toEvents(steps);
@@ -184,6 +184,15 @@ describe("Haunting_Machine properties", () => {
           if (s.state === "exorcised" && before !== "exorcised") {
             expect(before).toBe("possession");
             expect(events[k]?.type).toBe("protocol-completed");
+          }
+          if (before === "exorcised" && s.state !== "exorcised") {
+            expect(["possession", "idle"]).toContain(s.state);
+            if (s.state === "possession") {
+              // Re-possession needs confirmWindows scored windows at or above possession.
+              const e = events[k];
+              expect(e?.type === "window-scored" && e.smoothed >= cfg.possession).toBe(true);
+              expect(states[k]?.aboveCount).toBeGreaterThanOrEqual(cfg.confirmWindows);
+            }
           }
         });
       }),

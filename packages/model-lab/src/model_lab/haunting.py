@@ -105,7 +105,8 @@ def _scored(s: MachineState, smoothed: float, at: float, cfg: HauntingConfig) ->
         return replace(nxt, state=_band(smoothed, cfg) if below >= cfg.release_windows else s.state)
     if above >= cfg.confirm_windows:
         return replace(nxt, state="possession")
-    if s.state == "exorcised" and smoothed >= cfg.possession:
+    # Exorcised is sticky: only re-possession (above) or capture-stopped leaves it.
+    if s.state == "exorcised":
         return nxt
     return replace(nxt, state=_band(smoothed, cfg))
 

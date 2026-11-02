@@ -109,7 +109,8 @@ function scored(s: MachineState, smoothed: number, at: number, cfg: HauntingConf
     return { ...next, state: belowCount >= cfg.releaseWindows ? band(smoothed, cfg) : s.state };
   }
   if (aboveCount >= cfg.confirmWindows) return { ...next, state: "possession" as const };
-  if (s.state === "exorcised" && smoothed >= cfg.possession) return { ...next, state: s.state };
+  // Exorcised is sticky: only re-possession (above) or capture-stopped leaves it.
+  if (s.state === "exorcised") return { ...next, state: s.state };
   return { ...next, state: band(smoothed, cfg) };
 }
 

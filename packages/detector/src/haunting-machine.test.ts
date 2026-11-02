@@ -73,10 +73,12 @@ describe("transition (Requirement 5)", () => {
     expect(at(two, scoredAt(7000, 0.9)).state).toBe("possession");
   });
 
-  it("5.2/5.3 as written: Exorcised follows low scores to Mask or Unease", () => {
+  it("5.2/5.3: Exorcised is sticky and ignores low and middle scores", () => {
     const exorcised = at(possessed, { type: "protocol-completed", at: 4000 });
-    expect(at(exorcised, scoredAt(5000, 0.1)).state).toBe("mask");
-    expect(at(exorcised, scoredAt(5000, 0.5)).state).toBe("unease");
+    expect(at(exorcised, scoredAt(5000, 0.1)).state).toBe("exorcised");
+    expect(at(exorcised, scoredAt(5000, 0.5)).state).toBe("exorcised");
+    expect(at(exorcised, ...scores(5000, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1)).state).toBe("exorcised");
+    expect(at(exorcised, { type: "capture-stopped", at: 9000 }).state).toBe("idle");
   });
 
   it("5.8: silence for silenceMs shows Listening, except in Possession and Exorcised", () => {

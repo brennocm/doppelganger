@@ -51,6 +51,18 @@ const CASES: { name: string; config: DetectorConfig; events: Input[] }[] = [
     ],
   },
   {
+    name: "Exorcised is sticky through low scores and silence",
+    config: DEFAULT_CONFIG,
+    events: [
+      start,
+      ...scored(1000, repeat(0.95, 3)),
+      { type: "protocol-completed", at: 3500 },
+      ...scored(4000, [...repeat(0.05, 6), 0.5, 0.5]),
+      ...silences(12000, 4, 2000),
+      ...scored(20000, repeat(0.99, 6)),
+    ],
+  },
+  {
     name: "silence shows Listening, but Possession persists",
     config: DEFAULT_CONFIG,
     events: [
