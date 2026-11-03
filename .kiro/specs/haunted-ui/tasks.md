@@ -57,6 +57,7 @@
   - [x] 6.1 Playwright screenshots of every state (375 px and 1440 px, full and reduced motion) and axe-core checks
     - _Requirements: 6.1, 7.2_
   - [ ] 6.2 Create the `haunt-snapshots` hook (kiro-workbench task 4) and run it
+    - The command exists (`.kiro/steering/haunt-snapshots.md`). Left open: running it needs a Kiro session whose shell tool can keep a preview server alive, which the CLI refused (journal entry "End of the resumed overnight run", 2026-11-01). Developer steps: (1) in a separate terminal, start the server from step 1 of the command and wait for `http://127.0.0.1:4318/`; (2) in Kiro, with the Playwright MCP server enabled, run `/haunt-snapshots` and say the server is already running on port 4318; (3) check that the table has 24 rows (6 states × 2 widths × 2 motion settings) and no failing rows; (4) stop the server and add the table, one screenshot and any failures to the journal, then check this box.
     - _Requirements: 6.1_
   - [x] 6.3 Run the `haunter` agent review; fix findings; record before/after screenshots in the journal
     - _Requirements: 1.1, 3.2, 6.3_
