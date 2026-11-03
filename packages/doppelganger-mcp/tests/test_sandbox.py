@@ -1,6 +1,7 @@
 """Path sandbox (kiro-workbench Requirement 7.4)."""
 
 import os
+import stat
 import tempfile
 from collections.abc import Iterator
 from pathlib import Path
@@ -55,18 +56,72 @@ SEGMENTS = st.sampled_from(
 PREFIXES = st.sampled_from(["base", "root", "outside", "relative", "absolute-system"])
 
 
-def _expected(candidate: str, root: Path) -> bool:
-    """Oracle for Property 1: the strict real path is a regular file inside the real root.
+MAX_SYMLINKS = 40
 
-    Strict realpath follows every symlink and fails on missing components or a walk through
-    a file ("file/x"), and it collapses ".." and "." after resolving; that is the property's
-    "resolved real path". os.path keeps it separate from the pathlib code under test.
+
+def _absolute(candidate: str) -> str | None:
+    """Expand a leading "~" like Path.expanduser and anchor relative paths at the cwd."""
+    if candidate.startswith("~"):
+        expanded = os.path.expanduser(candidate)  # noqa: PTH111  (os, not pathlib, on purpose)
+        if expanded == candidate:  # pathlib raises here; the sandbox refuses
+            return None
+        candidate = expanded
+    return candidate if candidate.startswith("/") else os.getcwd() + "/" + candidate  # noqa: PTH109
+
+
+def _walk(candidate: str) -> str | None:
+    """Strict POSIX realpath, written out by hand with os.lstat and os.readlink only.
+
+    Models what Property 1 calls the "resolved real path": "" and "." are skipped; ".."
+    pops the last resolved component lexically (so "inside.wav/.." is the root even though
+    the kernel would refuse it); every other name must exist (os.lstat), and a symlink is
+    replaced by its target's components (an absolute target restarts from "/"). Missing
+    components, a walk through a file ("file/x") and more than 40 symlink expansions give
+    None. A leading "~" is expanded like sandbox.allowed() does with Path.expanduser: an
+    unknown user cannot be expanded and gives None. It never calls realpath or resolve.
     """
-    try:
-        real = os.path.realpath(candidate, strict=True)
-    except (OSError, ValueError):
+    start = _absolute(candidate)
+    if start is None:
+        return None
+    todo = list(reversed(start.split("/")))
+    resolved: list[str] = []
+    expansions = 0
+    while todo:
+        name = todo.pop()
+        if name in ("", "."):
+            continue
+        if name == "..":
+            if resolved:
+                resolved.pop()
+            continue
+        path = "/" + "/".join([*resolved, name])
+        try:
+            info = os.lstat(path)
+        except (OSError, ValueError):
+            return None
+        if not stat.S_ISLNK(info.st_mode):
+            resolved.append(name)
+            continue
+        expansions += 1
+        if expansions > MAX_SYMLINKS:
+            return None
+        target = os.readlink(path)  # noqa: PTH115
+        if target.startswith("/"):
+            resolved = []
+        todo.extend(reversed(target.split("/")))
+    return "/" + "/".join(resolved)
+
+
+def _expected(candidate: str, root: Path) -> bool:
+    """Oracle for Property 1: the walked real path is a regular file inside the real root."""
+    real = _walk(candidate)
+    if real is None:
         return False
-    return os.path.isfile(real) and Path(real).is_relative_to(root.resolve())  # noqa: PTH113
+    try:
+        is_regular = stat.S_ISREG(os.stat(real).st_mode)  # noqa: PTH116
+    except OSError:
+        return False
+    return is_regular and Path(real).is_relative_to(root.resolve())
 
 
 def _build(tree: Path, prefix: str, parts: list[str]) -> str:
@@ -123,9 +178,21 @@ def test_examples(tree: Path) -> None:
         sandbox.read_allowed(str(root / "inside.wav"), [tree / "does-not-exist"])
 
 
+def test_the_walker_oracle_on_known_paths(tree: Path) -> None:
+    real_root = str((tree / "root").resolve())
+    real_outside = str((tree / "outside").resolve())
+    assert _walk(f"{tree}/outside/link-in") == f"{real_root}/inside.wav"
+    assert _walk(f"{tree}/root/dir-out/secret.wav") == f"{real_outside}/secret.wav"
+    assert _walk(f"{tree}/root/inside.wav/../sub/./deep.wav") == f"{real_root}/sub/deep.wav"
+    assert _walk(f"{tree}/root/loop") is None  # more than 40 expansions
+    assert _walk(f"{tree}/root/inside.wav/x") is None  # through a file
+    assert _walk(f"{tree}/root/missing.wav") is None
+    assert _walk("~nosuchuser-doppelganger/x") is None
+
+
 def test_a_path_through_a_file_is_refused(tree: Path) -> None:
-    # Shrunk Hypothesis counterexample (2026-11-02): realpath() collapses this to deep.wav,
-    # but the kernel refuses to walk through a regular file.
+    # Shrunk Hypothesis counterexample (2026-11-02): a non-strict realpath() collapses this to
+    # deep.wav, but "deep.wav/root" does not exist, so strict resolution refuses it.
     candidate = str(tree / "root" / "sub" / "deep.wav" / "root" / "..")
     with pytest.raises(sandbox.SandboxError, match="outside the allowed folders"):
         sandbox.read_allowed(candidate, [tree / "root"])
