@@ -22,7 +22,7 @@ COPY packages/detector packages/detector
 COPY packages/tokens packages/tokens
 RUN pnpm --filter @doppelganger/web exec vite build --base=/app/ --outDir /out/web --emptyOutDir
 
-FROM python:3.12.16-slim-trixie@sha256:8523d6abeb48ceae0b7240d30c5808fc26cb79c1a635bacdf19cf3baecfbec07 AS python
+FROM python:3.12.16-slim-trixie@sha256:b18b261e1b4974b4f321451ad5251ded85abb22c2b8b262da527dda1d031ab30 AS python
 COPY --from=ghcr.io/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0 /uv /usr/local/bin/uv
 WORKDIR /src
 ENV UV_PYTHON_DOWNLOADS=never UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
@@ -47,7 +47,7 @@ RUN uv export --locked --package doppelganger-engine --no-dev --no-emit-workspac
       ./packages/contracts ./packages/model-lab ./apps/engine \
  && uv pip uninstall --python /opt/venv/bin/python uv-build
 
-FROM python:3.12.16-slim-trixie@sha256:8523d6abeb48ceae0b7240d30c5808fc26cb79c1a635bacdf19cf3baecfbec07 AS runtime
+FROM python:3.12.16-slim-trixie@sha256:b18b261e1b4974b4f321451ad5251ded85abb22c2b8b262da527dda1d031ab30 AS runtime
 LABEL org.opencontainers.image.title="doppelganger-engine" \
       org.opencontainers.image.licenses="MIT"
 # No compilers or build tools: only the virtualenv and the static web build are copied.
