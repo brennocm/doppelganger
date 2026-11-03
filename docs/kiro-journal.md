@@ -340,3 +340,18 @@ Template:
   - **Sandbox property test.** Its oracle was wrong twice: `realpath` collapses `file/x/..`, and pathlib drops `.` and empty segments. `check:all` and a 40-seed scan caught both. Each shrunk counterexample is now a unit test, and 80 seeds pass.
   - **License check.** `check:all` failed on `cffi` (MIT-0) and on the MCP SDK's free-text license, which led to P40 and two overrides that cite the license file.
   - **My own mistakes.** Splitting the prompt log, I first committed the 017 header under 016 and amended my own unpushed commit. A `pkill -f` matched its own shell. I also committed a design note together with the landing code, then split it with a soft reset to keep spec-before-code.
+
+## 2026-11-02 — The sandbox oracle was not fixed, and then it checked itself (prompt 018)
+- Kiro surface: CLI
+- Feature used: hook | PBT | spec
+- What happened: My prompt 017 report said the sandbox property test was fixed, but it was still flaky. The `test-affected` hook then reported a failure in `packages/doppelganger-mcp`, and runs failed 2 out of 5 again.
+  - **19adb5b** fixed that flake by making `_expected()` call `os.path.realpath(strict=True)`. On Python 3.12, `Path.resolve(strict=True)` is that same function, so the oracle called the code under test, and its docstring wrongly said otherwise. The reviewer caught this. The same commit made the power test keep stdin open until each reply arrives.
+  - **5886356** replaced a WSL2 kernel version string (`5.15.153.1`) that secret-sentinel read as an IPv4 address. That finding was a false positive.
+  - **In this prompt:**
+    - `_expected()` is now a hand-written walker. It uses only `os.lstat` and `os.readlink`, pops `..` lexically, allows up to 40 symlink expansions, and expands `~` like `Path.expanduser`. Over 60 fixed seeds at 1,000 examples each (60,000 cases, not committed), the walker and the sandbox never disagreed.
+    - A throwaway mutation check confirmed the oracle can fail. A lexical sandbox with no symlink resolution and a sandbox without the allowlist check are both caught on `root/link-out`.
+    - The spec now defines "resolved real path" as strict POSIX realpath.
+    - The power test's teardown no longer hides the real assertion, and it reports the server's stderr.
+  - **The original flake** is the MCP SDK cancelling in-flight handlers at stdin EOF. A bare SDK server dropped 2 of 20 requests and ours dropped 4 of 20 (P42).
+  - **A new flake** showed up while I committed: 11 errors from `FileNotFoundError` in `tmp_path`. `tmp_path_retention_policy = "none"`, which I set in prompt 017, turns off pytest's session lock. Two concurrent pytest sessions (the hook and a check) then deleted each other's folders. It is now `"failed"` (P41).
+- Effect: Each fix was trusted too early. A flaky test was reported as fixed, the fix made the oracle depend on the code under test, and I committed `1249380` from a loop that hid one run with 11 errors. Those errors came from the tmp_path race, not from the new code. The MCP suite then passed 20 runs in a row, and two concurrent sessions now pass.
