@@ -13,7 +13,7 @@ Doppelgänger is an on-device voice-clone detector for browser calls. It was bui
 
 ## Kiro surfaces: IDE, CLI, Web, Crew
 
-- **CLI.** 41 journal entries were made through the Kiro CLI, and 19 prompts are logged in [`docs/prompt-history.md`](prompt-history.md). The CLI drove long autonomous runs with fixed rules, for example prompt 013 ("decide reversible things and record them as P-numbers, spec before code, one commit per step, never push, never commit red").
+- **CLI.** 42 journal entries were made through the Kiro CLI, and 19 prompts are logged in [`docs/prompt-history.md`](prompt-history.md). The CLI drove long autonomous runs with fixed rules, for example prompt 013 ("decide reversible things and record them as P-numbers, spec before code, one commit per step, never push, never commit red").
 - **Hooks on the V3 engine.** Every hook was dry-run in a `kiro-cli` 2.37.0 session on the V3 engine; see the journal entry "kiro-workbench task 1.7: hook dry runs on CLI V3, two hook bugs, and the Turn_Report".
 
 <!-- PENDING-GATE: kiro-workbench 3.4 — the IDE session with a custom agent, and the
