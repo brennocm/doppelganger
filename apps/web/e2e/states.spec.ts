@@ -2,8 +2,19 @@
  * Every haunting state at 375 px and 1440 px, with full and reduced motion
  * (haunted-ui task 6.1), plus an axe-core check per state.
  */
+import { readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+
+// The baselines show the replay list as it ships, not the end-to-end build's test signals
+// (audio-capture P47). Without a service worker, page.route sees the app's fetch of it.
+const SHIPPED_CLIPS = readFileSync(new URL("../public/replay/clips.json", import.meta.url), "utf8");
+test.use({ serviceWorkers: "block" });
+test.beforeEach(async ({ page }) => {
+  await page.route("**/replay/clips.json", (route) =>
+    route.fulfill({ contentType: "application/json", body: SHIPPED_CLIPS }),
+  );
+});
 
 const STATES = ["idle", "listening", "mask", "unease", "possession", "exorcised"] as const;
 const HEADLINES: Record<(typeof STATES)[number], string> = {
