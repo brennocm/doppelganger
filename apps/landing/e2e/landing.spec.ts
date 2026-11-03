@@ -47,11 +47,15 @@ for (const width of WIDTHS) {
       expect([...origins]).toEqual([FACADE]);
 
       // After consent, exactly one more origin is added: the privacy-enhanced player.
+      // networkidle was already reached, so waiting for it again does not cover the iframe's
+      // request: wait for that request itself.
+      const embedRequest = page.waitForRequest((r) => new URL(r.url()).origin === EMBED_ORIGIN);
       await page.getByRole("button", { name: "Play the 3-minute video" }).click();
       const frame = page.locator("iframe.video-frame");
       await expect(frame).toHaveAttribute("src", `${EMBED_ORIGIN}/embed/aaaaaaaaaaa`);
       await expect(frame).toHaveAttribute("referrerpolicy", "no-referrer");
       await expect(page.locator("button.video-facade")).toHaveCount(0);
+      await embedRequest;
       await page.waitForLoadState("networkidle");
       expect([...origins].sort()).toEqual([EMBED_ORIGIN, FACADE].sort());
     });
