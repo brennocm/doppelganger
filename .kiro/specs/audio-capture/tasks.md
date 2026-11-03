@@ -45,14 +45,16 @@
   - [x] 4.2 Implement the error messages from the design
     - _Requirements: 1.2, 4.2_
 
-- [ ] 5. Offline
+- [x] 5. Offline
   - [x] 5.1 Add the service worker with a build-time precache list and the same-origin GET-only fetch handler
     - _Requirements: 6.1, 6.3_
-  - [ ] 5.2 Playwright test: load once, go offline, reload, run replay detection
+  - [x] 5.2 Playwright test: load once, go offline, reload, run replay detection
+    - `apps/web/e2e/replay.spec.ts` runs a replay offline with the P47 test signals; the same test runs on the real clips after detection-model 7.2.
     - _Requirements: 6.2_
 
 - [ ] 6. End-to-end
   - [ ] 6.1 Playwright test of the mic path with a fake audio file and of the replay path with both clip labels
+    - Written (2026-11-02): the mic path in `e2e/capture.spec.ts`, the replay path with both session labels in `e2e/replay.spec.ts`, on the P47 test signals. Left open: the replay path needs the real labelled clips (detection-model 7.2, PENDING-GATE in `public/replay/clips.json`); then re-run it unchanged.
     - _Requirements: 2.1, 2.2_
   - [ ] 6.2 Manual test of tab capture with a real web call in Chrome on the reference laptop; record latency in the journal
     - _Requirements: 1.1, 4.3_

@@ -18,14 +18,14 @@ export function fakeAudioFile(): string {
   return join(dir, "voice.wav");
 }
 
-/** 16-bit PCM mono WAV: a 120 Hz harmonic series with a 4 Hz syllable envelope. */
-export function voicedWav(seconds = 12, rate = 48000): Buffer {
+/** 16-bit PCM mono WAV: a harmonic series on `f0` (default 120 Hz) with a 4 Hz syllable envelope. */
+export function voicedWav(seconds = 12, rate = 48000, f0 = 120): Buffer {
   const samples = seconds * rate;
   const data = Buffer.alloc(samples * 2);
   for (let i = 0; i < samples; i++) {
     const t = i / rate;
     let v = 0;
-    for (let k = 1; k <= 5; k++) v += Math.sin(2 * Math.PI * 120 * k * t) / k;
+    for (let k = 1; k <= 5; k++) v += Math.sin(2 * Math.PI * f0 * k * t) / k;
     const envelope = 0.6 + 0.4 * Math.sin(2 * Math.PI * 4 * t);
     data.writeInt16LE(Math.round(((0.4 * envelope * v) / 2.3) * 32767), i * 2);
   }

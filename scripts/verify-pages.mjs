@@ -5,6 +5,8 @@
 // Fails when any HTML file:
 //   - lacks the Content-Security-Policy meta tag from .kiro/steering/security.md, or
 //   - references a URL on another origin (src, href, srcset, poster, action, formaction).
+//   - or the artifact holds a test-only replay signal (audio-capture P47: replay/test-signal-*),
+//     which only `vite build --mode e2e` may emit.
 // Exceptions: the landing page's YouTube facade (www.youtube-nocookie.com, only in the root
 // index.html and only with the matching frame-src), and https:// links on <a> elements,
 // which load nothing until clicked (project-foundation P39).
@@ -121,6 +123,15 @@ export function checkScript(path, source) {
   return problems;
 }
 
+const TEST_SIGNAL_RE = /(^|\/)replay\/test-signal-[^/]*$/;
+
+/** Test-only replay signals (audio-capture P47) must never reach the Pages artifact. */
+export function checkPaths(paths) {
+  return paths
+    .filter((path) => TEST_SIGNAL_RE.test(path))
+    .map((path) => `${path}: test-only replay signal in the Pages build`);
+}
+
 async function htmlFiles(dir) {
   return filesEndingWith(dir, [".html"]);
 }
@@ -149,6 +160,8 @@ async function main() {
     const path = relative(root, file).split(sep).join("/");
     problems.push(...checkScript(path, await readFile(file, "utf8")));
   }
+  const all = await filesEndingWith(root, [""]);
+  problems.push(...checkPaths(all.map((file) => relative(root, file).split(sep).join("/")).sort()));
   for (const problem of problems) stderr.write(`verify-pages: ${problem}\n`);
   stdout.write(
     `verify-pages: ${problems.length === 0 ? "ok" : "FAILED"}, ${files.length} HTML file(s), ${scripts.length} script(s), ${problems.length} problem(s)\n`,

@@ -9,6 +9,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defaultClientConditions, defineConfig, type Plugin } from "vite";
+import { voicedWav } from "./e2e/fake-audio.ts";
 
 const ORT_DIST = fileURLToPath(new URL("./node_modules/onnxruntime-web/dist/", import.meta.url));
 export const ORT_FILES = ["ort-wasm-simd-threaded.wasm", "ort-wasm-simd-threaded.mjs"] as const;
@@ -17,9 +18,34 @@ const PHOSPHOR = fileURLToPath(
   new URL("./node_modules/@phosphor-icons/core/assets/regular/", import.meta.url),
 );
 
+/**
+ * Test-only replay signals (audio-capture P47): generated tones, not voices, emitted only by
+ * `vite build --mode e2e` together with their own clips.json. The labels exist to exercise
+ * both session labels; they say nothing about the signals.
+ */
+export const E2E_REPLAY_CLIPS = [
+  { id: "test-a", file: "test-signal-a.wav", label: "genuine", title: "Test signal A", f0: 120 },
+  { id: "test-b", file: "test-signal-b.wav", label: "synthetic", title: "Test signal B", f0: 180 },
+] as const;
+const E2E_REPLAY_SECONDS = 15;
+
+function e2eReplayAssets(): Record<string, string | Uint8Array> {
+  const clips = E2E_REPLAY_CLIPS.map(({ f0: _f0, ...clip }) => ({
+    ...clip,
+    seconds: E2E_REPLAY_SECONDS,
+  }));
+  const assets: Record<string, string | Uint8Array> = {
+    "replay/clips.json": `${JSON.stringify({ clips }, null, 2)}\n`,
+  };
+  for (const clip of E2E_REPLAY_CLIPS)
+    assets[`replay/${clip.file}`] = voicedWav(E2E_REPLAY_SECONDS, 16000, clip.f0);
+  return assets;
+}
+
 function selfHostedAssets(): Plugin {
   let base = "/";
   let publicDir = "";
+  let mode = "production";
   return {
     name: "self-hosted-assets",
     // Inline Phosphor icons (MIT) for <!--icon:name--> markers: no icon font, no requests.
@@ -33,6 +59,7 @@ function selfHostedAssets(): Plugin {
     configResolved(config) {
       base = config.base;
       publicDir = config.publicDir;
+      mode = config.mode;
     },
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
@@ -47,6 +74,9 @@ function selfHostedAssets(): Plugin {
       });
     },
     generateBundle(_options, bundle) {
+      const e2eAssets = mode === "e2e" ? e2eReplayAssets() : {};
+      for (const [fileName, source] of Object.entries(e2eAssets))
+        this.emitFile({ type: "asset", fileName, source });
       for (const name of ORT_FILES) {
         this.emitFile({
           type: "asset",
@@ -62,7 +92,14 @@ function selfHostedAssets(): Plugin {
               relative(publicDir, join(entry.parentPath, entry.name)).split(sep).join("/"),
             )
         : [];
-      const files = [...Object.keys(bundle), ...fromPublic, ...ORT_FILES.map((n) => `ort/${n}`)]
+      const files = [
+        ...new Set([
+          ...Object.keys(bundle),
+          ...Object.keys(e2eAssets),
+          ...fromPublic,
+          ...ORT_FILES.map((n) => `ort/${n}`),
+        ]),
+      ]
         .filter((f) => f !== "sw.js" && !f.endsWith(".map"))
         .sort();
       const urls = ["./", ...files.map((f) => `./${f}`)];

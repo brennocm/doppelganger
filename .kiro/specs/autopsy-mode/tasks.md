@@ -38,4 +38,5 @@
 
 - [ ] 5. Verification
   - [ ] 5.1 Playwright tests with both replay fixtures; record the verdicts in the journal
+    - Written (2026-11-02): `apps/web/e2e/replay.spec.ts` analyzes every clip in `replay/clips.json` and records each verdict as a test annotation, on the P47 test signals. Left open: the real clips (detection-model 7.2) and the verdicts in the journal; test-signal verdicts are not recorded, because they mean nothing.
     - _Requirements: 3.3_

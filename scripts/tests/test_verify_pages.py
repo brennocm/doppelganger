@@ -48,3 +48,14 @@ def test_resource_loads_and_other_links_are_refused(tmp_path: Path, body: str) -
     done = _check(tmp_path, body)
     assert done.returncode != 0
     assert "external origin" in done.stderr + done.stdout
+
+
+def test_test_only_replay_signals_are_refused(tmp_path: Path) -> None:
+    replay = tmp_path / "app" / "replay"
+    replay.mkdir(parents=True)
+    (replay / "clips.json").write_text('{"clips": []}', encoding="utf-8")
+    assert _check(tmp_path, "<p>ok</p>").returncode == 0
+    (replay / "test-signal-a.wav").write_bytes(b"RIFF")
+    done = _check(tmp_path, "<p>ok</p>")
+    assert done.returncode != 0
+    assert "app/replay/test-signal-a.wav: test-only replay signal" in done.stderr

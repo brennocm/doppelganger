@@ -30,7 +30,6 @@ test("mic path: privacy notice first, then the synthetic model scores fake audio
   ).toBeVisible();
   await expect(page.locator("#model-id")).toHaveText(/^ci-synthetic-linear /);
   await expect(page.getByText("Test model: it detects nothing.", { exact: false })).toBeVisible();
-  await expect(page.getByText("No replay clips are bundled yet.")).toBeVisible();
   await expectScored(page);
   await page.getByRole("button", { name: "Stop listening" }).click();
   await expect(page.getByRole("heading", { name: "Not listening" })).toBeVisible();
