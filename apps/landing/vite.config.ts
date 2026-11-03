@@ -7,6 +7,16 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vite";
+import {
+  BASE_CSP,
+  cspFor,
+  type LandingContent,
+  PENDING,
+  parseContent,
+  renderCapture,
+  renderVideo,
+  renderWriteUp,
+} from "./src/content.ts";
 import { newestReport, renderEvaluation } from "./src/evaluation.ts";
 
 const REPORTS = fileURLToPath(new URL("../../packages/model-lab/reports/", import.meta.url));
@@ -43,8 +53,39 @@ function evaluation(dir = REPORTS): Plugin {
   };
 }
 
+const ROOT = fileURLToPath(new URL("./", import.meta.url));
+// Tests build with their own content and media (design P46); production uses the defaults.
+const CONTENT = process.env["LANDING_CONTENT"] ?? join(ROOT, "content.json");
+const PUBLIC = process.env["LANDING_PUBLIC"] ?? join(ROOT, "public");
+
+/** Content that waits for the gate becomes a neutral state; the marker never reaches the page. */
+function content(file = CONTENT, publicDir = PUBLIC): Plugin {
+  const parsed: LandingContent = parseContent(JSON.parse(readFileSync(file, "utf8")));
+  for (const media of [parsed.videoPoster, parsed.capture.video, parsed.capture.poster]) {
+    if (media !== PENDING && !existsSync(join(publicDir, media))) {
+      throw new Error(`landing: ${media} is named in content.json but not found in ${publicDir}`);
+    }
+  }
+  return {
+    name: "content",
+    transformIndexHtml: {
+      // After Vite's own asset handling, so the URLs stay as written (relative to the page).
+      order: "post",
+      handler(html) {
+        if (!html.includes(BASE_CSP)) throw new Error("landing: the base CSP is missing");
+        return html
+          .replace(BASE_CSP, cspFor(parsed))
+          .replace("<!-- capture -->", renderCapture(parsed))
+          .replace("<!-- writeup -->", renderWriteUp(parsed))
+          .replace("<!-- video -->", renderVideo(parsed));
+      },
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [evaluation()],
+  plugins: [evaluation(), content()],
+  publicDir: PUBLIC,
   build: { target: "es2022", sourcemap: false, assetsInlineLimit: 0 },
   test: { include: ["src/**/*.test.ts"] },
 });

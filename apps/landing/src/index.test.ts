@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { copyCommand, PACKAGE_NAME } from "./index.ts";
+import { activateFacade, copyCommand, PACKAGE_NAME, playCapture } from "./index.ts";
 
 /** The few Document members copyCommand uses, without a DOM library. */
 function fakeDoc() {
@@ -70,5 +70,95 @@ describe("@doppelganger/landing", () => {
     const { doc } = fakeDoc();
     const orphan = { dataset: { copy: "missing" } } as unknown as HTMLElement;
     expect(await copyCommand(orphan, doc, undefined)).toBe("");
+  });
+});
+
+describe("video facade", () => {
+  /** The few members activateFacade uses: a button to replace and a document to create the frame. */
+  function facade(embed: string | undefined) {
+    const replaced: unknown[] = [];
+    const frame: Record<string, unknown> = { setAttribute: vi.fn() };
+    const button = {
+      dataset: embed === undefined ? {} : { embed },
+      replaceWith: (f: unknown) => replaced.push(f),
+    };
+    const doc = { createElement: () => frame };
+    return {
+      button: button as unknown as HTMLElement,
+      doc: doc as unknown as Document,
+      frame,
+      replaced,
+    };
+  }
+
+  it("turns the button into a privacy-enhanced player", () => {
+    const { button, doc, frame, replaced } = facade(
+      "https://www.youtube-nocookie.com/embed/aaaaaaaaaaa",
+    );
+    expect(activateFacade(button, doc)).toBe(true);
+    expect(replaced).toEqual([frame]);
+    expect(frame["src"]).toBe("https://www.youtube-nocookie.com/embed/aaaaaaaaaaa");
+    expect(frame["referrerPolicy"]).toBe("no-referrer");
+    expect(frame["allow"]).toBe("");
+  });
+
+  it.each([
+    undefined,
+    "",
+    "https://evil.example/embed/aaaaaaaaaaa",
+    "http://www.youtube-nocookie.com/embed/aaaaaaaaaaa",
+    "https://www.youtube.com/embed/aaaaaaaaaaa",
+    "https://www.youtube-nocookie.com/embed/aaaaaaaaaaa?autoplay=1",
+    "https://www.youtube-nocookie.com/embed/short",
+    "https://www.youtube-nocookie.com.evil.example/embed/aaaaaaaaaaa",
+    "javascript:alert(1)",
+  ])("refuses %s", (address) => {
+    const { button, doc, replaced } = facade(address);
+    expect(activateFacade(button, doc)).toBe(false);
+    expect(replaced).toEqual([]);
+  });
+});
+
+describe("capture slot", () => {
+  function figure(source: string | undefined, hasVideo = false) {
+    const appended: Record<string, unknown>[] = [];
+    const video: Record<string, unknown> = { setAttribute: vi.fn() };
+    const node = {
+      dataset: source === undefined ? {} : { video: source },
+      querySelector: (selector: string) =>
+        selector === "video"
+          ? hasVideo
+            ? {}
+            : null
+          : { getAttribute: () => "./media/poster.svg" },
+      append: (v: Record<string, unknown>) => appended.push(v),
+      classList: { add: vi.fn() },
+    };
+    const doc = { createElement: () => video };
+    return {
+      node: node as unknown as HTMLElement,
+      doc: doc as unknown as Document,
+      video,
+      appended,
+    };
+  }
+
+  it("adds one muted, looping, lazy video with the poster", () => {
+    const { node, doc, video, appended } = figure("./media/capture.mp4");
+    expect(playCapture(node, doc)).toBe(true);
+    expect(appended).toEqual([video]);
+    expect(video["muted"]).toBe(true);
+    expect(video["loop"]).toBe(true);
+    expect(video["preload"]).toBe("none");
+    expect(video["src"]).toBe("./media/capture.mp4");
+    expect(video["poster"]).toBe("./media/poster.svg");
+  });
+
+  it("does nothing without a source or when a video is already there", () => {
+    expect(playCapture(figure(undefined).node, figure(undefined).doc)).toBe(false);
+    expect(playCapture(figure("").node, figure("").doc)).toBe(false);
+    const { node, doc, appended } = figure("./media/capture.mp4", true);
+    expect(playCapture(node, doc)).toBe(false);
+    expect(appended).toEqual([]);
   });
 });

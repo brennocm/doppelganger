@@ -382,6 +382,79 @@ caption {
   }
 }
 
+.capture {
+  margin: var(--space-8) 0 0;
+  max-width: 1080px;
+  aspect-ratio: 16 / 9;
+  background: var(--color-bg-deep);
+  border: 1px solid var(--color-surface-chip);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+}
+
+.capture img,
+.capture video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.capture video {
+  position: absolute;
+  inset: 0;
+}
+
+.video-facade {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 1080px;
+  aspect-ratio: 16 / 9;
+  margin-bottom: var(--space-4);
+  padding: 0;
+  background: var(--color-surface-input);
+  border: 1px solid var(--color-surface-chip);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.video-facade img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-play {
+  position: absolute;
+  left: var(--space-4);
+  bottom: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-purple);
+  color: var(--color-on-purple);
+  border-radius: var(--radius-md);
+  font: var(--type-reading);
+  font-weight: 600;
+}
+
+.video-facade:hover .video-play {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.video-frame {
+  display: block;
+  width: 100%;
+  max-width: 1080px;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--color-surface-chip);
+  border-radius: var(--radius-lg);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .button,
   .copy {
