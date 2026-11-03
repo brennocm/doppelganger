@@ -346,7 +346,7 @@ Template:
 - Feature used: hook | PBT | spec
 - What happened: My prompt 017 report said the sandbox property test was fixed, but it was still flaky. The `test-affected` hook then reported a failure in `packages/doppelganger-mcp`, and runs failed 2 out of 5 again.
   - **19adb5b** fixed that flake by making `_expected()` call `os.path.realpath(strict=True)`. On Python 3.12, `Path.resolve(strict=True)` is that same function, so the oracle called the code under test, and its docstring wrongly said otherwise. The reviewer caught this. The same commit made the power test keep stdin open until each reply arrives.
-  - **5886356** replaced a WSL2 kernel version string (`5.15.153.1`) that secret-sentinel read as an IPv4 address. That finding was a false positive.
+  - **5886356** replaced a four-part WSL2 kernel version string in the Bats fixture, which secret-sentinel read as an IPv4 address (it now has three parts). That finding was a false positive.
   - **In this prompt:**
     - `_expected()` is now a hand-written walker. It uses only `os.lstat` and `os.readlink`, pops `..` lexically, allows up to 40 symlink expansions, and expands `~` like `Path.expanduser`. Over 60 fixed seeds at 1,000 examples each (60,000 cases, not committed), the walker and the sandbox never disagreed.
     - A throwaway mutation check confirmed the oracle can fail. A lexical sandbox with no symlink resolution and a sandbox without the allowlist check are both caught on `root/link-out`.
