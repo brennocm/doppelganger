@@ -68,6 +68,7 @@ PCM16 decoding: `int16 / 32768.0`. The ring buffer is a preallocated NumPy array
   - It reads the launch URL from the logs and runs one WebSocket session with `scripts/container_stream_check.py`: hello with the token, then `ready`, then seeded PCM16 frames, and at least one `score` for the model.
   - It tears everything down in a trap, even on failure.
   - It runs in its own CI job on `ubuntu-latest`, which has Docker. It is not part of `check:all`, because developer machines may have no Docker, and it is not a new `mise` verb. Without Docker it exits 1 and does not skip, so a missing Docker can never pass as green.
+- **pnpm in the image (P44, 2026-11-02).** The `node:26` images no longer include Corepack, so the web stage installs pnpm with `npm install --global pnpm@12.16.1 --ignore-scripts` and then checks that `npm view pnpm@12.16.1 dist.integrity` equals the SHA-512 integrity written in the Dockerfile. npm already verifies the tarball against that field, so the build fails if the registry ever serves a different package for this version. A version bump changes the version and the integrity together, like the image digests.
 - **Base images (2026-11-02).** The digests were checked against the registries. `node:26.13.0-slim` and `ghcr.io/astral-sh/uv:0.13.6` are unchanged. The `python:3.12.16-slim-trixie` index digest moved, but its amd64 and arm64 images (built 2026-10-28) are the same as before, so the pin is updated to the current index digest.
 
 ### Compose (`infra/docker/compose.yaml`)
