@@ -62,6 +62,13 @@ PCM16 decoding: `int16 / 32768.0`. The ring buffer is a preallocated NumPy array
 - **The token on stdout.** The launch URL is the one stdout line that carries the token. It is printed once, outside the JSON logs, because Requirement 2.1 needs it. Whoever can read container logs is in the `docker` group, which is root-equivalent. Log forwarding to a central collector would carry a live token until the engine restarts. (exorcist L6, accepted)
 - **Engine score source (Requirement 3.5, deferred).** If it is built, it will not be an `InferenceBackend`, because the engine does its own windowing, voice activity and smoothing. The web app would stream PCM16 frames to `WS /v1/stream` and feed each `score` message (`windowIndex`, `raw`, `smoothed`) into the Haunting_Machine as a `window-scored` event, or `silence` when `raw` is null, skipping the browser smoother. Session statistics would be kept in the browser as for local detection. It is first in the cut order (developer decision, 2026-11-01).
 - **Tests without Docker.** The engine is tested in-process with FastAPI's `TestClient` and the synthetic CI model. The container test (task 5.3) needs Docker in CI.
+- **Container test (task 5.3, P43).** `scripts/container-test.sh` uses the real Compose file with the committed synthetic CI model (`apps/web/public/models`, `MODEL_ID=ci-synthetic-linear`), under project `doppelganger-ci` and on port 18787.
+  - It builds and starts the engine and waits up to 120 s for `/healthz`.
+  - It asserts on `docker inspect`: root filesystem read-only; `CapDrop` is `ALL`; `no-new-privileges:true`; user `10001:10001`; the port bound only on `127.0.0.1`; `/models` mounted read-only; `/tmp` a tmpfs with `noexec,nosuid`; memory and CPU limits set.
+  - It reads the launch URL from the logs and runs one WebSocket session with `scripts/container_stream_check.py`: hello with the token, then `ready`, then seeded PCM16 frames, and at least one `score` for the model.
+  - It tears everything down in a trap, even on failure.
+  - It runs in its own CI job on `ubuntu-latest`, which has Docker. It is not part of `check:all`, because developer machines may have no Docker, and it is not a new `mise` verb. Without Docker it exits 1 and does not skip, so a missing Docker can never pass as green.
+- **Base images (2026-11-02).** The digests were checked against the registries. `node:26.13.0-slim` and `ghcr.io/astral-sh/uv:0.13.6` are unchanged. The `python:3.12.16-slim-trixie` index digest moved, but its amd64 and arm64 images (built 2026-10-28) are the same as before, so the pin is updated to the current index digest.
 
 ### Compose (`infra/docker/compose.yaml`)
 
