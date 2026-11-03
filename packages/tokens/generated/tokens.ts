@@ -41,6 +41,12 @@ export const tokens = {
     "mono": "ui-monospace, SFMono-Regular, Menlo, Consolas, \"Liberation Mono\", monospace"
   },
   "type": {
+    "hero": {
+      "size": "clamp(36px, 6vw, 60px)",
+      "line": "1.06",
+      "weight": 600,
+      "family": "ui"
+    },
     "display": {
       "size": "26px",
       "line": "32px",

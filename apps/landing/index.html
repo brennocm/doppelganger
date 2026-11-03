@@ -8,15 +8,15 @@
     <meta name="theme-color" content="#131116" />
     <meta name="referrer" content="no-referrer" />
     <meta name="description" content="Doppelgänger listens to the other side of a browser call and warns you when the voice sounds synthetic. It runs in your browser; no audio leaves your device." />
-    <!-- An empty icon: no favicon request, no 404. -->
-    <link rel="icon" href="data:," />
-    <title>Doppelgänger · hear a cloned voice before it costs you</title>
+    <!-- The Twin as an inline icon: no favicon request, no 404. -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-10 0 140 140'%3E%3Cpath fill='%23B07FFF' d='M60 8C33 8 16 29 16 56v62c0 6 6 9 11 5l8-7 9 9c3 3 7 3 10 0l6-7 6 7c3 3 7 3 10 0l9-9 8 7c5 4 11 1 11-5V56C104 29 87 8 60 8Z'/%3E%3Ccircle cx='45' cy='60' r='9' fill='%23131116'/%3E%3Ccircle cx='75' cy='60' r='9' fill='%23131116'/%3E%3Cellipse cx='60' cy='90' rx='6' ry='8' fill='%23131116'/%3E%3C/svg%3E" />
+    <title>Doppelgänger: hear a cloned voice before it costs you</title>
     <script type="module" src="./src/index.ts"></script>
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-header">
-      <span class="wordmark">Doppelgänger</span>
+      <a class="wordmark" href="./"><svg class="mark" viewBox="-10 0 140 140" aria-hidden="true" focusable="false"><path d="M60 8C33 8 16 29 16 56v62c0 6 6 9 11 5l8-7 9 9c3 3 7 3 10 0l6-7 6 7c3 3 7 3 10 0l9-9 8 7c5 4 11 1 11-5V56C104 29 87 8 60 8Z" /><circle class="mark-eye" cx="45" cy="60" r="9" /><circle class="mark-eye" cx="75" cy="60" r="9" /></svg>Doppelgänger</a>
       <nav aria-label="Project links">
         <a href="https://github.com/brennocm/doppelganger">GitHub</a>
         <a href="#video">Video</a>
@@ -37,50 +37,76 @@
         <!-- capture -->
       </section>
 
-      <section aria-labelledby="scenario-title">
+      <section class="scenario" aria-labelledby="scenario-title">
         <h2 id="scenario-title">One call, three moments</h2>
-        <ol class="steps">
-          <li>
-            <h3>The call</h3>
-            <p>
-              Your finance director calls on a video meeting. It sounds exactly like her, and she
-              needs an urgent transfer before the bank closes.
-            </p>
+        <ol class="moments">
+          <li class="moment" data-state="mask">
+            <svg class="twin" viewBox="0 -6 120 146" aria-hidden="true" focusable="false"><path class="twin-sheet" d="M60 8C33 8 16 29 16 56v62c0 6 6 9 11 5l8-7 9 9c3 3 7 3 10 0l6-7 6 7c3 3 7 3 10 0l9-9 8 7c5 4 11 1 11-5V56C104 29 87 8 60 8Z" /><path class="twin-line" d="M38 60q7-7 14 0M68 60q7-7 14 0" /><path class="twin-line" d="M48 80q12 10 24 0" /></svg>
+            <div>
+              <h3>The call</h3>
+              <p>
+                Your finance director calls on a video meeting. It sounds exactly like her, and
+                she needs an urgent transfer before the bank closes.
+              </p>
+              <p class="shown">Doppelgänger shows <strong>Sounds human</strong> while it gathers evidence.</p>
+            </div>
           </li>
-          <li>
-            <h3>The alert</h3>
-            <p>
-              The calm interface starts to rot. After several seconds of sustained evidence it
-              reads: <strong>Doppelgänger detected.</strong> Do not approve anything on this call.
-            </p>
+          <li class="moment" data-state="possession">
+            <svg class="twin" viewBox="0 -6 120 146" aria-hidden="true" focusable="false"><path class="twin-sheet" d="M60 8C33 8 16 29 16 56v62c0 6 6 9 11 5l8-7 9 9c3 3 7 3 10 0l6-7 6 7c3 3 7 3 10 0l9-9 8 7c5 4 11 1 11-5V56C104 29 87 8 60 8Z" /><path class="twin-hollow" d="M34 50l20 6-4 12-16-4ZM86 50l-20 6 4 12 16-4Z" /><path class="twin-line" d="M40 84l6 8 6-8 6 8 6-8 6 8 6-8 6 8" /></svg>
+            <div>
+              <h3>The alert</h3>
+              <p>
+                The calm interface starts to rot. After several seconds of sustained evidence the
+                warning stays on screen until you act.
+              </p>
+              <p class="shown"><strong>Doppelgänger detected.</strong> Do not approve anything on this call.</p>
+            </div>
           </li>
-          <li>
-            <h3>The protocol</h3>
-            <p>
-              Ask the code word you agreed on. Hang up and call her back on a number you already
-              know. Report the call.
-            </p>
+          <li class="moment" data-state="exorcised">
+            <svg class="twin" viewBox="0 -6 120 146" aria-hidden="true" focusable="false"><path class="twin-sheet" d="M60 8C33 8 16 29 16 56v62c0 6 6 9 11 5l8-7 9 9c3 3 7 3 10 0l6-7 6 7c3 3 7 3 10 0l9-9 8 7c5 4 11 1 11-5V56C104 29 87 8 60 8Z" /><path class="twin-line" d="M38 60q7 6 14 0M68 60q7 6 14 0" /><path class="twin-line" d="M50 82q10 6 20 0" /><path class="twin-halo" d="M36 14q24-12 48 0" /></svg>
+            <div>
+              <h3>The protocol</h3>
+              <p>
+                Ask the code word you agreed on. Hang up and call her back on a number you already
+                know. Report the call.
+              </p>
+              <p class="shown"><strong>Protocol completed.</strong> Stay alert for the rest of the call.</p>
+            </div>
           </li>
         </ol>
       </section>
 
-      <section aria-labelledby="proof-title">
-        <h2 id="proof-title">Check it yourself: nothing leaves your device</h2>
-        <p>
-          The model and the audio both stay in your browser. The page downloads the app, the model
-          file and its runtime from this site, and then sends nothing to any server.
-        </p>
-        <ol class="proof">
-          <li>Open the live demo and press <kbd>F12</kbd> to open your browser's developer tools on the Network tab.</li>
-          <li>Start a replay or a capture and watch the requests while it listens.</li>
-          <li>Confirm that every request goes to this site and only downloads files. Nothing is sent back while it listens; a replay clip is downloaded, never uploaded.</li>
-        </ol>
-        <p>
-          The rules behind this are in the
-          <a href="https://github.com/brennocm/doppelganger/blob/main/.kiro/steering/security.md">security steering</a>
-          and the
-          <a href="https://github.com/brennocm/doppelganger/blob/main/docs/model-card.md">model card</a>.
-        </p>
+      <section class="proof-panel" aria-labelledby="proof-title">
+        <div class="proof-claim">
+          <h2 id="proof-title">Check it yourself: nothing leaves your device</h2>
+          <dl class="where">
+            <div>
+              <dt>In your browser</dt>
+              <dd>The model, its runtime and the audio</dd>
+            </div>
+            <div>
+              <dt>Sent to a server</dt>
+              <dd>Nothing</dd>
+            </div>
+          </dl>
+          <p>
+            The page downloads the app, the model file and its runtime from this site, and then
+            sends nothing back.
+          </p>
+        </div>
+        <div>
+          <ol class="proof">
+            <li>Open the live demo and press <kbd>F12</kbd> to open your browser’s developer tools on the Network tab.</li>
+            <li>Start a replay or a capture and watch the requests while it listens.</li>
+            <li>Confirm that every request goes to this site and only downloads files. Nothing is sent back while it listens; a replay clip is downloaded, never uploaded.</li>
+          </ol>
+          <p>
+            The rules behind this are in the
+            <a href="https://github.com/brennocm/doppelganger/blob/main/.kiro/steering/security.md">security steering</a>
+            and the
+            <a href="https://github.com/brennocm/doppelganger/blob/main/docs/model-card.md">model card</a>.
+          </p>
+        </div>
       </section>
 
       <section aria-labelledby="tiers-title">
@@ -117,22 +143,31 @@
             </tbody>
           </table>
         </div>
-        <p>On Linux or WSL2, from a clone of the repository:</p>
-        <div class="command">
-          <pre><code id="cmd-static">git clone https://github.com/brennocm/doppelganger.git
+        <div class="install">
+          <div>
+            <h3>Self-hosted</h3>
+            <p class="note">On Linux or WSL2, from a clone of the repository. Serves the app on your machine.</p>
+            <div class="command">
+              <pre><code id="cmd-static">git clone https://github.com/brennocm/doppelganger.git
 cd doppelganger
 scripts/install.sh --static</code></pre>
-          <button class="copy" type="button" data-copy="cmd-static" data-name="Self-hosted commands" aria-label="Copy the self-hosted commands">Copy</button>
+              <button class="copy" type="button" data-copy="cmd-static" data-name="Self-hosted commands" aria-label="Copy the self-hosted commands">Copy</button>
+            </div>
+          </div>
+          <div>
+            <h3>Pro engine</h3>
+            <p class="note">From the same clone. Starts the engine in a local container.</p>
+            <div class="command">
+              <pre><code id="cmd-engine">scripts/install.sh</code></pre>
+              <button class="copy" type="button" data-copy="cmd-engine" data-name="Pro engine command" aria-label="Copy the Pro engine command">Copy</button>
+            </div>
+          </div>
         </div>
-        <div class="command">
-          <pre><code id="cmd-engine">scripts/install.sh</code></pre>
-          <button class="copy" type="button" data-copy="cmd-engine" data-name="Pro engine command" aria-label="Copy the Pro engine command">Copy</button>
-        </div>
-        <p class="note">The first command serves the app on your machine. The second starts the Pro engine. macOS is untested.</p>
+        <p class="note">macOS is untested.</p>
         <p class="note" aria-live="polite" id="copy-status"></p>
       </section>
 
-      <section aria-labelledby="limits-title">
+      <section class="limits-section" aria-labelledby="limits-title">
         <h2 id="limits-title">Limits</h2>
         <ul class="limits">
           <li>The dissonance score is a probabilistic estimate that a voice is synthetic. It is not proof.</li>
@@ -148,7 +183,7 @@ scripts/install.sh --static</code></pre>
         <h2 id="built-title">How it was built with Kiro</h2>
         <p>
           Every feature started as a spec, with requirements, a design and tasks. Hooks checked
-          every save, custom agents reviewed security and accessibility, and the project's own MCP
+          every save, custom agents reviewed security and accessibility, and the project’s own MCP
           server lets Kiro run the detector.
         </p>
         <ul class="links">
@@ -166,7 +201,11 @@ scripts/install.sh --static</code></pre>
     </main>
 
     <footer class="site-footer">
-      <p>MIT license · <a href="https://github.com/brennocm/doppelganger">Repository</a> · Built with Kiro for Kiroween</p>
+      <p>Built with Kiro for Kiroween.</p>
+      <ul>
+        <li><a href="https://github.com/brennocm/doppelganger">Repository</a></li>
+        <li><a href="https://github.com/brennocm/doppelganger/blob/main/LICENSE">MIT license</a></li>
+      </ul>
     </footer>
   </body>
 </html>

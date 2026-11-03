@@ -35,6 +35,11 @@ body {
 a {
   color: var(--color-purple);
   text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
 }
 
 h1,
@@ -42,20 +47,26 @@ h2,
 h3 {
   color: var(--color-text);
   margin: 0 0 var(--space-4);
+  text-wrap: balance;
 }
 
 h1 {
-  font: var(--type-display);
-  max-width: 24ch;
+  font: var(--type-hero);
+  letter-spacing: -0.03em;
+  max-width: 15ch;
+  margin-bottom: var(--space-6);
 }
 
 h2 {
   font: var(--type-display);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-6);
 }
 
 h3 {
   font: var(--type-reading);
   font-weight: 600;
+  margin-bottom: var(--space-2);
 }
 
 p,
@@ -63,12 +74,12 @@ ul,
 ol {
   margin: 0 0 var(--space-4);
   max-width: 68ch;
+  text-wrap: pretty;
 }
 
 code,
 kbd,
-pre,
-.mono {
+pre {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
@@ -95,6 +106,8 @@ main,
   margin-inline: auto;
 }
 
+/* Header */
+
 .site-header {
   display: flex;
   flex-wrap: wrap;
@@ -105,9 +118,24 @@ main,
 }
 
 .wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
   font: var(--type-reading);
   font-weight: 600;
   color: var(--color-text);
+  text-decoration: none;
+}
+
+.mark {
+  width: 22px;
+  height: 22px;
+  fill: var(--color-purple);
+}
+
+.mark-eye {
+  fill: var(--color-bg);
 }
 
 .site-header nav {
@@ -116,22 +144,34 @@ main,
 }
 
 .site-header nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font: var(--type-label);
   color: var(--color-text-secondary);
+  text-decoration: none;
 }
+
+.site-header nav a:hover {
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
+/* Sections: rhythm comes from space; a rule only where the page changes subject. */
 
 section {
   padding-block: var(--space-12);
-  border-top: 1px solid var(--color-surface-chip);
 }
 
 .hero {
-  border-top: none;
-  padding-block: var(--space-12) var(--space-12);
+  padding-block: var(--space-12) var(--space-8);
 }
 
 .lede {
+  font-size: 18px; /* Between reading (16) and display (26): the one paragraph that sells. */
+  line-height: 28px;
   color: var(--color-text-secondary);
+  max-width: 52ch;
 }
 
 .actions {
@@ -139,13 +179,13 @@ section {
   flex-wrap: wrap;
   gap: var(--space-4);
   align-items: center;
-  margin-top: var(--space-6);
+  margin-top: var(--space-8);
 }
 
 .button {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
+  min-height: 48px;
   padding: var(--space-2) var(--space-6);
   border-radius: var(--radius-md);
   font: var(--type-reading);
@@ -153,7 +193,8 @@ section {
   text-decoration: none;
   transition:
     background-color var(--duration-ui) var(--ease-ui),
-    color var(--duration-ui) var(--ease-ui);
+    color var(--duration-ui) var(--ease-ui),
+    border-color var(--duration-ui) var(--ease-ui);
 }
 
 .button.primary {
@@ -167,59 +208,185 @@ section {
 }
 
 .button.secondary {
+  padding-inline: 0;
   color: var(--color-text);
-  border: 1px solid var(--color-line-strong);
+  text-decoration: underline;
+  text-decoration-color: var(--color-line-strong);
+  text-underline-offset: 5px;
 }
 
 .button.secondary:hover {
-  background: var(--color-surface-control);
+  text-decoration-color: var(--color-text);
 }
 
-.steps {
+/* The scenario: the app's own mascot, the Twin, changes face from moment to moment. */
+
+.moments {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--space-6);
+  gap: var(--space-8);
+  margin: 0;
   padding: 0;
   max-width: none;
   list-style: none;
-  counter-reset: step;
 }
 
-.steps li {
-  counter-increment: step;
-  padding: var(--space-6);
+.moment {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: var(--space-4);
+  align-items: start;
+  align-content: start;
+}
+
+.moment p {
+  margin-bottom: var(--space-2);
+}
+
+.twin {
+  width: 64px;
+  height: auto;
+  color: var(--twin-color);
+}
+
+.moment[data-state="mask"] {
+  --twin-color: var(--color-purple);
+}
+
+.moment[data-state="possession"] {
+  --twin-color: var(--color-blood);
+}
+
+.moment[data-state="exorcised"] {
+  --twin-color: var(--color-info-chip-text);
+}
+
+.twin-sheet {
+  fill: var(--color-surface-avatar);
+  stroke: currentColor;
+  stroke-width: 4;
+}
+
+.twin-line,
+.twin-halo {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.moment[data-state="possession"] .twin-line {
+  stroke: var(--color-ecto);
+}
+
+.twin-halo {
+  stroke: var(--color-info-line);
+}
+
+.twin-hollow {
+  fill: var(--color-bg-deep);
+  stroke: var(--color-blood);
+  stroke-width: 3;
+}
+
+.shown {
+  color: var(--color-text-muted);
+  font: var(--type-body);
+}
+
+.shown strong {
+  color: var(--twin-color);
+  font-weight: 600;
+}
+
+@media (min-width: 880px) {
+  .moments {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-12);
+  }
+
+  .moment {
+    grid-template-columns: 1fr;
+    position: relative;
+  }
+
+  .twin {
+    width: 80px;
+  }
+
+  /* A thread from one Twin to the next: the three moments are one call. */
+  .moment:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 40px;
+    left: calc(80px + var(--space-4));
+    right: calc(-1 * var(--space-12) + var(--space-4));
+    border-top: 1px dashed var(--color-line-strong);
+  }
+}
+
+/* Privacy proof: the claim on one side, how to check it on the other. */
+
+.proof-panel {
+  display: grid;
+  gap: var(--space-8);
+  margin-block: var(--space-12);
+  padding: var(--space-8);
   background: var(--color-surface-input);
   border: 1px solid var(--color-surface-chip);
   border-radius: var(--radius-lg);
 }
 
-.steps h3::before {
-  content: counter(step) " · ";
+.where {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin: 0 0 var(--space-6);
+}
+
+.where dt {
+  font: var(--type-small);
   color: var(--color-text-muted);
-  font-family: var(--font-mono);
+  margin-bottom: var(--space-1);
 }
 
-.steps li:nth-child(2) {
-  border-color: var(--color-blood);
-  background: var(--color-blood-deep);
+.where dd {
+  margin: 0;
+  color: var(--color-text);
 }
 
-.steps li:nth-child(2) strong {
-  color: var(--color-blood);
+.where div:last-child dd {
+  font: var(--type-display);
+  color: var(--color-purple);
 }
 
-.steps li:nth-child(3) {
-  border-color: var(--color-info-line);
-  background: var(--color-info-surface);
+.proof {
+  padding-left: var(--space-6);
 }
 
-.proof,
+.proof li {
+  margin-bottom: var(--space-4);
+  padding-left: var(--space-2);
+}
+
+.proof li::marker {
+  color: var(--color-purple);
+  font-weight: 600;
+}
+
+@media (min-width: 880px) {
+  .proof-panel {
+    grid-template-columns: 5fr 6fr;
+    gap: var(--space-12);
+    padding: var(--space-12);
+  }
+}
+
 .limits,
 .links {
   padding-left: var(--space-6);
 }
 
-.proof li,
 .limits li,
 .links li {
   margin-bottom: var(--space-2);
@@ -232,9 +399,11 @@ kbd {
   color: var(--color-text);
 }
 
+/* Tiers and install */
+
 .table-wrap {
   overflow-x: auto;
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-8);
 }
 
 table {
@@ -244,15 +413,17 @@ table {
 
 th,
 td {
-  padding: var(--space-2) var(--space-4) var(--space-2) 0;
+  padding: var(--space-4) var(--space-4) var(--space-4) 0;
   text-align: left;
   vertical-align: top;
   border-bottom: 1px solid var(--color-surface-chip);
 }
 
 thead th {
+  padding-block: var(--space-2);
   color: var(--color-text-muted);
   font: var(--type-small);
+  border-bottom-color: var(--color-line-strong);
 }
 
 tbody th {
@@ -275,13 +446,28 @@ caption {
   color: var(--color-text);
 }
 
+.install {
+  display: grid;
+  gap: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+@media (min-width: 880px) {
+  .install {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.install .note {
+  margin-bottom: var(--space-2);
+}
+
 .command {
   display: flex;
   gap: var(--space-2);
   align-items: flex-start;
-  margin-bottom: var(--space-4);
   padding: var(--space-4);
-  background: var(--color-surface-input);
+  background: var(--color-bg-deep);
   border: 1px solid var(--color-surface-chip);
   border-radius: var(--radius-lg);
 }
@@ -309,6 +495,10 @@ caption {
   background: var(--color-surface-chip);
 }
 
+.copy:active {
+  background: var(--color-surface-avatar);
+}
+
 .note {
   color: var(--color-text-muted);
 }
@@ -318,11 +508,38 @@ caption {
   color: var(--color-text-muted);
 }
 
+/* Footer */
+
 .site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-8);
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-12);
   padding-block: var(--space-8);
   border-top: 1px solid var(--color-surface-chip);
   color: var(--color-text-muted);
   font: var(--type-body);
+}
+
+.site-footer p,
+.site-footer ul {
+  margin: 0;
+}
+
+.site-footer ul {
+  display: flex;
+  gap: var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-text-secondary);
 }
 
 /* Narrow screens: each tier becomes a labelled block instead of a cramped table row. */
@@ -338,11 +555,7 @@ caption {
     overflow-wrap: anywhere;
   }
 
-  .copy,
-  .site-header nav a,
-  .site-footer a {
-    display: inline-flex;
-    align-items: center;
+  .copy {
     min-height: 44px;
   }
 

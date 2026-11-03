@@ -34,6 +34,7 @@
   --color-on-ecto: #131116;
   --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --type-hero: 600 clamp(36px, 6vw, 60px)/1.06 var(--font-ui);
   --type-display: 600 26px/32px var(--font-ui);
   --type-title: 600 14px/20px var(--font-ui);
   --type-body: 400 13px/20px var(--font-ui);

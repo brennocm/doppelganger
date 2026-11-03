@@ -64,7 +64,7 @@ Color never carries meaning alone. Every state also has a text label, an icon an
 ## Typography
 
 - System UI stack (as in Kiro). Monospace only for data: the dissonance score, timestamps and model IDs, always with `font-variant-numeric: tabular-nums`.
-- Scale: `display 26/32 600`, `title 14/20 600`, `body 13/20 400` (raise to 16px for reading text on the landing page), `label 13/16 500`, `small 12/16 500`, `legal 10/15 400`, `chip-mono 12/16 500 mono`.
+- Scale: `hero clamp(36–60px)/1.06 600` (landing headline only), `display 26/32 600`, `title 14/20 600`, `body 13/20 400` (raise to 16px for reading text on the landing page), `label 13/16 500`, `small 12/16 500`, `legal 10/15 400`, `chip-mono 12/16 500 mono`.
 - Sentence case for headings and buttons.
 
 ## Spacing and radius
