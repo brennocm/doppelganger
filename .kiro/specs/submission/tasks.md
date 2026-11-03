@@ -2,19 +2,22 @@
 
 - [ ] 1. Repository readiness
   - [ ] 1.1 Finalize `README.md` with links, screenshot, tiers, limits and docs
+    - Draft written (2026-11-02) with every section except the results and media. Left open: the screenshot, the video link, the gate numbers and the first release, each marked PENDING-GATE.
     - _Requirements: 1.3_
   - [ ] 1.2 Confirm the license is detected, `.kiro/` is tracked, and a full-history gitleaks run is clean
+    - Checked locally (2026-11-02): `LICENSE` is MIT, `.kiro/` is tracked (57 files) and not ignored, and gitleaks over the full history (168 commits) found no leaks. Left open: GitHub showing MIT in the About section, which needs the public repository page; `scripts/release-check.sh` repeats the local checks at submission time.
     - _Requirements: 1.1, 1.2, 1.4_
-  - [ ] 1.3 Write `scripts/release-check.sh`
+  - [x] 1.3 Write `scripts/release-check.sh`
     - _Requirements: 1.4, 4.3_
 
 - [ ] 2. Write-up
-  - [ ] 2.1 Write `scripts/journal-digest.mjs`
+  - [x] 2.1 Write `scripts/journal-digest.mjs`
     - _Requirements: 2.2, 2.4_
-  - [ ]* 2.2 Write property test for digest completeness
+  - [x]* 2.2 Write property test for digest completeness
     - **Property 1: Journal digest completeness**
     - **Validates: Requirements 2.2, 2.4**
   - [ ] 2.3 Write `docs/KIRO.md` following the design structure, citing files, commits and journal entries
+    - Draft written (2026-11-02); every claim cites a file, commit or journal entry. Left open: the IDE session, the custom MCP server and power in Kiro, the gate result, the prompt highlights and "What we would do next", each marked PENDING-GATE.
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
   - [ ] 2.4 Run the `exorcist` agent over the Write_Up for unverifiable claims and fix them
     - _Requirements: 2.4_
