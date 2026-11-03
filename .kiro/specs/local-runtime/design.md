@@ -119,6 +119,16 @@ The token in engine mode is read from the container's first log line with `docke
 - **Exit codes:** 0 ok, 1 prerequisites or usage, 2 integrity, 3 download, 4 engine not healthy in time.
 - **Test seams for Bats:** `PATH` stubs for `docker`, `curl`, `sha256sum`, `ss`, `df`, `uname`, `python3` and `sleep`; `DOPPELGANGER_PROC_VERSION` (default `/proc/version`); and `XDG_DATA_HOME` pointing at a temporary folder. Downloads are stubbed through `curl`, so no URL override is needed.
 
+### Release workflow (task 6.5, P45)
+
+- **Scripts.** `scripts/release-bundle.sh --version X.Y.Z --web-dir DIR --models DIR --out DIR [--allow-test-model]` packages the Release_Bundle in the layout of P35 and has no network access. `scripts/release-build.sh --version X.Y.Z --out DIR --models DIR [--allow-test-model]` first builds the web app with `--base=/app/`, then calls it.
+  - The tarball is reproducible: sorted names, fixed mtime, owner 0, `gzip -n`. It holds the web build at its root.
+  - Each manifest is checked against its model file: the file name and the SHA-256 and size in the manifest must match the file next to it. A manifest with `role: test` is refused unless `--allow-test-model` is given, so a test model can't be released by mistake.
+  - `SHA256SUMS` lists the tarball and the model files, sorted, in the `<hash>  <name>` form that `install.sh` reads. The script ends with `sha256sum -c --strict` on its own output and a check of every file name against `^[A-Za-z0-9._-]+$`.
+  - `release-build.sh` refuses a version other than the `VERSION` in `scripts/install.sh`, because the installer downloads that tag.
+- **Workflow `release.yml`.** `workflow_dispatch` runs the `bundle` job only: a dry run that allows the test model, verifies the checksums and runs the installer acceptance test (`RELEASE_BUNDLE_DIR`) in `scripts/tests/release.bats` against the built bundle. A push of a `v*` tag also runs `publish`, after `bundle` is green. It rebuilds the same bytes without `--allow-test-model`, from the Pro_Model and Light_Model files in `release/models/` (PENDING-GATE: they don't exist before the gate), and creates a **draft** release with `gh release create --draft --verify-tag`. The developer reviews the draft and publishes it. Permissions are read-only except `contents: write` on `publish`. Actions are pinned by commit SHA. The builder never creates a tag or a release.
+- **Tests.** `scripts/tests/release.bats` builds a bundle from tiny fixtures and shows that `install.sh --static` and the engine mode accept it through their checksum path (with the stubs of P35), that a tampered file ends in the integrity error, and that a test model and a mismatched manifest are refused.
+
 ## Data Models
 
 `StreamHello`, `StreamReady`, `StreamScore`, `StreamError`, `AutopsyReport`: all in `packages/contracts`, with Pydantic models generated from them.
