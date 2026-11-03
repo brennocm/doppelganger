@@ -6,8 +6,12 @@
 
 FROM node:26.13.0-slim@sha256:e4db4c914bf8ad241bd24804fc25d272d89bad97e68cdc8a1414862790a02c39 AS web
 WORKDIR /src
-ENV PNPM_HOME=/pnpm COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-RUN corepack enable && corepack prepare pnpm@12.16.1 --activate
+# node:26 has no Corepack. npm checks the tarball against dist.integrity, and the build fails
+# unless that field equals the value pinned here (local-runtime design P44).
+ENV PNPM_HOME=/pnpm
+RUN npm install --global --ignore-scripts --no-audit --no-fund pnpm@12.16.1 \
+ && test "$(npm view pnpm@12.16.1 dist.integrity)" = \
+      "sha512-CR0d7nknV1Zhsl2rPCrjHK/BxU1rce1qZgDPDByxBDSkR+rhQBXxsj4ua+3u1535SpMuIWTSgyKA3OP7MvZW0Q=="
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY apps/web/package.json apps/web/
 COPY apps/landing/package.json apps/landing/
