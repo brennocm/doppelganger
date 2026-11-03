@@ -1,5 +1,6 @@
 """The Kiro power in powers/doppelganger/ (kiro-workbench Requirement 8, design P37)."""
 
+import contextlib
 import json
 import os
 import re
@@ -78,17 +79,20 @@ def test_the_declared_command_starts_the_server(tmp_path: Path) -> None:
             "clientInfo": {"name": "power-test", "version": "0"},
         },
     }
+    stderr_path = tmp_path / "server-stderr.log"
     try:
+        stderr_file = stderr_path.open("wb")
         proc = subprocess.Popen(  # noqa: S603  (fixed command from the committed mcp.json)
             [server["command"], *server["args"]],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
+            stderr=stderr_file,
             text=True,
             env=env,
             cwd=tmp_path,  # any working directory: the command must not depend on it
         )
     except FileNotFoundError:
+        stderr_file.close()
         pytest.skip("sh or uv not on PATH")
     stdin, stdout = proc.stdin, proc.stdout
     assert stdin is not None
@@ -107,7 +111,9 @@ def test_the_declared_command_starts_the_server(tmp_path: Path) -> None:
             message: dict[str, Any] = json.loads(line)
             if message.get("id") == wanted:
                 return message
-        msg = f"server exited before answering request {wanted}"
+        stderr_file.flush()
+        tail = stderr_path.read_bytes()[-2048:].decode("utf-8", "replace")
+        msg = f"server exited before answering request {wanted}; stderr tail:\n{tail}"
         raise AssertionError(msg)
 
     try:
@@ -118,6 +124,13 @@ def test_the_declared_command_starts_the_server(tmp_path: Path) -> None:
         tools = reply(2)["result"]["tools"]
     finally:
         timer.cancel()
-        stdin.close()
-        proc.wait(timeout=30)
+        with contextlib.suppress(BrokenPipeError):  # the server may already be gone
+            stdin.close()
+        try:
+            proc.wait(timeout=30)
+        except subprocess.TimeoutExpired:
+            # Kill and reap instead of raising here, so the real assertion is not masked.
+            proc.kill()
+            proc.wait()
+        stderr_file.close()
     assert {t["name"] for t in tools} == {"analyze_audio_file", "list_models", "explain_thresholds"}
