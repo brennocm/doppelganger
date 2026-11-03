@@ -1,5 +1,7 @@
 # Model card: Doppelgänger detector
 
+<!-- PENDING-GATE: detection-model 7.1 writes this card from the latest gate report. -->
+
 > Status: stub. No model has been selected, trained or evaluated yet. This card is filled in by the `detection-model` spec. Until then, this project makes **no** claims about detection performance.
 
 ## Model details
