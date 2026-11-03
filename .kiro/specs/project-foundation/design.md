@@ -103,3 +103,4 @@ This spec is configuration; it has no runtime properties. Its verifiable guarant
 
 - A smoke test per package (`it("loads")`) so `check` exercises every workspace from day one.
 - CI runs on `ubuntu-latest`; the Pages job runs only after `ci` passes on `main`.
+- **P41 (2026-11-02):** pytest runs with `tmp_path_retention_policy = "failed"`. A passing test's `tmp_path` (and any synthetic audio in it) is deleted when the test ends, and a failing test's is kept in the system temp folder for debugging. The previous value, `"none"` (set in prompt 017), turned off pytest's session lock. Two pytest sessions running at once, such as a `test-affected` hook run next to `mise run check`, then deleted each other's temporary folders, and the tests failed with `FileNotFoundError`.
