@@ -86,4 +86,4 @@ A canvas at full width, 160 px high: the smoothed score as a line, dashed lines 
 ## Testing Strategy
 
 - fast-check tests for Properties 1 to 4 (fake backend, synthetic signals).
-- Playwright: drop the replay fixtures and assert the verdict, timeline and download.
+- Playwright: drop the replay fixtures and assert the verdict, timeline and download. Until detection-model 7.2 the fixtures are the audio-capture P47 test signals, and the test asserts that a verdict is one of the three labels, not which one; the verdicts recorded in the journal come from the real clips.
