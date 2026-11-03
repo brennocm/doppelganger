@@ -98,6 +98,7 @@ Tools:
 - **Output.** Window `score` is the raw calibrated Dissonance_Score, or null for an unvoiced window. `summary` has `peak` and `mean` over the scored windows (null if there are none), `state_timeline` (the report's `states`), `verdict` and `verdict_reason`. A fixed `note` says that the score is probabilistic, is not proof and does not identify a person, and points to `docs/model-card.md`. `explain_thresholds` returns the `HauntingConfig` defaults that the engine's Autopsy uses.
 - **SDK.** `mcp==2.3.0` (MIT), with `MCPServer` and `run()` on stdio. Problems the model can fix (outside the sandbox, too large, not WAV, unknown model) are raised as `ToolError`. The server makes no network requests and writes nothing.
 - **Command.** `uv run --locked --package doppelganger-mcp python -m doppelganger_mcp`, from the repository root.
+- **P42 (2026-11-02): stdin EOF drops in-flight requests.** The MCP SDK 2.3.0 cancels in-flight handlers when the stdio read stream ends (`mcp/shared/jsonrpc_dispatcher.py`, where the task group is cancelled on EOF). A client that writes a request and closes stdin at once may get no answer. This happened in 2 of 20 runs with a bare SDK server and 4 of 20 with ours, so it is not caused by `doppelganger_mcp/__main__.py`, which only calls `mcp.run()`. Real clients such as Kiro keep stdin open for the whole session. The tests do the same, and the SDK is not patched.
 
 ### Power
 
