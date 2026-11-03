@@ -121,6 +121,8 @@ The MCP tool outputs reuse the `AutopsyReport` and `ModelManifest` schemas from 
 
 *For any* requested path, `analyze_audio_file` reads the file only if its resolved real path (after following symlinks) is inside an allowlisted root; otherwise it returns an error and performs no read.
 
+"Resolved real path" means strict POSIX realpath, so ".." after a regular file collapses lexically (`inside.wav/../x` is `root/x`).
+
 **Validates: Requirements 7.4**
 
 ### Property 2: Output consistency with the engine
