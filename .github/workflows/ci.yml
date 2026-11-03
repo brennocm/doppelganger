@@ -55,3 +55,29 @@ jobs:
       # then runs every gate in check:all.
       - name: mise run check:all
         run: mise run check:all
+
+  # local-runtime task 5.3 (design P43): build the engine image with the real Compose file,
+  # check the hardening with docker inspect and run one WebSocket session. Not in check:all,
+  # because developer machines may have no Docker; the script fails instead of skipping.
+  container:
+    name: container
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up toolchain (mise)
+        uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
+        with:
+          version: 2026.10.21
+          install: true
+          cache: true
+
+      - name: Install the Python environment from uv.lock
+        run: mise x -- uv sync --locked --quiet
+
+      - name: Container test
+        run: mise x -- scripts/container-test.sh

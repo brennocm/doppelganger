@@ -44,3 +44,24 @@ def test_compose_publishes_loopback_only_and_hardens_the_container() -> None:
     ):
         assert setting in COMPOSE, setting
     assert "0.0.0.0" not in COMPOSE  # noqa: S104  (asserts it is absent)
+
+
+def test_the_ci_container_test_checks_every_hardening_setting() -> None:
+    script = (REPO / "scripts/container-test.sh").read_text(encoding="utf-8")
+    for check in (
+        ".HostConfig.ReadonlyRootfs",
+        ".HostConfig.CapDrop",
+        "no-new-privileges:true",
+        "10001:10001",
+        "127.0.0.1:$port",
+        '"/models"',
+        "noexec",
+        "nosuid",
+        ".HostConfig.Memory",
+        ".HostConfig.NanoCpus",
+        "container_stream_check.py",
+    ):
+        assert check in script, check
+    assert "grep -v 'engine ready:'" in script  # never print the session token
+    workflow = (REPO / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+    assert "scripts/container-test.sh" in workflow
