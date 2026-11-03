@@ -189,5 +189,6 @@ testpaths = [
 ]
 addopts = ["--strict-markers", "--strict-config", "--import-mode=importlib"]
 xfail_strict = true
-# Synthetic test audio written to tmp_path must not outlive the test (testing steering).
-tmp_path_retention_policy = "none"
+# Passing tests' tmp_path (and any synthetic audio in it) is deleted at once; "none" would
+# also drop pytest's session lock, so concurrent sessions deleted each other's dirs (P41).
+tmp_path_retention_policy = "failed"
