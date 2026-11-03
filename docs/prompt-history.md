@@ -425,3 +425,53 @@ The item that matters most is 1: right now the security property test for the sa
 ```
 
 Outcome: The sandbox oracle is now an independent strict-realpath walker. It agreed with the sandbox on 60 seeds × 1,000 examples, and mutated sandboxes are caught. Also: the power test teardown is hardened, the SDK stdin-EOF drop is recorded (P42), a concurrent tmp_path race is fixed (P41), and the CI container test is in place (P43, not run: no Docker here). 10 commits, a657362 to d124e3a; `mise run check:all` green; see the journal entry of 2026-11-02 for prompt 018.
+
+## 019 — 2026-11-02 — CLI — set by hand
+
+```text
+Prompt 019. The reviewer checked the repository at 426a0b6 and pushed main to origin (6ee9537..426a0b6). The prompt-018 work is accepted: the independent walker oracle, P41, P42 and P43. The docs-only fix of the hook findings is accepted too. Same autonomy rules as prompt 013 (decide reversible things and record them as P44+, skip big deviations and blocked tasks, spec before code, one commit per step, never push, never commit red). One journal entry per finished spec section.
+
+Context: the developer is recording the Haunt_Set now. The go/no-go gate (detection-model 4.1) runs when they hand it over, so nothing in this prompt may depend on real gate results. Build everything else now, so the gate only changes data, not code.
+
+Rules for pending data (read them before step 1):
+- ml-honesty applies in full. No invented numbers, no faked detections, and no text that implies an evaluation has happened. Landing Requirement 5 already says: the model card's numbers with their date, or no numbers at all. Keep that behaviour; the page must build and pass with no report.
+- Every place that waits for gate output (real clips, model card numbers, the Light_Model, the landing capture, the video link, the write-up link) carries the exact marker PENDING-GATE, in a comment or a data field, never in visible copy. Where users would see it, show a neutral state ("Evaluation pending") or hide the section.
+- The marker must never ship. scripts/release-check.sh (step 5) fails, and lists the files, if any PENDING-GATE remains in tracked files or in the built output. mise run check and check:all must stay green while the markers exist, so do not wire release-check into them.
+- Tests use the existing ci-synthetic-linear model and the P31 synthetic signals. Never add cloning code, cloning prompts or generated voices to the repository.
+- Do not check a task box whose acceptance needs real data or a manual step. Note what is left under the task, as 1.2 already does.
+
+Docker now works in this environment (the developer enabled WSL integration; docker info gives server 29.2.1). If gh is authenticated, first check the CI run for 426a0b6, and if it is red, fix CI before anything else, as in prompt 016.
+
+1. local-runtime 5 (container). Build the image from infra/docker/Dockerfile, run the compose stack, and run the P43 CI container test locally (health, a stream session, docker inspect assertions: non-root user, read-only model volume, the hardening settings). Fix what fails. Check 5.1–5.3 only after they pass here. Report the image size and the test output.
+
+2. local-runtime 6.5. Write the release workflow that builds the web tarball and publishes the models and SHA256SUMS. It must be testable without publishing: a dry-run job, or a local script that the workflow calls, which builds the assets and checks that install.sh accepts them through its checksum path, using the Bats setup or a local file server. Never create a tag or a release. Pin actions by commit SHA, as the existing workflows do. Leave the Pro_Model asset as PENDING-GATE.
+
+3. Landing page:
+   - 2.2: the video facade and the landing CSP, with a placeholder poster and video of the final dimensions (under 2 MB, marked PENDING-GATE).
+   - 2.3: the Playwright property test that nothing third-party is requested before consent.
+   - 3.1: the weight budget check and axe-core at 375 px and 1440 px.
+   - 1.2: the write-up link as PENDING-GATE; keep the box unchecked.
+   - Leave 2.1 and 3.2 for after the gate. The capture of the real app comes then; the screenshots may be taken now as a draft, but record them in the journal as a pre-gate draft.
+
+4. Replay and Autopsy end-to-end with synthetic data:
+   - audio-capture 5.2 (offline: load once, go offline, reload, run replay detection) and 6.1 (the mic path with a fake audio file and the replay path), run against the CI model and generated signals listed in a test-only clips index. Do not touch the real apps/web/public/replay/clips.json except to add PENDING-GATE where the real clips go.
+   - autopsy-mode 5.1, the same way.
+   - The tests must assert behaviour (states, labels, the "Replay" label, no network after load), never a particular verdict on mock audio, so the same tests keep passing when the real clips and model arrive. Check boxes only where the task text is fully met with synthetic data; 6.1 says "both clip labels", so keep it open until the real clips exist and say so.
+
+5. submission:
+   - 1.3: scripts/release-check.sh, including the PENDING-GATE check, plus a Bats test that it fails with a marker present and passes without one.
+   - 2.1: scripts/journal-digest.mjs.
+   - 2.2: its fast-check property test (Property 1: journal digest completeness).
+   - 1.1: a README draft with every section except results and media; mark the gaps PENDING-GATE.
+   - 2.3: a docs/KIRO.md draft that follows the design structure, citing real files, commits and journal entries only, with PENDING-GATE where results go.
+   - 1.2: run a full-history gitleaks scan if gitleaks can be installed through mise without changing the policy. If it can't, say so.
+   - Leave 2.4, 3.x and 4.x.
+
+6. haunted-ui 6.2: the haunt-snapshots hook exists (kiro-workbench 4), but running it needs Kiro. Do not check the box; list the exact steps the developer must follow in Kiro.
+
+At the end, run mise run check:all, and run scripts/release-check.sh once. It must fail, and its output must list every PENDING-GATE location. Paste that list in your report: it is the post-gate to-do list. Also give the exact steps that replace the mock data with the real data after the gate (export, clips, model card, landing capture), so that the change touches data, not code.
+
+End with the same six-part final report as prompt 013. Also confirm that the logger wrote this entry's surface as CLI.
+```
+
+Outcome: _pending_
