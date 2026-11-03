@@ -391,3 +391,37 @@ Run `mise run check:all` before your final report, and say which steps it covere
 
 Outcome: Step 1 finished, then steps 2–6, in 26 commits (8a6a459 to d86e752) with P32–P40. Left open: the 4.1 gate run, local-runtime 6.5, kiro-workbench 5.6 and 6.2, and the landing-page 1.2 write-up link. `mise run check:all` is green; see the journal entry of 2026-11-02.
 e
+## 018 — 2026-11-02 — CLI — set by hand
+
+```text
+Prompt 018 para o builder
+
+Prompt 018. The reviewer checked the repository at 5886356. Same autonomy rules as prompt 013 (decide reversible things and record them as P41+, skip big deviations and blocked tasks, spec before code, one commit per step, never push, never commit red).
+
+The reviewer confirmed: the MCP suite passed 10 of 10 runs, mise run check is green, and the WSL2 fixture change is fine. Accepting inside.wav/../inside.wav is correct: the allowlist is checked on the final real path and the read uses O_NOFOLLOW.
+
+1. The sandbox oracle is no longer independent. On Python 3.12, Path.resolve(strict=True) is os.path.realpath(strict=True) (see pathlib.Path.resolve), so _expected() in packages/doppelganger-mcp/tests/test_sandbox.py now calls the same code as sandbox.allowed(), and its docstring claim "os.path keeps it separate from the pathlib code under test" is false. Replace it with a small hand-written walker that does not call realpath or resolve:
+   - split on "/"; skip "" and "."; for "..", pop the last resolved component (lexically, as POSIX realpath does);
+   - for any other name, os.lstat the joined path; if that fails, return False; if it is a symlink, os.readlink it and push the target's components back onto the work list (absolute target: restart from "/"); cap symlink expansions at 40 and return False past the cap;
+   - start relative paths from os.getcwd(), and treat a candidate starting with "~" the way sandbox.allowed() does (expanduser) — check which prefixes the strategy can actually produce first;
+   - at the end, the path must be a regular file (os.stat + S_ISREG) and inside root.resolve().
+   Keep the docstring honest about what it models. Run the property test with 60 fixed seeds and max_examples=1000 once (do not commit the higher count), and report any disagreement before changing either side. If the walker and the sandbox disagree on something that matters for security, stop and report it; do not adjust the sandbox to make it pass.
+   Add one sentence under Property 1 in .kiro/specs/kiro-workbench/design.md: "resolved real path" means strict POSIX realpath, so ".." after a regular file collapses lexically (inside.wav/../x is root/x). Spec commit first, then the test commit.
+
+2. Harden the finally block in test_the_declared_command_starts_the_server (packages/doppelganger-mcp/tests/test_power.py):
+   - wrap stdin.close() so BrokenPipeError is ignored;
+   - on proc.wait TimeoutExpired, kill and wait again so the real assertion is not masked;
+   - send stderr to a file in tmp_path and include its last 2 KB in the AssertionError message from reply().
+   Then check whether the server really drops an in-flight request when stdin reaches EOF (the original flake). If it does, write down whether it comes from the MCP SDK or from our __main__.py. If it is ours and the fix is small, fix it with a test; if it comes from the SDK, record it as P41 (real clients keep stdin open) and do not patch the SDK.
+   Run the MCP suite 20 times in a row and report the count.
+
+3. Write one journal entry in docs/kiro-journal.md covering 19adb5b, 5886356 and this prompt's fixes. Say plainly that the 017 report called the oracle fixed while it was still flaky, and that the 19adb5b oracle was not independent. Do not edit the 017 entry or its outcome.
+
+4. Then local-runtime section 5 (container), in order: 5.1 Dockerfile, 5.2 compose.yaml, 5.3 CI container test. Follow the local-runtime design and the security steering (digest-pinned bases, non-root user, read-only model volume, the hardening settings). Look up the current digests; do not invent them. If Docker is not available locally, write the files, check them with any linter you have, and leave the checkboxes for steps you could not run unchecked; say exactly what is missing.
+
+Run `mise run check:all` before your final report and say which steps it covered. End with the same six-part final report as prompt 013. Also confirm that the logger wrote this entry's surface as CLI.
+
+The item that matters most is 1: right now the security property test for the sandbox checks itself. The rest are hygiene fixes plus continuing the next spec section.
+```
+
+Outcome: The sandbox oracle is now an independent strict-realpath walker. It agreed with the sandbox on 60 seeds × 1,000 examples, and mutated sandboxes are caught. Also: the power test teardown is hardened, the SDK stdin-EOF drop is recorded (P42), a concurrent tmp_path race is fixed (P41), and the CI container test is in place (P43, not run: no Docker here). 10 commits, a657362 to d124e3a; `mise run check:all` green; see the journal entry of 2026-11-02 for prompt 018.
