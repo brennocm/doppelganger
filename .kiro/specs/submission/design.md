@@ -54,6 +54,18 @@ Each section is filled from journal entries filtered by their "Feature used" fie
 - `scripts/journal-digest.mjs`: groups journal entries by feature and surface into a Markdown digest used while writing the Write_Up. It only reads `docs/kiro-journal.md`.
 - `scripts/release-check.sh`: checks the public URLs (demo, video, repository) return 200 from an unauthenticated request, the license file exists, `.kiro/` is tracked, and a full-history gitleaks run is clean.
 
+### Release check and journal digest (P48, 2026-11-02)
+
+- **`scripts/release-check.sh`** runs from the repository root, runs every check even after a failure, prints one `release-check: FAIL <check>: <detail>` line per problem and a final count, and exits 1 if anything failed. Checks:
+  1. *Pending markers in tracked files.* `git grep` for `PENDING-GATE`, listing `file:line`. Files that define, detect or quote the marker are skipped, each for a reason written next to it in the script: the logs (`docs/prompt-history.md`, `docs/kiro-journal.md`), the specs (`.kiro/specs/`), the release check and its test, the landing's marker reader (`apps/landing/src/content.ts` and its test) and end-to-end test code and fixtures (`*/e2e/`), which are never built into Pages.
+  2. *Pending markers in the built output.* The same search over `dist/pages` (built first with `scripts/build-pages.sh` unless `--dist DIR` names an existing build) and over `release/` when it exists.
+  3. *License.* `LICENSE` exists and is the MIT license.
+  4. *Kiro files.* `.kiro/` is tracked and not ignored.
+  5. *Secrets.* `gitleaks git --redact --no-banner .` over the full history is clean.
+  6. *Public URLs.* The repository, the demo, the landing's `app/`, and the video (from `apps/landing/content.json`, skipped while it is pending, because check 1 already reports it) answer 200 to an anonymous `curl -q` with no credentials. `--offline` skips this check and says so.
+  It is not part of `mise run check` or `check:all`, which stay green while markers exist.
+- **`scripts/journal-digest.mjs [journal]`** prints a Markdown digest of `docs/kiro-journal.md` to stdout. It reads entries (`## YYYY-MM-DD — title` headings outside code fences) and their `Kiro surface` and `Feature used` lines. Each entry goes into exactly one group: the first feature it lists, or `unclassified` when it lists none. The entry line names the other features (`also: hook, PBT`), so the write-up can still find an entry under every feature it used. A table counts entries per surface. The feature groups come out in the template order (spec, hook, steering, MCP, custom agent, power, PBT), then any other feature in order of first appearance, then `unclassified`.
+
 ## Data Models
 
 None.
