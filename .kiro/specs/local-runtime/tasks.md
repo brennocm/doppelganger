@@ -62,6 +62,7 @@
   - [x] 6.4 Write Bats tests with stubbed commands
     - _Requirements: 6.3, 6.7, 6.8_
   - [ ] 6.5 Add the release workflow that builds the web tarball and publishes the models and `SHA256SUMS`
+    - Built and tested without publishing (2026-11-02): `scripts/release-bundle.sh`, `scripts/release-build.sh`, `release.yml` (dry run on manual start, draft release on a `v*` tag), 10 Bats tests that show `install.sh` accepting the bundle, and 5 static workflow tests. Left open: the `publish` job has never run, and it needs the real models in `release/models/` (PENDING-GATE) and a first tag from the developer.
     - _Requirements: 6.4_
 
 - [ ] 7. Checkpoint

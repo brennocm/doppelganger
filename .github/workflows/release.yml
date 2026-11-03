@@ -1,0 +1,107 @@
+# Release bundle (local-runtime task 6.5, design P45).
+#
+#   workflow_dispatch   dry run: builds the bundle with the CI test model, checks the
+#                       checksums and that scripts/install.sh accepts it. Publishes nothing.
+#   push of a v* tag    the same dry run, then `publish` creates a DRAFT release from the
+#                       real models. The developer reviews the draft and publishes it.
+#
+# The builder never creates a tag or a release. The bundle layout is in the local-runtime
+# design (P35); scripts/release-bundle.sh packages it.
+name: release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+# Nothing but reading by default; `publish` asks for more.
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  MISE_LOCKED: "1"
+  LEFTHOOK: "0"
+
+jobs:
+  bundle:
+    name: bundle (dry run)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up toolchain (mise)
+        uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
+        with:
+          version: 2026.10.21
+          install: true
+          cache: true
+
+      - name: Install dependencies from the lockfile
+        run: mise x -- pnpm install --frozen-lockfile --silent
+
+      # The installer downloads the tag for its own VERSION, so the bundle uses that version.
+      - name: Build the bundle with the test model
+        run: |
+          version="$(sed -n 's/^VERSION="\([0-9.]*\)"$/\1/p' scripts/install.sh | head -n 1)"
+          mise x -- scripts/release-build.sh --version "$version" --out dist/release \
+            --models apps/web/public/models --allow-test-model
+
+      - name: Check that install.sh accepts the bundle
+        env:
+          RELEASE_BUNDLE_DIR: ${{ github.workspace }}/dist/release
+        run: mise x -- bats scripts/tests/release.bats
+
+  publish:
+    name: publish (draft release)
+    # Only a pushed tag, and only after the dry run is green.
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up toolchain (mise)
+        uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
+        with:
+          version: 2026.10.21
+          install: true
+          cache: true
+
+      - name: Install dependencies from the lockfile
+        run: mise x -- pnpm install --frozen-lockfile --silent
+
+      # PENDING-GATE: release/models/ holds the Light_Model and Pro_Model manifests and
+      # files chosen by the go/no-go gate. It does not exist before the gate.
+      - name: Require the real models
+        run: |
+          [ -d release/models ] || { echo "release/models/ is missing: the gate has not chosen the models" >&2; exit 1; }
+
+      - name: Build the bundle without the test model
+        run: |
+          version="${TAG#v}"
+          mise x -- scripts/release-build.sh --version "$version" --out dist/release \
+            --models release/models
+
+      # A draft: nothing is public until the developer publishes it.
+      - name: Create the draft release
+        run: |
+          gh release create "$TAG" --draft --verify-tag --title "Doppelgänger $TAG" \
+            --notes "Release bundle for scripts/install.sh. Draft: review the assets, then publish." \
+            dist/release/*
