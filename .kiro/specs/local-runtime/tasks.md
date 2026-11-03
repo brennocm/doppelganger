@@ -44,12 +44,12 @@
     - **Property 3: Size guard**
     - **Validates: Requirements 4.1, 4.2**
 
-- [ ] 5. Container
-  - [ ] 5.1 Write the multi-stage Dockerfile with digest-pinned bases and a non-root user
+- [x] 5. Container
+  - [x] 5.1 Write the multi-stage Dockerfile with digest-pinned bases and a non-root user
     - _Requirements: 5.1, 5.4_
-  - [ ] 5.2 Write `infra/docker/compose.yaml` with the hardening settings and read-only model volume
+  - [x] 5.2 Write `infra/docker/compose.yaml` with the hardening settings and read-only model volume
     - _Requirements: 5.2, 5.3_
-  - [ ] 5.3 Add the CI container test (health, stream session, `docker inspect` assertions)
+  - [x] 5.3 Add the CI container test (health, stream session, `docker inspect` assertions)
     - _Requirements: 5.1, 5.2_
 
 - [ ] 6. Installer
