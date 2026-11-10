@@ -2,10 +2,22 @@ import { describe, expect, it } from "vitest";
 import {
   captureMessage,
   isSlowDevice,
+  modelNote,
   offersReplay,
   PRIVACY_NOTICE,
+  TEST_MODEL,
+  UNMEASURED_MODEL,
   workerMessage,
 } from "./messages.ts";
+
+describe("model note", () => {
+  it("says the test model detects nothing and the real models are unmeasured on calls", () => {
+    expect(modelNote("test")).toBe(TEST_MODEL);
+    expect(modelNote("light")).toBe(UNMEASURED_MODEL);
+    expect(modelNote("pro")).toBe(UNMEASURED_MODEL);
+    expect(UNMEASURED_MODEL).toContain("hasn't been measured on call audio");
+  });
+});
 
 describe("capture messages", () => {
   it("uses the design's wording for the documented errors", () => {

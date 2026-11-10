@@ -11,7 +11,7 @@ if (($# == 0)); then
   uv run --locked pytest -q
   # Installer tests with stubbed commands (local-runtime 6.4); bats comes from .mise.toml.
   bats scripts/tests/*.bats
-  # Node scripts' tests (journal digest, submission 2.2).
+  # Node scripts' tests (journal digest, release 2.2).
   node --test scripts/tests/*.test.mjs
   exit 0
 fi

@@ -182,13 +182,16 @@ class Exported:
 
 
 def spec(name: str) -> export.ExportSpec:
-    """Manifest fields of a candidate (fp32 until the gate measures int8 on the Haunt_Set)."""
+    """Manifest fields of a candidate (fp32: int8 is kept only after a labelled AUC check).
+
+    AASIST-L is the browser model (role ``light``), AASIST the engine model (``pro``).
+    """
     entry = _entry(name)
     up = CATALOG["upstream"]
     return export.ExportSpec(
         model_id=name,
         version="0.1.0",
-        role="light",
+        role="light" if name == "aasist-l" else "pro",
         window_samples=WINDOW,
         hop_samples=HOP,
         output_kind="two-class-logits",

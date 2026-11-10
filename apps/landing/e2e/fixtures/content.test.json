@@ -1,10 +1,9 @@
 {
-  "videoId": "aaaaaaaaaaa",
-  "videoPoster": "media/video-poster.svg",
   "writeUpUrl": "https://github.com/brennocm/doppelganger/blob/main/docs/KIRO.md",
   "capture": {
     "video": "media/capture.mp4",
     "poster": "media/capture-poster.svg",
-    "alt": "A placeholder for the capture of the app moving from Mask to Possession."
+    "alt": "A placeholder for the capture of the app moving from Mask to Possession.",
+    "caption": "A placeholder caption."
   }
 }

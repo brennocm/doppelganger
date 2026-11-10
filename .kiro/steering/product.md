@@ -14,13 +14,7 @@ Voice cloning makes social-engineering calls cheap: a fake CEO asking for an urg
 
 - Employees who approve payments or share sensitive data over calls.
 - SecOps teams who want a local, auditable tool with no cloud dependency.
-- Hackathon judges, who must be able to try it with one click.
-
-## Hackathon context
-
-- Event: Kiroween 2026 (30 Oct to 4 Dec 2026).
-- Target category: **Costume Contest** (a haunting, polished, reactive UI).
-- Judging: impact, design, innovation, the video (3 minutes max), and how deeply Kiro was used.
+- Anyone curious, who must be able to try it with one click.
 
 ## Delivery tiers
 
@@ -34,7 +28,7 @@ Voice cloning makes social-engineering calls cheap: a fake CEO asking for an urg
 - **Exorcism protocol:** when possession is detected, the UI tells the user what to do: do not approve anything now, ask the agreed code word, hang up and call back on a known number, report it.
 - **Floating widget:** a Document Picture-in-Picture window that stays on top of the call.
 - **Autopsy mode:** drop a recorded audio file (for example a WhatsApp voice note) and get a dissonance timeline.
-- **Replay mode:** labelled, pre-recorded real and cloned samples (the author's own consented voice) for a deterministic demo.
+- **Replay mode:** labelled, pre-recorded real and cloned samples (the author's own consented voice) for a deterministic demo, when such clips are bundled.
 
 ## Product principles
 

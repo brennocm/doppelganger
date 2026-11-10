@@ -6,7 +6,7 @@
 
 ## Context
 
-Different people need different levels of trust and capability. Judges want one public URL. Privacy-conscious users and SecOps teams may not want to load even a static app from a third-party host. Some users want a heavier model and offline analysis of recorded files (Autopsy mode), which is too much for a browser tab.
+Different people need different levels of trust and capability. Casual visitors want one public URL. Privacy-conscious users and SecOps teams may not want to load even a static app from a third-party host. Some users want a heavier model and offline analysis of recorded files (Autopsy mode), which is too much for a browser tab.
 
 ## Decision
 
@@ -19,7 +19,7 @@ Ship the same web app in three tiers:
 ## Alternatives considered
 
 - **Pages only.** Rejected: no answer for users who distrust the host, and no room for a heavier model or file analysis.
-- **Docker only.** Rejected: judges and casual users would need Docker before seeing anything.
+- **Docker only.** Rejected: casual users would need Docker before seeing anything.
 - **A public hosted engine.** Rejected: audio would leave the device (ADR 0002).
 - **Electron or another desktop wrapper.** Rejected: a non-goal in the product steering. It also adds a large runtime to audit and update.
 

@@ -6,7 +6,7 @@
 
 ## Context
 
-Doppelgänger listens to the remote side of a call and scores it for signs of a synthetic voice. The audio is personal, often confidential, and sometimes legally protected. The product promise is "local by construction": no audio, transcript or score leaves the device. Judges and first-time users must also be able to try it with one click, without installing anything.
+Doppelgänger listens to the remote side of a call and scores it for signs of a synthetic voice. The audio is personal, often confidential, and sometimes legally protected. The product promise is "local by construction": no audio, transcript or score leaves the device. First-time users must also be able to try it with one click, without installing anything.
 
 ## Decision
 

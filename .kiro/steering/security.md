@@ -18,7 +18,7 @@ These rules override convenience. If a task seems to require breaking one, stop 
 
 - Strict Content Security Policy (meta tag, because GitHub Pages cannot set headers):
   `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'`.
-  The landing page alone may add `frame-src https://www.youtube-nocookie.com`.
+  The landing page uses the same policy.
 - No third-party scripts, fonts, analytics or CDNs. Everything is self-hosted.
 - Model files are verified against the SHA-256 in the model manifest before loading. A mismatch blocks loading with a clear error.
 

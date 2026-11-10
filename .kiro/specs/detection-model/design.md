@@ -72,6 +72,14 @@ Window length equals the model's native input (for AASIST, 64,600 samples). Hop 
 - **Outputs**, in `--out`: `model.pth` (state dict only) and `run.json` (config, seed, starting checkpoint SHA-256, per-epoch mean loss, `model.pth` SHA-256). With `exportOnnx`, it also writes `<modelId>.fp32.onnx` and its manifest through `export.export_model`, with the parity check. `--out` is refused if it resolves inside the repository, checked again right before anything is written (a symlink can appear during a long run), so weights trained on ASVspoof (ODC-By, attribution) are never committed by accident.
 - **Smoke test.** On CPU, random init, `synthetic` data (the dry-run items), one epoch of two batches of two, with no export. Two runs with the same seed give identical losses and an identical `model.pth` hash. CI never trains for real and never downloads anything.
 
+### Shipping without the gate (P49, 2026-11-10)
+
+- The project is finished without the Haunt_Set, so the gate (task 4) is not run. The shipped models are the pinned checkpoints exported unchanged: AASIST-L as the Light_Model (role `light`, `apps/web/public/models/`) and AASIST as the Pro_Model (role `pro`, `release/models/`). `candidates.spec()` sets the role by name.
+- fp32 only (no labelled set for the Requirement 5.2 int8 check), temperature 1.0, default thresholds.
+- The app loads AASIST-L except in the end-to-end build (`--mode e2e`), which keeps the synthetic CI model. A role other than `test` shows a note that the model hasn't been measured on call audio.
+- `bench-web` takes `BENCH_MODEL=<id>` to benchmark a committed manifest other than the CI model.
+- Decision, numbers and revert path: [ADR 0006](../../../docs/adr/0006-ship-pretrained-aasist.md).
+
 ### Calibration
 
 Temperature scaling on the spoof logit: `p = sigmoid(z / T)` for single-logit models, `softmax(z / T)[spoof_index]` for two-class models. `T` is fit by minimizing negative log-likelihood on dev. Report ECE (15 bins).

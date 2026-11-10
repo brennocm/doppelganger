@@ -4,7 +4,7 @@ detection-model Requirement 1.1. Researched on 2026-10-31 with the Hugging Face 
 
 Searches: "anti-spoofing" returned only face, text and video models. The speech-specific queries "audio deepfake detection", "AASIST", "ASVspoof", "RawNet2" and "deepfake speech wav2vec2" found the candidates below.
 
-> **About the numbers in this file.** The EER figures are reported by each model's uploader or by the third-party Speech Anti-Spoofing Arena. This project has not reproduced them. They are used only to choose what to evaluate, and they must never appear in the UI, README, landing page, video or write-up (ml-honesty steering). Our own numbers will come from `mise run model:eval` on the Haunt_Set.
+> **About the numbers in this file.** The EER figures are reported by each model's uploader or by the third-party Speech Anti-Spoofing Arena. This project has not reproduced them. They are used only to choose what to evaluate, and they must never appear in the UI, README, landing page or write-up (ml-honesty steering). Our own numbers will come from `mise run model:eval` on the Haunt_Set.
 
 ## Light_Model candidates (browser, ≤ 10 MB)
 

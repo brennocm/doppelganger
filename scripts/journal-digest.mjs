@@ -1,4 +1,4 @@
-// Group the Kiro journal by feature and surface (submission task 2.1, design P48).
+// Group the Kiro journal by feature and surface (release task 2.1, design P48).
 //
 //   node scripts/journal-digest.mjs [docs/kiro-journal.md] > digest.md
 //

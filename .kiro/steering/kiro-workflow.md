@@ -4,7 +4,7 @@ inclusion: always
 
 # How we work with Kiro in this repository
 
-The hackathon judges how deeply Kiro was used, so the way we build is part of the product. Follow these rules in every session.
+How Kiro was used is documented as part of the project, so the way we build is part of the product. Follow these rules in every session.
 
 ## Spec-driven by default
 
@@ -25,7 +25,7 @@ After each meaningful session, append a dated entry to `docs/kiro-journal.md`:
 - Effect: <time saved, bug caught, decision changed>
 ```
 
-The journal is the raw material for the submission write-up. Record failures and corrections too: they show real usage.
+The journal is the raw material for the write-up (`docs/KIRO.md`). Record failures and corrections too: they show real usage.
 
 ## Prompt history
 

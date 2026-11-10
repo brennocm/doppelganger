@@ -66,4 +66,4 @@ Specs are implemented in this order, because later ones depend on earlier ones:
 9. `local-runtime`
 10. `kiro-workbench` (phase B: custom MCP server and power)
 11. `landing-page`
-12. `submission`
+12. `release`

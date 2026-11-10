@@ -19,7 +19,7 @@ Outcome: <one line: what happened, link to commit or journal entry>
 ## 001 — 2026-10-30 — CLI — project-foundation, kiro-workbench (Phase A)
 
 ```text
-You are starting the Doppelgänger project for Kiroween 2026. Everything you need is in .kiro/.
+You are starting the Doppelgänger project. Everything you need is in .kiro/.
 
 Before writing any code:
 1. Read every file in .kiro/steering/ and follow them as binding rules. security.md and kiro-workflow.md override convenience.
@@ -220,7 +220,7 @@ Outcome: _pending_
 ## 010 — 2026-10-31 — set by hand — set by hand
 
 ```text
-Make these calls and quote each exact result. 1) code tool, operation format_code, file_path scratch-code-probe.ts. 2) code tool, operation rename_symbol, file_path scratch-code-rename.ts, row 1, column 14, new_name renamedProbe. 3) Playwright tool browser_run_code_unsafe with code: async (page) => { return 1; } . 4) Playwright tool browser_file_upload with paths ["/home/<user>/projetos/kiroween-2026/scratch-code-probe.ts"]. 5) invoke a sub-agent named general-task-execution with the prompt: create scratch-sub-probe.txt containing probe.
+Make these calls and quote each exact result. 1) code tool, operation format_code, file_path scratch-code-probe.ts. 2) code tool, operation rename_symbol, file_path scratch-code-rename.ts, row 1, column 14, new_name renamedProbe. 3) Playwright tool browser_run_code_unsafe with code: async (page) => { return 1; } . 4) Playwright tool browser_file_upload with paths ["/home/<user>/projetos/<repo>/scratch-code-probe.ts"]. 5) invoke a sub-agent named general-task-execution with the prompt: create scratch-sub-probe.txt containing probe.
 ```
 
 Outcome: _pending_

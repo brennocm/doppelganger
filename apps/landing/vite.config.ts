@@ -9,12 +9,10 @@ import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vite";
 import {
   BASE_CSP,
-  cspFor,
   type LandingContent,
-  PENDING,
+  mediaFiles,
   parseContent,
   renderCapture,
-  renderVideo,
   renderWriteUp,
 } from "./src/content.ts";
 import { newestReport, renderEvaluation } from "./src/evaluation.ts";
@@ -58,11 +56,11 @@ const ROOT = fileURLToPath(new URL("./", import.meta.url));
 const CONTENT = process.env["LANDING_CONTENT"] ?? join(ROOT, "content.json");
 const PUBLIC = process.env["LANDING_PUBLIC"] ?? join(ROOT, "public");
 
-/** Content that waits for the gate becomes a neutral state; the marker never reaches the page. */
+/** Render content.json into the page; a missing media file fails the build. */
 function content(file = CONTENT, publicDir = PUBLIC): Plugin {
   const parsed: LandingContent = parseContent(JSON.parse(readFileSync(file, "utf8")));
-  for (const media of [parsed.videoPoster, parsed.capture.video, parsed.capture.poster]) {
-    if (media !== PENDING && !existsSync(join(publicDir, media))) {
+  for (const media of mediaFiles(parsed)) {
+    if (!existsSync(join(publicDir, media))) {
       throw new Error(`landing: ${media} is named in content.json but not found in ${publicDir}`);
     }
   }
@@ -74,10 +72,8 @@ function content(file = CONTENT, publicDir = PUBLIC): Plugin {
       handler(html) {
         if (!html.includes(BASE_CSP)) throw new Error("landing: the base CSP is missing");
         return html
-          .replace(BASE_CSP, cspFor(parsed))
           .replace("<!-- capture -->", renderCapture(parsed))
-          .replace("<!-- writeup -->", renderWriteUp(parsed))
-          .replace("<!-- video -->", renderVideo(parsed));
+          .replace("<!-- writeup -->", renderWriteUp(parsed));
       },
     },
   };

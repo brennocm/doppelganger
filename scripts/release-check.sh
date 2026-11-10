@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Release gate for the submission (submission task 1.3, design P48). Run it from anywhere
-# inside the repository, by hand, before submitting:
+# Release gate (release task 1.3, design P48). Run it from anywhere inside the repository,
+# by hand, after publishing:
 #
 #   scripts/release-check.sh                 # builds dist/pages, then runs every check
 #   scripts/release-check.sh --dist DIR      # check an existing Pages build instead
@@ -8,7 +8,7 @@
 #
 # Every check runs even after a failure. Each problem is one "release-check: FAIL" line, and
 # the exit status is 1 if anything failed. It is deliberately NOT part of `mise run check`
-# or `check:all`: those stay green while PENDING-GATE markers wait for the go/no-go gate.
+# or `check:all`: it needs the network and the published site.
 set -uo pipefail
 
 MARKER="PENDING-GATE"
@@ -60,8 +60,6 @@ skip=(
   ':!.kiro/specs/'                    # specs describe where the marker goes
   ':!scripts/release-check.sh'        # this check
   ':!scripts/tests/release-check.bats' # its test plants markers on purpose
-  ':!apps/landing/src/content.ts'     # the landing's only marker reader (P46)
-  ':!apps/landing/src/content.test.ts'
   ':!*/e2e/*'                         # test code and fixtures, never built into Pages
 )
 if hits="$(git grep -n -I -F "$MARKER" -- . "${skip[@]}")"; then
@@ -112,15 +110,11 @@ else
   fail "secrets" "gitleaks found leaks; run 'mise run secrets:history' to see them"
 fi
 
-# 6. Public URLs answer an anonymous request (Requirement 4.3).
+# 6. Public URLs answer an anonymous request (Requirement 3.1).
 if ((offline)); then
   echo "release-check: skip public URLs (--offline)"
 else
   urls=("$REPO_URL" "$DEMO_URL" "${DEMO_URL}app/")
-  video="$(sed -n 's/.*"videoId"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' apps/landing/content.json 2>/dev/null)"
-  if [[ -n "$video" && "$video" != "$MARKER" ]]; then
-    urls+=("https://www.youtube.com/watch?v=$video")
-  fi
   for url in "${urls[@]}"; do
     # -q: ignore any ~/.curlrc; no credentials are ever passed.
     code="$(curl -q -sS -o /dev/null -w '%{http_code}' --max-time 20 "$url" 2>/dev/null)"

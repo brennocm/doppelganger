@@ -13,6 +13,14 @@ export const SLOW_DEVICE =
 
 export const TEST_MODEL = "Test model: it detects nothing. Scores are not meaningful.";
 
+export const UNMEASURED_MODEL =
+  "This model was trained on studio recordings and hasn't been measured on call audio yet, so expect mistakes in both directions. The model card in the repository has the details.";
+
+/** The note under the model name: what the loaded model's role means for its scores. */
+export function modelNote(role: "light" | "pro" | "test"): string {
+  return role === "test" ? TEST_MODEL : UNMEASURED_MODEL;
+}
+
 export const NO_REPLAY_CLIPS = "No replay clips are bundled yet.";
 
 const CAPTURE: Record<CaptureErrorCode, string> = {

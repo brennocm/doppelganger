@@ -87,11 +87,11 @@ jobs:
       - name: Install dependencies from the lockfile
         run: mise x -- pnpm install --frozen-lockfile --silent
 
-      # PENDING-GATE: release/models/ holds the Light_Model and Pro_Model manifests and
-      # files chosen by the go/no-go gate. It does not exist before the gate.
+      # release/models/ holds the Light_Model (AASIST-L) and Pro_Model (AASIST) manifests
+      # and files (detection-model 6.4, P49).
       - name: Require the real models
         run: |
-          [ -d release/models ] || { echo "release/models/ is missing: the gate has not chosen the models" >&2; exit 1; }
+          [ -d release/models ] || { echo "release/models/ is missing" >&2; exit 1; }
 
       - name: Build the bundle without the test model
         run: |

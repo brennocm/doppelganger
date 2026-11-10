@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# scripts/release-check.sh (submission task 1.3, design P48). Each test runs the check in a
+# scripts/release-check.sh (release task 1.3, design P48). Each test runs the check in a
 # throwaway git repository with stub gitleaks and curl on PATH: no network, no real scan.
 
 CHECK="$BATS_TEST_DIRNAME/../release-check.sh"
@@ -26,8 +26,7 @@ EOF
   git init -q -b main .
   printf 'MIT License\n\nCopyright (c) 2026\n' >LICENSE
   printf 'steering\n' >.kiro/steering/product.md
-  printf '{\n  "videoId": "dQw4w9WgXcQ",\n  "writeUpUrl": "https://example.org/w"\n}\n' \
-    >apps/landing/content.json
+  printf '{\n  "writeUpUrl": "https://example.org/w"\n}\n' >apps/landing/content.json
   printf '<!doctype html><p>landing</p>\n' >dist/pages/index.html
   printf '<!doctype html><p>app</p>\n' >dist/pages/app/index.html
   printf 'dist/\n' >.gitignore
@@ -36,17 +35,17 @@ EOF
 
 marker() { printf 'PENDING-%s' GATE; }
 
-@test "a clean repository passes and checks the repository, demo, app and video URLs" {
+@test "a clean repository passes and checks the repository, demo and app URLs" {
   run "$CHECK" --dist dist/pages
   [ "$status" -eq 0 ]
   [[ "$output" == *"release-check: ready, 0 problems"* ]]
   grep -qx "https://github.com/brennocm/doppelganger" "$CALLS"
   grep -qx "https://brennocm.github.io/doppelganger/app/" "$CALLS"
-  grep -qx "https://www.youtube.com/watch?v=dQw4w9WgXcQ" "$CALLS"
+  [ "$(wc -l <"$CALLS")" -eq 3 ]
 }
 
 @test "a marker in a tracked file fails and is listed as file:line" {
-  printf 'line one\nvideo: %s\n' "$(marker)" >README.md
+  printf 'line one\nmodel: %s\n' "$(marker)" >README.md
   git add README.md
   run "$CHECK" --dist dist/pages --offline
   [ "$status" -eq 1 ]
@@ -54,20 +53,19 @@ marker() { printf 'PENDING-%s' GATE; }
   [[ "$output" == *"NOT ready, 1 problem(s)"* ]]
 }
 
-@test "a marker in the built output fails, and a pending video is not requested" {
+@test "a marker in the built output fails" {
   marker >dist/pages/app/clips.json
-  printf '{\n  "videoId": "%s"\n}\n' "$(marker)" >apps/landing/content.json
-  run "$CHECK" --dist dist/pages
+  printf '{\n  "writeUpUrl": "%s"\n}\n' "$(marker)" >apps/landing/content.json
+  run "$CHECK" --dist dist/pages --offline
   [ "$status" -eq 1 ]
   [[ "$output" == *"FAIL pending-built: dist/pages/app/clips.json"* ]]
   [[ "$output" == *"FAIL pending: apps/landing/content.json:2"* ]]
-  ! grep -q youtube "$CALLS"
 }
 
-@test "markers in logs, specs, the marker reader and e2e fixtures are not reported" {
-  mkdir -p docs .kiro/specs/x apps/landing/src apps/landing/e2e/fixtures scripts/tests
+@test "markers in logs, specs and e2e fixtures are not reported" {
+  mkdir -p docs .kiro/specs/x apps/landing/e2e/fixtures scripts/tests
   for f in docs/prompt-history.md docs/kiro-journal.md .kiro/specs/x/design.md \
-    apps/landing/src/content.ts apps/landing/e2e/fixtures/a.svg scripts/tests/release-check.bats; do
+    apps/landing/e2e/fixtures/a.svg scripts/tests/release-check.bats; do
     marker >"$f"
   done
   git add -A

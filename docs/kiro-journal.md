@@ -1,6 +1,6 @@
 # Kiro journal
 
-A dated log of how Kiro was used to build Doppelgänger. It is the raw material for the submission write-up, so it records failures and corrections as well as wins. New entries go at the bottom.
+A dated log of how Kiro was used to build Doppelgänger. It is the raw material for the write-up (`docs/KIRO.md`), so it records failures and corrections as well as wins. New entries go at the bottom.
 
 Template:
 
@@ -373,3 +373,12 @@ Template:
   - **submission 1.3, 2.1 and 2.2.** `scripts/release-check.sh` lists every `PENDING-GATE` left in tracked files and in the built output, and also checks the license, `.kiro/`, gitleaks and the public URLs; 6 Bats tests. `scripts/journal-digest.mjs` puts each entry under exactly one feature; Property 1 is a fast-check test over generated journals, including headings inside code fences.
   - **Drafts.** The README (1.1) and `docs/KIRO.md` (2.3) are drafted, with each gap marked. A full-history gitleaks run is clean (168 commits). haunted-ui 6.2 now lists the steps the developer follows in Kiro.
 - Effect: Two of my own mistakes were caught by the tests before any commit. The first replay test waited for `#model-id` to be non-empty, but it starts as "Loading", so the clip was clicked before the model was ready and nothing happened. The first build left the test signals out of the service worker's precache list, because files emitted in `generateBundle` do not appear in that hook's `bundle` argument. In the write-up draft I first cited two journal entries by the wrong title and attributed an exorcist finding to the wrong spec; checking each claim against the journal caught all three. One mistake did get committed: 6dca244 was red. I ran only the replay and capture specs before committing it, and the full `check:all` then failed four idle-state screenshots, which had grown by 56 px because the test signals replaced the "no clips" note. The state screenshots now get the shipped `clips.json` (2529db4), and the baselines are unchanged.
+
+## 2026-11-10 — Finishing without the hackathon: AASIST-L ships, the video and gate are dropped (P49–P50)
+- Kiro surface: none (done outside Kiro)
+- Feature used: spec | steering
+- What happened: The project is no longer entered in the hackathon, so everything aimed at it was removed and the remaining work was finished without the author's recordings.
+  - **Model (P49, ADR 0006).** The app now loads AASIST-L, exported unchanged from the pinned checkpoint (fp32, parity 5.84e-06); the Pro engine gets AASIST with role `pro` in `release/models/`. The gate and the demo clips stay open because the Haunt_Set was never recorded. The app shows that the model hasn't been measured on call audio, and the model card publishes only measured latency (ORT Web p95 729 ms per window on the reference laptop) and no detection numbers.
+  - **Landing (P50).** The video section, its YouTube facade and the `frame-src` exception are gone, so `verify-pages` now allows only the base policy. The write-up is linked, and the hero capture is built from the visual-test screenshots of the three alert levels, with a visible caption that the scores are fixed.
+  - **Specs and docs.** The `submission` spec became `release` (no video, form or deadline), the steering lost its hackathon section, and every `PENDING-GATE` marker outside the logs and specs was resolved, so `scripts/release-check.sh` has nothing pending to report.
+- Effect: The demo runs a real, honestly labelled detector instead of a test model, and nothing in the repository depends on the hackathon any more.

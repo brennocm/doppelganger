@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is the Costume Contest centerpiece: the detector UI that looks like a harmless call widget while the voice sounds human and visibly rots as dissonance rises. It includes the main view, the waveform "spectre" visualizer, the Twin mascot, the floating Picture-in-Picture widget, and the accessibility and motion-safety rules that make the effects safe.
+This is the project's centerpiece: the detector UI that looks like a harmless call widget while the voice sounds human and visibly rots as dissonance rises. It includes the main view, the waveform "spectre" visualizer, the Twin mascot, the floating Picture-in-Picture widget, and the accessibility and motion-safety rules that make the effects safe.
 
 ## Glossary
 

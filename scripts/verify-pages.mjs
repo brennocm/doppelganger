@@ -7,9 +7,8 @@
 //   - references a URL on another origin (src, href, srcset, poster, action, formaction).
 //   - or the artifact holds a test-only replay signal (audio-capture P47: replay/test-signal-*),
 //     which only `vite build --mode e2e` may emit.
-// Exceptions: the landing page's YouTube facade (www.youtube-nocookie.com, only in the root
-// index.html and only with the matching frame-src), and https:// links on <a> elements,
-// which load nothing until clicked (project-foundation P39).
+// Exception: https:// links on <a> elements, which load nothing until clicked
+// (project-foundation P39).
 import { readdir, readFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 import { argv, exit, stderr, stdout } from "node:process";
@@ -18,8 +17,6 @@ export const BASE_CSP =
   "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; " +
   "connect-src 'self'; img-src 'self' data:; style-src 'self'; media-src 'self' blob:; " +
   "object-src 'none'; base-uri 'none'; form-action 'none'";
-const YOUTUBE = "https://www.youtube-nocookie.com";
-export const LANDING_CSP = `${BASE_CSP}; frame-src ${YOUTUBE}`;
 
 const URL_ATTRIBUTES = ["src", "href", "srcset", "poster", "action", "formaction"];
 const ATTRIBUTE_RE = new RegExp(
@@ -86,18 +83,14 @@ export function isExternal(url) {
 /** Check one HTML document; return a list of problems. */
 export function checkHtml(path, html) {
   const problems = [];
-  const isLanding = path === "index.html";
   const csp = cspValues(html);
-  const allowedCsp = isLanding ? [BASE_CSP, LANDING_CSP] : [BASE_CSP];
   if (csp.length !== 1) {
     problems.push(`${path}: expected exactly one CSP meta tag, found ${csp.length}`);
-  } else if (!allowedCsp.includes(csp[0])) {
+  } else if (csp[0] !== BASE_CSP) {
     problems.push(`${path}: CSP differs from the security steering: "${csp[0]}"`);
   }
-  const embedsYoutube = isLanding && csp[0] === LANDING_CSP;
   for (const url of referencedUrls(html)) {
     if (!isExternal(url)) continue;
-    if (embedsYoutube && url.startsWith(`${YOUTUBE}/`)) continue;
     problems.push(`${path}: references an external origin: ${url}`);
   }
   return problems;

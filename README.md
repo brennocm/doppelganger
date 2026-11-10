@@ -2,19 +2,18 @@
 
 A real-time voice-clone detector that runs on your own device. It listens to the remote side of a call in a browser tab (Google Meet, Teams web, WhatsApp Web), scores each slice of speech for signs of a synthetic or cloned voice, and shows the result as an interface that stays calm while the voice sounds human and visibly "rots" when it does not. When it detects a likely clone, it tells you what to do next: don't approve anything, ask for the agreed code word, hang up and call back on a known number.
 
-<!-- PENDING-GATE: screenshot of the app in Possession during a labelled replay (apps/landing/public/media/). -->
+![The app's alert card in three states: Sounds human, Something doesn't add up, and Doppelgänger detected](docs/media/states.png)
 
-Built with Kiro for Kiroween 2026. See [How it was built with Kiro](docs/KIRO.md) and [the journal](docs/kiro-journal.md).
+<sub>The three alert levels, rendered by the visual tests with fixed scores.</sub>
+
+Built with Kiro. See [How it was built with Kiro](docs/KIRO.md) and [the journal](docs/kiro-journal.md).
 
 ## Live demo
 
 - **App:** [brennocm.github.io/doppelganger/app/](https://brennocm.github.io/doppelganger/app/)
 - **Landing page:** [brennocm.github.io/doppelganger](https://brennocm.github.io/doppelganger/)
 
-<!-- PENDING-GATE: the video link (at most 3:00, on YouTube). -->
-
-<!-- PENDING-GATE: until detection-model 6.4 ships the Light_Model, the app loads a test model
-     that detects nothing and says so on screen. Remove this comment when the real model ships. -->
+The app runs [AASIST-L](https://github.com/clovaai/aasist), a small public anti-spoofing model (MIT), in the browser. It was trained on studio recordings and has not been measured on call audio, and the app says so on screen. See [Limitations](#limitations).
 
 ## Delivery tiers
 
@@ -28,7 +27,7 @@ In every tier, no audio, transcript or score is sent to a remote host, and audio
 
 ### 1. Demo
 
-Open the [app](https://brennocm.github.io/doppelganger/app/) in a Chromium-based browser and choose a call tab, the microphone or a labelled replay. After the first visit it also works offline.
+Open the [app](https://brennocm.github.io/doppelganger/app/) in a Chromium-based browser and choose a call tab or the microphone. After the first visit it also works offline.
 
 ### 2. Self-hosted and 3. Pro engine
 
@@ -40,17 +39,16 @@ scripts/install.sh              # tier 3: build and start the engine with Docker
 scripts/install.sh --status     # or --stop, or --uninstall
 ```
 
-<!-- PENDING-GATE: the first release (local-runtime 6.5) is published after the gate; until then the installer has nothing to download. -->
+The installer downloads a GitHub Release. Releases are built by [`release.yml`](.github/workflows/release.yml) from a `v*` tag, with the models in [`release/models/`](release/models/).
 
 ## Limitations
 
 - **The score is probabilistic.** It is a calibrated *dissonance score*, an estimate that a voice is synthetic. It is not proof, accuracy or certainty, and it never identifies who is speaking.
-- **Evaluation.** Every published number comes from a reproducible `mise run model:eval` run, with its date and dataset named in the [model card](docs/model-card.md).
+- **Not evaluated on calls.** The models are pretrained public checkpoints, used as published. They have not been evaluated on call audio, codecs or the author's own recordings, so this project publishes no accuracy numbers for them. Any future number comes from a reproducible `mise run model:eval` run, with its date and dataset named in the [model card](docs/model-card.md).
+- **No replay clips.** The app bundles no labelled replay clips; use a call tab or the microphone.
 - **Expected weak spots:** codec compression on calls and voice notes, background noise, accents and languages missing from the training data, short utterances, and voice-cloning systems the model has never seen.
 - **Browser support.** Capturing a tab's audio and the floating widget (Document Picture-in-Picture) need a Chromium-based browser; other browsers get a compact mode. The end-to-end tests run on Chromium only.
 - **A detector does not replace a verification habit.** Use it together with a code word and call-backs on known numbers.
-
-<!-- PENDING-GATE: the gate's headline numbers with their date, copied from docs/model-card.md, or a sentence saying there are none. -->
 
 ## Develop
 
@@ -76,7 +74,7 @@ Then open `http://127.0.0.1:8788/`.
 | `mise run test -- <package>` | Tests for one package, for example `mise run test -- packages/detector` |
 | `mise run build:pages` | Build the Pages artifact; set `PAGES_BASE=/doppelganger/` for the GitHub Pages project site |
 | `mise run model:eval`, `mise run model:export` | Evaluate and export candidate models ([`packages/model-lab`](packages/model-lab/)) |
-| `scripts/release-check.sh` | The submission gate: public URLs, license, `.kiro/`, secrets, and no pending placeholders |
+| `scripts/release-check.sh` | The release check: public URLs, license, `.kiro/`, secrets, and no pending placeholders |
 
 ## Repository layout
 

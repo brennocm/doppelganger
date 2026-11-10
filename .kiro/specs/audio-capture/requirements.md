@@ -27,7 +27,7 @@ This spec covers how the web app gets audio: the remote side of a call through b
 
 ### Requirement 2: Microphone and replay sources
 
-**User Story:** As a judge, I want to try the detector without a call, so that I can see it work in seconds.
+**User Story:** As a visitor, I want to try the detector without a call, so that I can see it work in seconds.
 
 #### Acceptance Criteria
 

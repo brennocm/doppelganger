@@ -134,6 +134,11 @@ def test_spec_is_fp32_two_class_with_spoof_at_index_zero() -> None:
     assert candidates.CATALOG["upstream"]["commit"] in spec.source
 
 
+def test_aasist_l_is_the_browser_model_and_aasist_the_engine_model() -> None:
+    assert candidates.spec("aasist-l").role == "light"
+    assert candidates.spec("aasist").role == "pro"
+
+
 @needs_checkpoints
 @pytest.mark.parametrize("name", candidates.NAMES)
 def test_cached_checkpoint_is_reused_without_downloading(name: str) -> None:

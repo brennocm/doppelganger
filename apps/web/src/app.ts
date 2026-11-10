@@ -11,12 +11,12 @@ import workletUrl from "./features/capture/capture-processor.ts?worker&url";
 import {
   captureMessage,
   isSlowDevice,
+  modelNote,
   NO_REPLAY_CLIPS,
   offersReplay,
   PRIVACY_NOTICE,
   SLOW_DEVICE,
   TAB_UNSUPPORTED,
-  TEST_MODEL,
   workerMessage,
 } from "./features/capture/messages.ts";
 import { LIGHT_MODEL_MANIFEST } from "./features/capture/model-choice.ts";
@@ -76,7 +76,6 @@ export function startApp(base: string, mode: string): AppEvents {
   };
   ui.notice.textContent = PRIVACY_NOTICE;
   ui.slow.textContent = SLOW_DEVICE;
-  ui.testModel.textContent = TEST_MODEL;
 
   const listeners: ((u: DetectorUpdate) => void)[] = [];
   let hopSamples = 16000;
@@ -171,7 +170,8 @@ export function startApp(base: string, mode: string): AppEvents {
         // The worker's verdicts use the manifest thresholds; draw the same ones.
         thresholds = message.model.thresholds;
         ui.modelId.textContent = `${message.model.id} ${message.model.version}`;
-        ui.testModel.hidden = message.model.role !== "test";
+        ui.testModel.textContent = modelNote(message.model.role);
+        ui.testModel.hidden = false;
         ui.tab.disabled = !tabOk;
         ui.mic.disabled = false;
         autopsy.setEnabled(true);

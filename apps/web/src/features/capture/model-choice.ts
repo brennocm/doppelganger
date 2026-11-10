@@ -1,7 +1,7 @@
 /**
- * The model the app loads. Until detection-model 6.4 ships the Light_Model, this is the
- * synthetic CI model (role "test"); swapping in the real one changes only this line and
- * the two files in public/models/.
+ * The model the app loads: AASIST-L, the Light_Model (detection-model 6.4, P49). The
+ * end-to-end build (`vite build --mode e2e`) keeps the synthetic CI model (role "test"),
+ * whose scores are deterministic and say nothing about a voice.
  */
-// PENDING-GATE: point this at the Light_Model manifest from detection-model 6.4.
-export const LIGHT_MODEL_MANIFEST = "models/ci-synthetic-linear.json";
+export const LIGHT_MODEL_MANIFEST =
+  import.meta.env.MODE === "e2e" ? "models/ci-synthetic-linear.json" : "models/aasist-l.json";

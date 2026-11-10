@@ -46,7 +46,7 @@ All hook and agent files are created through Kiro so they use its current native
 
 ### Requirement 3: Spec and journal hooks (Phase A)
 
-**User Story:** As a hackathon entrant, I want evidence of how Kiro was used to accumulate automatically, so that the write-up is accurate and cheap to produce.
+**User Story:** As the developer, I want evidence of how Kiro was used to accumulate automatically, so that the write-up is accurate and cheap to produce.
 
 #### Acceptance Criteria
 
@@ -56,7 +56,7 @@ All hook and agent files are created through Kiro so they use its current native
 
 ### Requirement 4: Visual verification hook (Phase A)
 
-**User Story:** As a Costume Contest entrant, I want screenshots of every haunting state on demand, so that I can review the UI without clicking through scenarios by hand.
+**User Story:** As the developer, I want screenshots of every haunting state on demand, so that I can review the UI without clicking through scenarios by hand.
 
 #### Acceptance Criteria
 
@@ -111,7 +111,7 @@ All hook and agent files are created through Kiro so they use its current native
 
 ### Requirement 9: Kiro surfaces evidence
 
-**User Story:** As a hackathon entrant, I want to have tried more than one Kiro surface, so that the write-up can compare them honestly.
+**User Story:** As the developer, I want to have tried more than one Kiro surface, so that the write-up can compare them honestly.
 
 #### Acceptance Criteria
 

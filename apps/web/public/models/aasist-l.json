@@ -1,0 +1,32 @@
+{
+  "id": "aasist-l",
+  "version": "0.1.0",
+  "role": "light",
+  "file": "aasist-l.fp32.onnx",
+  "sha256": "13033d872323ba58a15c390191ff65455b430f07d0d55bc6b94de974072df65a",
+  "bytes": 648435,
+  "quantization": "fp32",
+  "sampleRate": 16000,
+  "windowSamples": 64600,
+  "hopSamples": 16000,
+  "input": "waveform",
+  "output": "logits",
+  "outputKind": "two-class-logits",
+  "spoofIndex": 0,
+  "calibration": {
+    "method": "temperature",
+    "temperature": 1.0
+  },
+  "thresholds": {
+    "unease": 0.4,
+    "possession": 0.7,
+    "release": 0.5
+  },
+  "license": {
+    "code": "MIT",
+    "weights": "MIT",
+    "trainingData": "ODC-By (ASVspoof 2019 LA, attribution required)",
+    "verifiedOn": "2026-11-10"
+  },
+  "source": "https://github.com/clovaai/aasist @ a04c9863f63d44471dde8a6abcb3b082b07cd1d1, AASIST-L.pth"
+}

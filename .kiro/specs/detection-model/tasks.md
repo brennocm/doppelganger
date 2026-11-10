@@ -29,6 +29,7 @@
 
 - [ ] 4. Go/no-go gate
   - [ ] 4.1 Write the AASIST-L and AASIST checkpoint loaders in `candidates/`, export them to fp32 ONNX, run the evaluation, apply the gate, and write the ADR with the numbers
+    - Loaders and fp32 exports done. Not run: the evaluation and the gate, which need the Haunt_Set. The models shipped without it (P49, ADR 0006).
     - _Requirements: 3.1, 3.3_
   - [ ] 4.2 If the gate fails, run the fallbacks in order (codec-augmented fine-tuning first) and update the ADR
     - _Requirements: 3.2_
@@ -51,13 +52,15 @@
   - [x]* 6.3 Write property test for manifest hash integrity
     - **Property 4: Manifest hash integrity**
     - **Validates: Requirements 5.4**
-  - [ ] 6.4 Export the chosen Light_Model into `apps/web/public/models/`; publish the Pro_Model as a release asset
+  - [x] 6.4 Export the chosen Light_Model into `apps/web/public/models/`; publish the Pro_Model as a release asset
+    - AASIST-L in `apps/web/public/models/`, AASIST in `release/models/` for `release.yml` (P49). The release itself is published from a `v*` tag.
     - _Requirements: 5.5_
   - [x] 6.5 Implement `inference.py` (shared ONNX Runtime inference for the engine and MCP server)
     - _Requirements: 5.4_
 
 - [ ] 7. Model card and demo clips
-  - [ ] 7.1 Write `docs/model-card.md` from the latest report
+  - [x] 7.1 Write `docs/model-card.md` from the latest report
+    - No report exists; the card says so and records sources, licenses, training data and measured latency (P49).
     - _Requirements: 6.1, 6.2_
   - [ ] 7.2 Select and commit the labelled demo clips (genuine and synthetic, each under 30 s) to `apps/web/public/replay/` with a `clips.json` index
     - _Requirements: 7.3_

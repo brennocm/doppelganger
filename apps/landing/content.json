@@ -1,10 +1,9 @@
 {
-  "videoId": "PENDING-GATE",
-  "videoPoster": "PENDING-GATE",
-  "writeUpUrl": "PENDING-GATE",
+  "writeUpUrl": "https://github.com/brennocm/doppelganger/blob/main/docs/KIRO.md",
   "capture": {
-    "video": "PENDING-GATE",
-    "poster": "PENDING-GATE",
-    "alt": "The app moving from the calm Mask state to Possession during a replay."
+    "video": "media/states.mp4",
+    "poster": "media/states-poster.webp",
+    "alt": "The app moving from “Sounds human” to “Something doesn't add up” to “Doppelgänger detected”, rendered by its visual tests.",
+    "caption": "The three alert levels, rendered by the app's visual tests with fixed scores. Not a live detection."
   }
 }

@@ -11,7 +11,7 @@ Use this for a recording that someone suspects is synthetic, for example a voice
 
 ## How to use
 
-1. Call `list_models` and name the model you use, with its ID and SHA-256. If the only model is `ci-synthetic-linear`, stop and say so. It is a synthetic test model and its scores mean nothing.
+1. Call `list_models` and name the model you use, with its ID and SHA-256. If the only model is `ci-synthetic-linear`, stop and say so. It is a synthetic test model and its scores mean nothing. Never pass it as `model_id` for a real recording. The `aasist-l` and `aasist` models have not been measured on call audio (`docs/model-card.md`); say so with the result.
 2. Call `analyze_audio_file` with a path inside the allowed folders (`DOPPELGANGER_MCP_ROOTS`). Only WAV files of up to 20 MB and 5 minutes are read. Other formats have to be converted by the user first. Do not convert files yourself or write audio anywhere.
 3. Call `explain_thresholds` if the user asks why the verdict came out as it did.
 

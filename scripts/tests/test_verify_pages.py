@@ -50,6 +50,20 @@ def test_resource_loads_and_other_links_are_refused(tmp_path: Path, body: str) -
     assert "external origin" in done.stderr + done.stdout
 
 
+def test_a_frame_src_exception_is_refused(tmp_path: Path) -> None:
+    page = tmp_path / "index.html"
+    csp = f"{CSP}; frame-src https://www.youtube-nocookie.com"
+    page.write_text(f'<meta http-equiv="Content-Security-Policy" content="{csp}">', "utf-8")
+    done = subprocess.run(  # noqa: S603
+        ["node", str(SCRIPT), str(tmp_path)],  # noqa: S607
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert done.returncode != 0
+    assert "CSP differs" in done.stderr + done.stdout
+
+
 def test_test_only_replay_signals_are_refused(tmp_path: Path) -> None:
     replay = tmp_path / "app" / "replay"
     replay.mkdir(parents=True)

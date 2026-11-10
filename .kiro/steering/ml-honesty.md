@@ -9,8 +9,8 @@ The detector is a probabilistic tool with known blind spots. Everything we write
 
 ## Never
 
-- Never invent or round up metrics. Every number in the UI, README, landing page, video or write-up comes from a reproducible run of `mise run model:eval`, with the run's date and dataset named.
-- Never fake a detection in the demo or the video. Replay mode uses the real model on real recordings and is labelled "Replay".
+- Never invent or round up metrics. Every number in the UI, README, landing page or write-up comes from a reproducible run of `mise run model:eval`, with the run's date and dataset named.
+- Never fake a detection in the demo. Screenshots of UI states with fixed scores are labelled as such. Replay mode uses the real model on real recordings and is labelled "Replay".
 - Never call the score "accuracy" or "certainty". It is a **dissonance score**: a calibrated estimate that a voice is synthetic.
 - Never claim the tool identifies a person.
 

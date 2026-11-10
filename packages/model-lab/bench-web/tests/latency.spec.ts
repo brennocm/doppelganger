@@ -23,7 +23,11 @@ test("ONNX Runtime Web runs the model single-threaded and reports p50 and p95", 
     page.on("request", (request) => {
       if (!request.url().startsWith(origin)) external.push(request.url());
     });
-    await page.goto(`${origin}/index.html?windows=50`);
+    // BENCH_MODEL=<id> benchmarks apps/web/public/models/<id>.json instead of the CI model.
+    const model = process.env["BENCH_MODEL"];
+    const manifest =
+      model === undefined ? "" : `&manifest=/models/${encodeURIComponent(model)}.json`;
+    await page.goto(`${origin}/index.html?windows=50${manifest}`);
     await expect(page.locator("#status")).not.toHaveText("Running", { timeout: 120_000 });
     const error = await page.evaluate(() => (window as { benchError?: string }).benchError);
     expect(error).toBeUndefined();

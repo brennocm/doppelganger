@@ -58,7 +58,7 @@ This spec sets up the repository skeleton, toolchain, quality gates, CI and the 
 
 ### Requirement 5: GitHub Pages pipeline
 
-**User Story:** As a judge, I want to open one public URL and find the landing page and the working demo.
+**User Story:** As a visitor, I want to open one public URL and find the landing page and the working demo.
 
 #### Acceptance Criteria
 

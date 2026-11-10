@@ -63,6 +63,8 @@ async def test_list_models_reports_hash_and_license() -> None:
     assert not result.is_error
     models = result.structured_content["result"]
     ci = next(m for m in models if m["id"] == CI_MODEL)
+    assert ci["role"] == "test"
+    assert next(m for m in models if m["id"] == "aasist-l")["role"] == "light"
     assert len(ci["sha256"]) == 64  # noqa: PLR2004
     assert set(ci["license"]) >= {"code", "weights", "trainingData"}
     assert ci["window_samples"] == 64_600  # noqa: PLR2004
@@ -79,7 +81,7 @@ async def test_explain_thresholds_matches_the_detector_defaults() -> None:
 async def test_analyze_scores_a_wav_inside_the_sandbox(roots: Path) -> None:
     clip = roots / "clip.wav"
     clip.write_bytes(wav_bytes(8.0, seed=1))
-    result = await call("analyze_audio_file", {"path": str(clip)})
+    result = await call("analyze_audio_file", {"path": str(clip), "model_id": CI_MODEL})
     assert not result.is_error, result.content
     body = result.structured_content
     assert body["model_id"] == CI_MODEL
@@ -105,6 +107,14 @@ async def test_analyze_refusals_are_tool_errors(roots: Path, make: Any, message:
     result = await call("analyze_audio_file", {"path": str(make(roots))})
     assert result.is_error
     assert message in result.content[0].text
+
+
+async def test_without_a_model_id_the_light_model_is_used(roots: Path) -> None:
+    clip = roots / "clip.wav"
+    clip.write_bytes(wav_bytes(5.0, seed=2))
+    result = await call("analyze_audio_file", {"path": str(clip)})
+    assert not result.is_error, result.content
+    assert result.structured_content["model_id"] == "aasist-l"
 
 
 async def test_unknown_models_are_tool_errors(roots: Path) -> None:

@@ -60,28 +60,6 @@ export function wireCopyButtons(doc: Document, clipboard: Clipboard | undefined)
   return buttons.length;
 }
 
-/** The only embed address the facade may load: the privacy-enhanced YouTube player. */
-const EMBED = /^https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]{11}$/;
-
-/**
- * Replace the facade button with the player iframe, after the visitor pressed play. Returns
- * false (and does nothing) when the button's address is not the privacy-enhanced player.
- */
-export function activateFacade(button: HTMLElement, doc: Document): boolean {
-  const address = button.dataset["embed"] ?? "";
-  if (!EMBED.test(address)) return false;
-  const frame = doc.createElement("iframe");
-  frame.src = address;
-  frame.title = "The 3-minute video";
-  frame.allow = "";
-  frame.referrerPolicy = "no-referrer";
-  frame.loading = "lazy";
-  frame.className = "video-frame";
-  frame.setAttribute("allowfullscreen", "");
-  button.replaceWith(frame);
-  return true;
-}
-
 /** Swap the capture's poster for the looping clip, unless the visitor prefers less motion. */
 export function playCapture(figure: HTMLElement, doc: Document): boolean {
   const source = figure.dataset["video"];
@@ -105,9 +83,6 @@ export function playCapture(figure: HTMLElement, doc: Document): boolean {
 
 function wirePage(doc: Document, win: Window): void {
   wireCopyButtons(doc, win.navigator.clipboard);
-  for (const button of doc.querySelectorAll<HTMLElement>("button.video-facade")) {
-    button.addEventListener("click", () => activateFacade(button, doc), { once: true });
-  }
   const figure = doc.querySelector<HTMLElement>("figure.capture");
   const reduced = win.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (figure !== null && !reduced && typeof IntersectionObserver !== "undefined") {

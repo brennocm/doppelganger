@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { activateFacade, copyCommand, PACKAGE_NAME, playCapture } from "./index.ts";
+import { copyCommand, PACKAGE_NAME, playCapture } from "./index.ts";
 
 /** The few Document members copyCommand uses, without a DOM library. */
 function fakeDoc() {
@@ -70,52 +70,6 @@ describe("@doppelganger/landing", () => {
     const { doc } = fakeDoc();
     const orphan = { dataset: { copy: "missing" } } as unknown as HTMLElement;
     expect(await copyCommand(orphan, doc, undefined)).toBe("");
-  });
-});
-
-describe("video facade", () => {
-  /** The few members activateFacade uses: a button to replace and a document to create the frame. */
-  function facade(embed: string | undefined) {
-    const replaced: unknown[] = [];
-    const frame: Record<string, unknown> = { setAttribute: vi.fn() };
-    const button = {
-      dataset: embed === undefined ? {} : { embed },
-      replaceWith: (f: unknown) => replaced.push(f),
-    };
-    const doc = { createElement: () => frame };
-    return {
-      button: button as unknown as HTMLElement,
-      doc: doc as unknown as Document,
-      frame,
-      replaced,
-    };
-  }
-
-  it("turns the button into a privacy-enhanced player", () => {
-    const { button, doc, frame, replaced } = facade(
-      "https://www.youtube-nocookie.com/embed/aaaaaaaaaaa",
-    );
-    expect(activateFacade(button, doc)).toBe(true);
-    expect(replaced).toEqual([frame]);
-    expect(frame["src"]).toBe("https://www.youtube-nocookie.com/embed/aaaaaaaaaaa");
-    expect(frame["referrerPolicy"]).toBe("no-referrer");
-    expect(frame["allow"]).toBe("");
-  });
-
-  it.each([
-    undefined,
-    "",
-    "https://evil.example/embed/aaaaaaaaaaa",
-    "http://www.youtube-nocookie.com/embed/aaaaaaaaaaa",
-    "https://www.youtube.com/embed/aaaaaaaaaaa",
-    "https://www.youtube-nocookie.com/embed/aaaaaaaaaaa?autoplay=1",
-    "https://www.youtube-nocookie.com/embed/short",
-    "https://www.youtube-nocookie.com.evil.example/embed/aaaaaaaaaaa",
-    "javascript:alert(1)",
-  ])("refuses %s", (address) => {
-    const { button, doc, replaced } = facade(address);
-    expect(activateFacade(button, doc)).toBe(false);
-    expect(replaced).toEqual([]);
   });
 });
 

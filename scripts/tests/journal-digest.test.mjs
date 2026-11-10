@@ -1,4 +1,4 @@
-// scripts/journal-digest.mjs (submission tasks 2.1 and 2.2, design P48).
+// scripts/journal-digest.mjs (release tasks 2.1 and 2.2, design P48).
 // Run with `node --test scripts/tests/`.
 import assert from "node:assert/strict";
 import { test } from "node:test";

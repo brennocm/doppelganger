@@ -72,7 +72,7 @@ This spec chooses, evaluates, calibrates and exports the voice-clone detection m
 
 ### Requirement 6: Model card
 
-**User Story:** As a judge or user, I want to know what the model can and cannot do.
+**User Story:** As a user, I want to know what the model can and cannot do.
 
 #### Acceptance Criteria
 

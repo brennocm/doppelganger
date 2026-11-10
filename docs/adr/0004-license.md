@@ -6,7 +6,7 @@
 
 ## Context
 
-Doppelgänger is a public hackathon project. It should be easy for anyone, including companies' SecOps teams, to read, run, audit, fork and reuse. Its dependencies and any model checkpoints come with their own licenses, which must stay compatible with how the project is distributed.
+Doppelgänger is a public open-source project. It should be easy for anyone, including companies' SecOps teams, to read, run, audit, fork and reuse. Its dependencies and any model checkpoints come with their own licenses, which must stay compatible with how the project is distributed.
 
 ## Decision
 
